@@ -10,7 +10,7 @@ def center_window(win, width, height):
         y = (screen_height // 2) - (height // 2)
         win.geometry(f"{width}x{height}+{x}+{y}") 
 
-class Window(ABC):
+class Window:
     def __init__(self):
         self.root = ctk.CTk()
         self.root.title("Attendance Tracker")
