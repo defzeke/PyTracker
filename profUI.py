@@ -29,8 +29,6 @@ class NavigationPanel(Window):
         self.nav_text = None
         self.notif = None
 
-
-
 ###########################################################################################
     def on_mouse_move(self, event):
         if event.x <= 10 and not self.nav_visible and not self.animating:
@@ -51,10 +49,30 @@ class NavigationPanel(Window):
                 self.animating = False
                 if not self.nav_text:
                     self.nav_text = self.canvas.create_text(45, 40, text="logo", fill="white", font=("Actor", 16))
+        
+                self.nav_bar_features()
+                
         animate()
 
     def slide_out(self):
         self.animating = True
+
+        if hasattr(self, "dashboard"):
+            self.canvas.delete(self.dashboard)
+            self.dashboard = None
+        if hasattr(self, "attend"):
+            self.canvas.delete(self.attend)
+            self.attend = None
+        if hasattr(self, "sched"):
+            self.canvas.delete(self.sched)
+            self.sched = None
+        if hasattr(self, "add"):
+            self.canvas.delete(self.add)
+            self.add = None
+
+        if self.nav_text:
+            self.canvas.delete(self.nav_text)
+            self.nav_text = None
         def animate():
             x1, y1, x2, y2 = self.canvas.coords(self.nav_rect)
             if x1 > -self.nav_width:
@@ -63,10 +81,7 @@ class NavigationPanel(Window):
             else:
                 self.canvas.coords(self.nav_rect, -self.nav_width, 0, 0, 1000)
                 self.nav_visible = False
-                self.animating = False
-                if self.nav_text:
-                    self.canvas.delete(self.nav_text)
-                    self.nav_text = None
+                self.animating = False    
         animate()
 
     def draw_top_bar(self):
@@ -88,28 +103,23 @@ class NavigationPanel(Window):
 
 
 
-
-    def top_bar_features(self):
+    def top_bar_features(self): # EUNICE HERE
         # notif
-        notif = Image.open("attendance/public/image 11.png")
-        resized_notif_logo = notif.resize((30, 30), Image.LANCZOS)
-        self.notif = ImageTk.PhotoImage(resized_notif_logo)
+        notif = Image.open("attendance/public/image 11.png").resize((30, 30), Image.LANCZOS)
+        self.notif = ImageTk.PhotoImage(notif)
         # recitation
-        recit = Image.open("attendance/public/image 18.png")
-        resized_recit_logo = recit.resize((42, 42), Image.LANCZOS)
-        self.recit = ImageTk.PhotoImage(resized_recit_logo)
+        recit = Image.open("attendance/public/image 18.png").resize((42, 42), Image.LANCZOS)
+        self.recit = ImageTk.PhotoImage(recit)
         # message
-        msg = Image.open("attendance/public/image 17.png")
-        resized_msg_logo = msg.resize((37, 37), Image.LANCZOS)
-        self.msg = ImageTk.PhotoImage(resized_msg_logo)
+        msg = Image.open("attendance/public/image 17.png").resize((37, 37), Image.LANCZOS)
+        self.msg = ImageTk.PhotoImage(msg)
         # status
-        stat = Image.open("attendance/public/image 16.png")
-        resized_status_logo = stat.resize((37, 37), Image.LANCZOS)
-        self.status = ImageTk.PhotoImage(resized_status_logo)
+        stat = Image.open("attendance/public/image 16.png").resize((37, 37), Image.LANCZOS)
+        self.status = ImageTk.PhotoImage(stat)
         # sticky nav bar
-        stick = Image.open("attendance/public/image 15.png")
-        resized_sticky_logo = stick.resize((37, 37), Image.LANCZOS)
-        self.sticky = ImageTk.PhotoImage(resized_sticky_logo)
+        stick = Image.open("attendance/public/image 15.png").resize((37, 37), Image.LANCZOS)
+        self.sticky = ImageTk.PhotoImage(stick)
+
 
 
         notification = self.canvas.create_image(1300, 25, image=self.notif, anchor="nw")
@@ -118,19 +128,42 @@ class NavigationPanel(Window):
         status = self.canvas.create_image(445, 23, image=self.status, anchor="nw")
         sticky = self.canvas.create_image(10, 23, image=self.sticky, anchor="nw")
 
-    def account_settings(self):
+
+    def account_settings(self): # EIRVIN HERE
         # settings dropdown
-        settings_dropdown = Image.open("attendance/public/image 9.png")
-        resized_dropdown_logo = settings_dropdown.resize((15, 15), Image.LANCZOS)
-        self.dropdown = ImageTk.PhotoImage(resized_dropdown_logo)
+        settings_dropdown = Image.open("attendance/public/image 9.png").resize((15, 15), Image.LANCZOS)
+        self.dropdown = ImageTk.PhotoImage(settings_dropdown)
+
         # display picture
-        dp = Image.open("attendance/public/display pic.png")
-        resized_dp_logo = dp.resize((40, 40), Image.LANCZOS)
-        self.dp = ImageTk.PhotoImage(resized_dp_logo)
+        dp = Image.open("attendance/public/display pic.png").resize((40, 40), Image.LANCZOS)
+        self.dp = ImageTk.PhotoImage(dp)
+
+
 
         dropdown = self.canvas.create_image(1650, 32, image=self.dropdown, anchor="nw")
         display_pic = self.canvas.create_image(1600, 20, image=self.dp, anchor="nw")
 
+
+    def nav_bar_features(self): # RAFAEL HERE
+        # inactive dashboard
+        db = Image.open("attendance/public/dashboard=Default.png").resize((50, 50), Image.LANCZOS)
+        self.dashboard = ImageTk.PhotoImage(db)
+        # inactive attendance
+        attend = Image.open("attendance/public/attendance=Default.png").resize((55, 55), Image.LANCZOS)
+        self.attend = ImageTk.PhotoImage(attend)
+        # inactive schedule
+        sched = Image.open("attendance/public/schedule=Default.png").resize((55, 55), Image.LANCZOS)
+        self.sched = ImageTk.PhotoImage(sched)
+        # inactive add class
+        add = Image.open("attendance/public/add class=Default.png").resize((57, 57), Image.LANCZOS)
+        self.add = ImageTk.PhotoImage(add)
+
+
+
+        dashboard = self.canvas.create_image(20, 100, image=self.dashboard, anchor="nw")
+        attendance = self.canvas.create_image(19, 175, image=self.attend, anchor="nw")
+        schedule = self.canvas.create_image(19, 250, image=self.sched, anchor="nw")
+        add_class = self.canvas.create_image(20, 325, image=self.add, anchor="nw")
 
 
 
