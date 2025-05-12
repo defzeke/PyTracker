@@ -1,7 +1,7 @@
 import customtkinter as ctk
 from PIL import ImageTk, Image
 from abc import ABC, abstractmethod
-from Login import LogInFrame
+from modules.Login import LogInFrame
 
 def center_window(win, width, height):
         screen_width = win.winfo_screenwidth()

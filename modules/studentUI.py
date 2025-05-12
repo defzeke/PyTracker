@@ -1,6 +1,9 @@
 import tkinter as tk
 import customtkinter as ctk
 from PIL import ImageTk, Image
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from mainProgram import Window
 
 class NavigationPanel(Window):
