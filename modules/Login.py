@@ -1,18 +1,27 @@
 import customtkinter as ctk
 from PIL import Image, ImageTk
 
+
 class LogInFrame(ctk.CTkFrame):
-    def __init__(self, master=None):
+    def __init__(self, master=None, switch_to_register=None):
         super().__init__(master)
         self.canvas = ctk.CTkCanvas(self, width=580, height=681, bg="#272757", highlightthickness=0)
         self.canvas.pack(fill="both", expand=True)
+        self.switch_to_register = switch_to_register
         self.container()
         self.input_panel()
         self.log_in_heading()
         self.remember_me()
         self.forgot_password()
         self.account_sign_in()
-        self.to_register()
+        
+        self.canvas.create_text(265, 560, text="Don't have an account?", font=("Tai Heritage Pro", 15))
+
+        # Create "Register" text
+        self.register_text = self.canvas.create_text(365, 560, text="Register", font=("Tai Heritage Pro", 15, "bold"), fill="lightblue")
+
+        # Bind click event to "Register" text
+        self.canvas.tag_bind(self.register_text, "<Button-1>", self.to_register)
 
 
     def container(self):
@@ -49,12 +58,10 @@ class LogInFrame(ctk.CTkFrame):
         # THE LOGO
         self.pass_logo = ImageTk.PhotoImage(pass_logo)
         self.canvas.create_image(490, 310, image=self.pass_logo, anchor="nw")
-       
 
 
     def log_in_heading(self):
         self.canvas.create_text(290, 100, text="LOGIN", font=("Tai Heritage Pro", 70), fill="white")
-
 
 
     def remember_me(self):
@@ -63,13 +70,11 @@ class LogInFrame(ctk.CTkFrame):
         self.canvas.create_window(45, 390, anchor="nw", window=self.remember)
 
 
-
     def submit_action(self):
         if self.check_var.get():
             print("remembered, (Need backend and database)")
         else:
             print("forgot, (Need backend and database)")
-
 
 
     def forgot_password(self):
@@ -84,11 +89,11 @@ class LogInFrame(ctk.CTkFrame):
         self.canvas.create_image(31, 450, image=self.sign_ins, anchor="nw")
         self.canvas.create_text(31 + 260, 450 + 40, text="Sign In", fill="#E2E2E7", font=("Tai Heritage Pro", 20))
 
-    def to_register(self):
-        self.canvas.create_text(265, 560, text="Don't have an account?", font=("Tai Heritage Pro", 15))
-        self.canvas.create_text(365, 560, text="Register", font=("Tai Heritage Pro", 15, "bold"))
 
-
+    def to_register(self, event):
+            
+        if self.switch_to_register:
+            self.switch_to_register()
     
 
 
