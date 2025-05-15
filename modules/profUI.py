@@ -147,26 +147,42 @@ class NavigationPanel(Window):
         display_pic = self.canvas.create_image(1600, 20, image=self.dp, anchor="nw")
 
 
-    def nav_bar_features(self): # RAFAEL HERE
-        # inactive dashboard
-        db = Image.open("attendance/public/dashboard=Default.png").resize((50, 50), Image.LANCZOS)
-        self.dashboard = ImageTk.PhotoImage(db)
-        # inactive attendance
-        attend = Image.open("attendance/public/attendance=Default.png").resize((55, 55), Image.LANCZOS)
-        self.attend = ImageTk.PhotoImage(attend)
-        # inactive schedule
-        sched = Image.open("attendance/public/schedule=Default.png").resize((55, 55), Image.LANCZOS)
-        self.sched = ImageTk.PhotoImage(sched)
-        # inactive add class
-        add = Image.open("attendance/public/add class=Default.png").resize((57, 57), Image.LANCZOS)
-        self.add = ImageTk.PhotoImage(add)
+    class NavigationBar(tk.Frame):
+     def __init__(self, master):
+        super().__init__(master)
+        self.canvas = tk.Canvas(self, width=80, height=600, bg="white")
+        self.canvas.pack()
+
+        self.images = {
+            "dashboard": {
+                "active": ImageTk.PhotoImage(Image.open("attendance/public/dashboard=Active.png").resize((50, 50), Image.LANCZOS)),
+                "inactive": ImageTk.PhotoImage(Image.open("attendance/public/dashboard=Default.png").resize((50, 50), Image.LANCZOS))
+            },
+            "attendance": {
+                "active": ImageTk.PhotoImage(Image.open("attendance/public/attendance=Active.png").resize((55, 55), Image.LANCZOS)),
+                "inactive": ImageTk.PhotoImage(Image.open("attendance/public/attendance=Default.png").resize((55, 55), Image.LANCZOS))
+            },
+            "schedule": {
+                "active": ImageTk.PhotoImage(Image.open("attendance/public/schedule=Active.png").resize((55, 55), Image.LANCZOS)),
+                "inactive": ImageTk.PhotoImage(Image.open("attendance/public/schedule=Default.png").resize((55, 55), Image.LANCZOS))
+            },
+            "add_class": {
+                "active": ImageTk.PhotoImage(Image.open("attendance/public/add class=Active.png").resize((57, 57), Image.LANCZOS)),
+                "inactive": ImageTk.PhotoImage(Image.open("attendance/public/add class=Default.png").resize((57, 57), Image.LANCZOS))
+            }
+        }
 
 
+     def bind_clicks(self):
+        self.canvas.tag_bind(self.image_ids["dashboard"], "<Button-1>", lambda e: self.change_image("dashboard"))
+        self.canvas.tag_bind(self.image_ids["attendance"], "<Button-1>", lambda e: self.change_image("attendance"))
+        self.canvas.tag_bind(self.image_ids["schedule"], "<Button-1>", lambda e: self.change_image("schedule"))
+        self.canvas.tag_bind(self.image_ids["add_class"], "<Button-1>", lambda e: self.change_image("add_class"))
 
-        dashboard = self.canvas.create_image(20, 100, image=self.dashboard, anchor="nw")
-        attendance = self.canvas.create_image(19, 175, image=self.attend, anchor="nw")
-        schedule = self.canvas.create_image(19, 250, image=self.sched, anchor="nw")
-        add_class = self.canvas.create_image(20, 325, image=self.add, anchor="nw")
+     def change_image(self, selected):
+        for key in self.image_ids:
+            self.canvas.itemconfig(self.image_ids[key], image=self.images[key]["inactive"])
+        self.canvas.itemconfig(self.image_ids[selected], image=self.images[selected]["active"])
 
 
 
