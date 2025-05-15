@@ -188,5 +188,8 @@ class NavigationPanel(Window):
 
 
 if __name__ == "__main__":
-    app = NavigationPanel()
-    app.run()
+    root = tk.Tk()
+    nav_bar = NavigationBar(root)
+    nav_bar.pack(side="left", fill="both")
+    
+    root.mainloop()
