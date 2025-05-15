@@ -1,8 +1,8 @@
 import customtkinter as ctk
 from abc import ABC, abstractmethod
 from modules.Login import LogInFrame
-from modules.studentRegister import RegisterFrame
-import time
+from modules.Register import RegisterFrame
+from modules.Captcha import CaptchaWidget
 
 def center_window(win, width, height):
         screen_width = win.winfo_screenwidth()

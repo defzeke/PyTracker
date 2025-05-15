@@ -17,10 +17,8 @@ class LogInFrame(ctk.CTkFrame):
         
         self.canvas.create_text(265, 560, text="Don't have an account?", font=("Tai Heritage Pro", 15))
 
-        # Create "Register" text
         self.register_text = self.canvas.create_text(365, 560, text="Register", font=("Tai Heritage Pro", 15, "bold"), fill="lightblue")
 
-        # Bind click event to "Register" text
         self.canvas.tag_bind(self.register_text, "<Button-1>", self.to_register)
 
 
