@@ -1,23 +1,34 @@
 import tkinter as tk
 import customtkinter as ctk
 from PIL import ImageTk, Image
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from mainProgram import Window
 
 class NavigationPanel(Window):
+    
     def __init__(self):
         super().__init__()
 
         self.root.resizable(True, True)
         self.root.state("zoomed")
         self.root.resizable(False, False)
-        
+
+        #color properties
+        self.clrs = {"cnv_clr": ["#E3E9ED", "#0b0b1a"],
+                     "nav_clr": ["#272757", "#13132b"],
+                     "tpb_clr": ["#78788f", "#4b4b6a"],
+                     "set_clr": ["#78788f", "#4b4b6a"]}
+        self.chng_clr = 0
+
         # Used tk.Canvas for animation only kasi may move() function sya unlike sa ctk
-        self.canvas = tk.Canvas(self.root, width=2000, height=2000, bg="#E3E9ED", highlightthickness=0)
+        self.canvas = tk.Canvas(self.root, width=2000, height=2000, bg=self.clrs["cnv_clr"][self.chng_clr], highlightthickness=0)
         self.canvas.pack(fill="both", expand=True)
 
         # Navigation rectangle properties
         self.nav_width = 100
-        self.nav_rect = self.canvas.create_rectangle(-self.nav_width, 0, 0, 1000, fill="#272757", outline="")
+        self.nav_rect = self.canvas.create_rectangle(-self.nav_width, 0, 0, 1000, fill=self.clrs["nav_clr"][self.chng_clr], outline="")
         self.nav_visible = False
         self.animating = False
 
@@ -29,6 +40,9 @@ class NavigationPanel(Window):
         self.nav_text = None
         self.notif = None
 
+        
+
+
 ###########################################################################################
     def on_mouse_move(self, event):
         if event.x <= 10 and not self.nav_visible and not self.animating:
@@ -36,6 +50,7 @@ class NavigationPanel(Window):
         elif event.x > self.nav_width and self.nav_visible and not self.animating:
             self.slide_out()
 
+    
     def slide_in(self):
         self.animating = True
         def animate():
@@ -87,18 +102,19 @@ class NavigationPanel(Window):
     def draw_top_bar(self):
         width = self.canvas.winfo_width()
         if width > 0:
-            top_bar = self.canvas.create_rectangle(0, 0, width, 80, fill="white", outline="")
-            self.canvas.tag_lower(top_bar)
+            self.top_bar = self.canvas.create_rectangle(0, 0, width, 80, fill=self.clrs["tpb_clr"][self.chng_clr], outline="")
+            self.canvas.tag_lower(self.top_bar)
             
             self.add_top_bar_lines(width)
-            self.top_bar_features()
             self.account_settings()
+            self.top_bar_features()
+            
         else:
             self.root.after(100, self.draw_top_bar)
 
     def add_top_bar_lines(self, width):
-        self.canvas.create_line(1370, 0, 1370, 81, fill="gray", width=1)
-        self.canvas.create_line(1260, 0, 1260, 81, fill="gray", width=1)
+        self.canvas.create_line(1370, 0, 1370, 81, fill="white", width=1)
+        self.canvas.create_line(1260, 0, 1260, 81, fill="white", width=1)
 ###########################################################################################
 
 
@@ -137,13 +153,71 @@ class NavigationPanel(Window):
         # display picture
         dp = Image.open("attendance/public/display pic.png").resize((40, 40), Image.LANCZOS)
         self.dp = ImageTk.PhotoImage(dp)
+        
+        # Setting rect properties
+        self.set_rect = self.canvas.create_rectangle(-100, 0, 0, 250, fill=self.clrs["set_clr"][self.chng_clr], outline="")
+        self.set_visible = False
 
-        """
-        add dark mode and other settings
-        """
+                                            #1650
+        dropdown = self.canvas.create_image(1200, 32, image=self.dropdown, anchor="nw")
+                                               #1600
+        display_pic = self.canvas.create_image(1150, 20, image=self.dp, anchor="nw")
 
-        dropdown = self.canvas.create_image(1650, 32, image=self.dropdown, anchor="nw")
-        display_pic = self.canvas.create_image(1600, 20, image=self.dp, anchor="nw")
+        self.canvas.tag_bind(dropdown, "<Button-1>", self.show_settings)
+        self.canvas.tag_bind(display_pic, "<Button-1>", self.show_settings)
+
+
+    def show_settings(self, event):
+        if not self.set_visible:
+            self.canvas.move(self.set_rect, 1237, 0) #(1637,0)
+            self.settings_features()
+            
+            self.set_visible = True
+
+        elif self.set_visible:
+            if hasattr(self, "change_mode"): self.canvas.delete(self.change_mode)
+            if hasattr(self, "log_out"): self.canvas.delete(self.log_out)
+            if hasattr(self, "chng_pass"): self.canvas.delete(self.chng_pass)
+
+            self.canvas.move(self.set_rect, -1237, 0)
+            
+            self.set_visible = False
+        
+
+    def settings_features(self):
+        #change to color mode of screen
+        def change_color_mode(event):
+            def change():
+                self.canvas.itemconfig(self.set_rect, fill=self.clrs["set_clr"][self.chng_clr])
+                self.canvas.itemconfig(self.nav_rect, fill=self.clrs["nav_clr"][self.chng_clr])
+                self.canvas.itemconfig(self.top_bar, fill=self.clrs["tpb_clr"][self.chng_clr])
+                self.canvas.config(bg=self.clrs["cnv_clr"][self.chng_clr])
+
+            match self.chng_clr:
+                case 0: 
+                    self.chng_clr = 1
+                    change()
+                case 1: 
+                    self.chng_clr = 0
+                    change()
+
+        def chng_pass():
+            #add this later
+            pass
+
+        def log_out():
+            #add this later
+            pass
+
+        #draw setting features
+        self.change_mode = self.canvas.create_text(1162, 100, text="Darkmode", fill="white", font=("Tai Heritage Pro", 9), anchor="nw") #(1562, 100)
+        self.canvas.tag_bind(self.change_mode, "<Button-1>", change_color_mode)
+        
+        self.chng_pass = self.canvas.create_text(1162, 140, text="Change\nPassword", fill="white", font=("Tai Heritage Pro", 9), anchor="nw") #(1562, 100)
+        self.canvas.tag_bind(self.chng_pass, "<Button-1>", None)
+
+        self.log_out = self.canvas.create_text(1162, 200, text="Logout", fill="white", font=("Tai Heritage Pro", 9), anchor="nw") #(1562, 100)
+        self.canvas.tag_bind(self.log_out, "<Button-1>", None)
 
 
     def nav_bar_features(self): # RAFAEL HERE

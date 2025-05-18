@@ -1,7 +1,8 @@
 import customtkinter as ctk
-from PIL import ImageTk, Image
 from abc import ABC, abstractmethod
-from Login import LogInFrame
+from modules.Login import LogInFrame
+from modules.Register import RegisterFrame
+from modules.Captcha import CaptchaWidget
 
 def center_window(win, width, height):
         screen_width = win.winfo_screenwidth()
@@ -14,7 +15,6 @@ class Window:
     def __init__(self):
         self.root = ctk.CTk()
         self.root.title("Attendance Tracker")
-                                #1280
         center_window(self.root, 1280, 800)
         self.root.configure(fg_color="#272757")
         self.root.resizable(False, False)
@@ -25,15 +25,34 @@ class Window:
 class OpeningAnimation(Window):
     pass
 
-class LogIn(Window):
+class Main(Window):
     def __init__(self):
         super().__init__()
-        self.login_ui = LogInFrame(self.root)
+        self.login_ui = LogInFrame(self.root, switch_to_register=self.show_register)
         self.login_ui.place(rely=0.5, x=930 , anchor="center")
+
+        self.register_ui = RegisterFrame(self.root, switch_to_login=self.show_login)
+        self.register_ui.place(rely=0.5, x=930 , anchor="center")
+        self.register_ui.lower() 
+
+###############################################
+    def show_register(self):
+        self.login_ui.lower()  
+        self.register_ui.lift()  
+
+    def show_login(self):
+        self.register_ui.lower() 
+        self.login_ui.lift() 
+
+    def run(self):
+        self.root.mainloop()
+###############################################
+
+
 
  
 if __name__ == "__main__":
-    app = LogIn()
+    app = Main()
     app.run()
 
 
