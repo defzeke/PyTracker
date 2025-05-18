@@ -42,7 +42,6 @@ class NavigationPanel(Window):
 
         
 
-
 ###########################################################################################
     def on_mouse_move(self, event):
         if event.x <= 10 and not self.nav_visible and not self.animating:
@@ -179,7 +178,7 @@ class NavigationPanel(Window):
             if hasattr(self, "log_out"): self.canvas.delete(self.log_out)
             if hasattr(self, "chng_pass"): self.canvas.delete(self.chng_pass)
 
-            self.canvas.move(self.set_rect, -1237, 0)
+            self.canvas.move(self.set_rect, -1237, 0) #(-1637, 0)
             
             self.set_visible = False
         
@@ -213,10 +212,10 @@ class NavigationPanel(Window):
         self.change_mode = self.canvas.create_text(1162, 100, text="Darkmode", fill="white", font=("Tai Heritage Pro", 9), anchor="nw") #(1562, 100)
         self.canvas.tag_bind(self.change_mode, "<Button-1>", change_color_mode)
         
-        self.chng_pass = self.canvas.create_text(1162, 140, text="Change\nPassword", fill="white", font=("Tai Heritage Pro", 9), anchor="nw") #(1562, 100)
+        self.chng_pass = self.canvas.create_text(1162, 140, text="Change\nPassword", fill="white", font=("Tai Heritage Pro", 9), anchor="nw") #(1562, 140)
         self.canvas.tag_bind(self.chng_pass, "<Button-1>", None)
 
-        self.log_out = self.canvas.create_text(1162, 200, text="Logout", fill="white", font=("Tai Heritage Pro", 9), anchor="nw") #(1562, 100)
+        self.log_out = self.canvas.create_text(1162, 200, text="Logout", fill="white", font=("Tai Heritage Pro", 9), anchor="nw") #(1562, 200)
         self.canvas.tag_bind(self.log_out, "<Button-1>", None)
 
 
