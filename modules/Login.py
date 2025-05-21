@@ -1,4 +1,6 @@
 import customtkinter as ctk
+import pandas as pd
+import numpy as np
 from PIL import Image, ImageTk
 
 
@@ -17,13 +19,72 @@ class LogInFrame(ctk.CTkFrame):
         
         self.canvas.create_text(265, 560, text="Don't have an account?", font=("Tai Heritage Pro", 15))
 
-        # Create "Register" text
         self.register_text = self.canvas.create_text(365, 560, text="Register", font=("Tai Heritage Pro", 15, "bold"), fill="lightblue")
 
-        # Bind click event to "Register" text
         self.canvas.tag_bind(self.register_text, "<Button-1>", self.to_register)
+        
+        self.login_data = {
+            "Control No.": [],
+            "name": [],
+            "ID_number": [],
+            "role": [],
+            "password": [],
+            "email": []
+        }
 
+        try:
+            # Load registration CSV
+            self.registration_df = pd.read_csv("attendance/public/registration_main.csv")
 
+            # Load login CSV
+            self.login_df = pd.read_csv("attendance/public/login_main.csv")
+
+        except FileNotFoundError:
+            ctk.CTkToplevel(self, text="Error", width=300, height=100)
+            ctk.CTkLabel(self, text="Error: One or both of the CSV files (registration_main.csv or login_main.csv) not found.", font=("Tai Heritage Pro", 15)).pack(pady=20)
+            self.registration_df = pd.DataFrame(columns=["Control No.", "name", "ID_number", "role", "password", "email"])
+            self.login_df = pd.DataFrame(columns=["Control No.", "name", "ID_number", "role", "password", "email"])
+
+        except pd.errors.EmptyDataError:
+            ctk.CTkToplevel(self, text="Error", width=300, height=100)
+            ctk.CTkLabel(self, text="Error: One or both of the CSV files (registration_main.csv or login_main.csv) are empty.", font=("Tai Heritage Pro", 15)).pack(pady=20)
+            self.registration_df = pd.DataFrame(columns=["Control No.", "name", "ID_number", "role", "password", "email"])
+            self.login_df = pd.DataFrame(columns=["Control No.", "name", "ID_number", "role", "password", "email"])
+
+        except pd.errors.ParserError:
+            ctk.CTkToplevel(self, text="Error", width=300, height=100)
+            ctk.CTkLabel(self, text="Error: Unable to parse one or both of the CSV files (registration_main.csv or login_main.csv).", font=("Tai Heritage Pro", 15)).pack(pady=20)
+            self.registration_df = pd.DataFrame(columns=["Control No.", "name", "ID_number", "role", "password", "email"])
+            self.login_df = pd.DataFrame(columns=["Control No.", "name", "ID_number", "role", "password", "email"])
+
+        except Exception as e:
+            ctk.CTkToplevel(self, text="Error", width=300, height=100)
+            ctk.CTkLabel(self, text=f"An error occurred: {e}", font=("Tai Heritage Pro", 15)).pack(pady=20)
+            self.registration_df = pd.DataFrame(columns=["Control No.", "name", "ID_number", "role", "password", "email"])
+            self.login_df = pd.DataFrame(columns=["Control No.", "name", "ID_number", "role", "password", "email"])
+       
+        # Uncomment the following lines if you want to load the login CSV file even if the registration CSV file is not found.
+        # This is useful if you want to allow users to log in even if the registration data is not available.
+        """
+        Code if Database is proceeding with error, and the user is not able to register, proceed to uncomment this if necessary.
+        - Database Manager, Yco
+        try:
+            # Load login CSV
+            self.login_df = pd.read_csv("attendance/public/login_main.csv")
+            print("Login CSV loaded successfully.")
+            print("Login CSV data:")
+            print(self.login_df)
+        except FileNotFoundError:
+            print("Error: Login CSV file not found.")
+            self.login_df = pd.DataFrame(columns=["Control No.", "name", "ID_number", "role", "password", "email"])
+        except pd.errors.EmptyDataError:
+            print("Error: Login CSV file is empty.")
+            self.login_df = pd.DataFrame(columns=["Control No.", "name", "ID_number", "role", "password", "email"])
+        except pd.errors.ParserError:
+            print("Error: Unable to parse Login CSV file.")
+            self.login_df = pd.DataFrame(columns=["Control No.", "name", "ID_number", "role", "password", "email"])
+        """
+        
     def container(self):
         container_pic = Image.open("attendance/public/Rectangle 9.png").resize((580, 681), Image.LANCZOS)
         self.login_container = ImageTk.PhotoImage(container_pic)
@@ -88,6 +149,8 @@ class LogInFrame(ctk.CTkFrame):
 
         self.canvas.create_image(31, 450, image=self.sign_ins, anchor="nw")
         self.canvas.create_text(31 + 260, 450 + 40, text="Sign In", fill="#E2E2E7", font=("Tai Heritage Pro", 20))
+        self.sign_in_button = ctk.CTkButton(self, text="", font=("Tai Heritage Pro", 20), command=self.login)
+        self.canvas.create_window(31 + 260, 450 + 40, window=self.sign_in_button)
 
 
     def to_register(self, event):
@@ -95,6 +158,48 @@ class LogInFrame(ctk.CTkFrame):
         if self.switch_to_register:
             self.switch_to_register()
     
+
+    def login(self):
+        try:
+            # Get user input
+            id_number = self.id_entry.get()
+            password = self.pass_entry.get()
+
+            # Check if user exists in login CSV
+            user_exists = self.login_df[(self.login_df['ID_number'] == id_number) & (self.login_df['password'] == password)]
+
+            if not user_exists.empty:
+                # Get user role
+                user_role = user_exists['role'].iloc[0]
+
+                # Proceed to respective page based on user role
+                if user_role == 'admin':
+                    # Proceed to admin page
+                    self.proceed_to_admin_page()
+                elif user_role == 'user':
+                    # Proceed to user page
+                    self.proceed_to_user_page()
+                else:
+                    # Handle unknown user role
+                    ctk.CTkToplevel(self, text="Error", width=300, height=100)
+                    ctk.CTkLabel(self, text="Error: Unknown user role.", font=("Tai Heritage Pro", 15)).pack(pady=20)
+            else:
+                # Handle invalid login credentials
+                ctk.CTkToplevel(self, text="Error", width=300, height=100)
+                ctk.CTkLabel(self, text="Error: Invalid login credentials.", font=("Tai Heritage Pro", 15)).pack(pady=20)
+
+        except Exception as e:
+            # Handle any exceptions
+            ctk.CTkToplevel(self, text="Error", width=300, height=100)
+            ctk.CTkLabel(self, text=f"An error occurred: {e}", font=("Tai Heritage Pro", 15)).pack(pady=20)
+
+    def proceed_to_admin_page(self):
+        # Implement admin page logic here
+        print("Proceeding to admin page...")
+
+    def proceed_to_user_page(self):
+        # Implement user page logic here
+        print("Proceeding to user page...")
 
 
 if __name__ == "__main__":
