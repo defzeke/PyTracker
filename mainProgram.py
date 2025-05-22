@@ -14,10 +14,10 @@ def center_window(win, width, height):
 class Window:
     def __init__(self):
         self.root = ctk.CTk()
-        self.root.title("Attendance Tracker")
+        self.root.title("PyTracker")
         center_window(self.root, 1280, 800)
         self.root.configure(fg_color="#272757")
-        self.root.resizable(False, False)
+        self.root.resizable(True, True)
 
     def run(self):
         self.root.mainloop()
@@ -28,12 +28,18 @@ class OpeningAnimation(Window):
 class Main(Window):
     def __init__(self):
         super().__init__()
+        for col in range(2):            
+            self.root.grid_columnconfigure(col, weight=1)
+
+        self.root.grid_columnconfigure(2, weight=0) 
+        self.root.grid_rowconfigure(0, weight=1)
+
         self.login_ui = LogInFrame(self.root, switch_to_register=self.show_register)
-        self.login_ui.place(rely=0.5, x=930 , anchor="center")
+        self.login_ui.grid(row=0, column=2, padx=60, pady=20)
 
         self.register_ui = RegisterFrame(self.root, switch_to_login=self.show_login)
-        self.register_ui.place(rely=0.5, x=930 , anchor="center")
-        self.register_ui.lower() 
+        self.register_ui.grid(row=0, column=2, padx=60, pady=20)
+        self.register_ui.lower()
 
 ###############################################
     def show_register(self):
