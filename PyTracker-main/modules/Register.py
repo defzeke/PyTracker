@@ -1,8 +1,7 @@
 import customtkinter as ctk
-import pandas as pd
-import numpy as np
 from PIL import Image, ImageTk
 from .Captcha import CaptchaWidget
+
 
 class RegisterFrame(ctk.CTkFrame):
     def __init__(self, master=None, switch_to_login=None):
@@ -15,14 +14,14 @@ class RegisterFrame(ctk.CTkFrame):
         # Callback to switch to login frame
         self.switch_to_login = switch_to_login
 
-        
+        # Draw container background and UI sections
         self.container()
         self.register_heading()
         self.role_pick()
         
         # Text asking if user already has account
-        self.canvas.create_text(200, 560, text="Already have an account?", font=("Tai Heritage Pro", 15))
-        
+        self.canvas.create_text(265, 560, text="Already have an account?", font=("Tai Heritage Pro", 15))
+
         # Clickable 'Log In' text
         self.login_text = self.canvas.create_text(365, 560, text="Log In", font=("Tai Heritage Pro", 15, "bold"), fill="lightblue")
         self.canvas.tag_bind(self.login_text, "<Button-1>", self.to_login)
@@ -31,72 +30,7 @@ class RegisterFrame(ctk.CTkFrame):
         self.continue_text_button = self.canvas.create_text(460, 480, text="Continue -->", font=("Tai Heritage Pro", 15, "bold"), fill="white")
         self.canvas.tag_bind(self.continue_text_button, "<Button-1>", self.continue_register)
         self.continue_enabled = False 
-
-        # Initialize registration data
-        self.registration_data = {
-            "Control No.": "",
-            "temp_ID": "",
-            "name": "",
-            "email": "",
-            "role": "",
-            "password": "",
-            "status": "Pending"
-        }
-        try:
-            # Load registration CSV
-            self.registration_df = pd.read_csv("attendance/database/registration_main.csv")
-
-            # Load login CSV
-            self.login_df = pd.read_csv("attendance/database/login_main.csv")
-
-        # Error Handsling
-        # If CSV files are not found, create empty DataFrames with the same columns
-        # and show error message
-        except FileNotFoundError:
-            ctk.CTkToplevel(self, text="Error", width=300, height=100)
-            ctk.CTkLabel(self, text="Error: One or both of the CSV files (registration_main.csv or login_main.csv) not found.", font=("Tai Heritage Pro", 15)).pack(pady=20)
-            self.registration_df = pd.DataFrame(columns=["Control No.", "name", "ID_number", "role", "password", "email"])
-            self.login_df = pd.DataFrame(columns=["Control No.", "name", "ID_number", "role", "password", "email"])
-
-        except pd.errors.EmptyDataError:
-            ctk.CTkToplevel(self, text="Error", width=300, height=100)
-            ctk.CTkLabel(self, text="Error: One or both of the CSV files (registration_main.csv or login_main.csv) are empty.", font=("Tai Heritage Pro", 15)).pack(pady=20)
-            self.registration_df = pd.DataFrame(columns=["Control No.", "name", "ID_number", "role", "password", "email"])
-            self.login_df = pd.DataFrame(columns=["Control No.", "name", "ID_number", "role", "password", "email"])
-
-        except pd.errors.ParserError:
-            ctk.CTkToplevel(self, text="Error", width=300, height=100)
-            ctk.CTkLabel(self, text="Error: Unable to parse one or both of the CSV files (registration_main.csv or login_main.csv).", font=("Tai Heritage Pro", 15)).pack(pady=20)
-            self.registration_df = pd.DataFrame(columns=["Control No.", "name", "ID_number", "role", "password", "email"])
-            self.login_df = pd.DataFrame(columns=["Control No.", "name", "ID_number", "role", "password", "email"])
-
-        except Exception as e:
-            ctk.CTkToplevel(self, text="Error", width=300, height=100)
-            ctk.CTkLabel(self, text=f"An error occurred: {e}", font=("Tai Heritage Pro", 15)).pack(pady=20)
-            self.registration_df = pd.DataFrame(columns=["Control No.", "name", "ID_number", "role", "password", "email"])
-            self.login_df = pd.DataFrame(columns=["Control No.", "name", "ID_number", "role", "password", "email"])
-
-            # Uncomment the following lines if you want to proceed with registration even if the CSV files are not found    
-        '''
-        Code if Database is proceeding with error, and the user is not able to register, proceed to uncomment this if necessary.
-        - Database Manager, Yco
-        try:
-            # Load login CSV
-            self.login_df = pd.read_csv("attendance/database/login_main.csv")
-            print("Login CSV loaded successfully.")
-            print("Login CSV data:")
-            print(self.login_df)
-        except FileNotFoundError:
-            print("Error: Login CSV file not found.")
-            self.login_df = pd.DataFrame(columns=["Control No.", "name", "ID_number", "role", "password", "email"])
-        except pd.errors.EmptyDataError:
-            print("Error: Login CSV file is empty.")
-            self.login_df = pd.DataFrame(columns=["Control No.", "name", "ID_number", "role", "password", "email"])
-        except pd.errors.ParserError:
-            print("Error: Unable to parse Login CSV file.")
-            self.login_df = pd.DataFrame(columns=["Control No.", "name", "ID_number", "role", "password", "email"])
-        '''
-       
+        
 
     def container(self):
         # Load and display background container image
@@ -221,14 +155,12 @@ class RegisterFrame(ctk.CTkFrame):
             first = self.first_name_entry.get().strip()
             middle = self.middle_name_entry.get().strip()
             last = self.last_name_entry.get().strip()
-            if not first or not last:
+
+            if not first or not last or not middle:
                 self.show_error("You must fill up every sections.")
             else:
-                if middle:
-                    self.registration_data["name"] = f"{first} {middle} {last}"
-                else:
-                    self.registration_data["name"] = f"{first} {last}"
                 self.show_credentials_input()
+
 
         elif self.stage == "credentials":
             email = self.email_entry.get().strip()
@@ -237,65 +169,12 @@ class RegisterFrame(ctk.CTkFrame):
 
             if not email or not password or not confirm:
                 self.show_error("You must fill up every sections.")
-            elif password != confirm:
-                self.show_error("Passwords do not match.")
             else:
-                self.registration_data["email"] = email
-                self.registration_data["password"] = password
-                self.registration_data["role"] = self.selected_role
+                print("OTP LOGIC HERE")
 
-                # Generate control number
-                if self.registration_df.empty:
-                    control_no = 1
-                else:
-                    control_no = self.registration_df['Control No.'].max() + 1
-                self.registration_data["Control No."] = control_no
-
-                # Generate temp_ID
-                if self.registration_df.empty:
-                    temp_id = 1
-                else:
-                    temp_id = self.registration_df['temp_ID'].max() + 1
-                self.registration_data["temp_ID"] = temp_id
-
-                # Save registration data to CSV
-                new_row = pd.DataFrame([self.registration_data])
-                self.registration_df = pd.concat([self.registration_df, new_row], ignore_index=True)
-                self.registration_df.to_csv("attendance/database/registration_main.csv", index=False)
-
-                # Check if user already exists in login_main.csv
-                existing_user = self.login_df[(self.login_df['email'] == email) & (self.login_df['password'] == password)]
-                if not existing_user.empty:
-                    self.show_error("User      already exists. Please try again.")
-                else:
-                    # Generate control number for login
-                    if self.login_df.empty:
-                        login_control_no = 1
-                    else:
-                        login_control_no = self.login_df['Control No.'].max() + 1
-
-                    # Generate temp_ID for login
-                    if self.login_df.empty:
-                        login_temp_id = 1
-                    else:
-                        login_temp_id = self.login_df['ID_number'].max() + 1
-
-                    # Add registration data to login CSV
-                    login_data = {
-                        "Control No.": login_control_no,
-                        "name": self.registration_data["name"],
-                        "ID_number": login_temp_id,
-                        "role": self.registration_data["role"],
-                        "password": self.registration_data["password"],
-                        "email": self.registration_data["email"]
-                    }
-                    new_login_row = pd.DataFrame([login_data])
-                    self.login_df = pd.concat([self.login_df, new_login_row], ignore_index=True)
-                    self.login_df.to_csv("attendance/database/login_main.csv", index=False)
-
-                    # Switch to login frame
-                    if self.switch_to_login:
-                        self.switch_to_login()
+            if not self.captcha_widget.verified:
+                self.show_error("You're a robot.")
+                return
 
     def back_to_role(self, event=None):
         # Go back from name input to role selection
