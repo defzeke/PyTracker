@@ -5,24 +5,26 @@ from tkcalendar import Calendar
 import pandas as pd
 import sys
 import os
+# Add parent directory to sys.path for imports
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from mainProgram import Window
 
 class NavigationPanel(Window):
     def __init__(self):
         super().__init__()
-        self.root.state("zoomed")
-        self.root.resizable(False, False)
+        self.root.state("zoomed") # Maximize window
+        self.root.resizable(False, False) # Disable resizing
         
+        # Create main canvas for UI
         self.canvas = tk.Canvas(self.root, width=2000, height=2000, bg="#E3E9ED", highlightthickness=0)
         self.canvas.pack(fill="both", expand=True)
 
+        # Store relative positions for UI elements (for responsive design)
         self.positions = {
             'dashboard': (20/2000, 100/1000),  
             'attendance': (19/2000, 175/1000),    
             'schedule': (19/2000, 250/1000),     
             'add_class': (20/2000, 325/1000), 
-
             'dropdown': (1650/2000, 32/1000),
             'display_pic': (1600/2000, 20/1000),
             'first_line': (1370/2000, 0/1000),
@@ -39,16 +41,20 @@ class NavigationPanel(Window):
             'schedule_label': (240/2000, 140/1000),
             'adclass_label': (240/2000, 140/1000),
 }
-        
+
+        # Load and display the navigation bar image
         navbar_img = Image.open("attendance/public/rectangle 1.png").resize((90, 1000), Image.LANCZOS)
         self.navbar = ImageTk.PhotoImage(navbar_img)
         self.navbar_img_id = self.canvas.create_image(0, 0, image=self.navbar, anchor="nw")  
-
+        
+        # Bind resize event for responsive layout
         self.canvas.bind("<Configure>", self.on_canvas_resize)
 
+        # Draw top bar and navigation features after window loads
         self.root.after(100, self.draw_top_bar)
         self.load_navbar_features()
 
+        # Show dashboard UI by default
         self.root.after(100, self.show_dashboard_ui)
         self.active_section = "dashboard"
 
@@ -56,6 +62,7 @@ class NavigationPanel(Window):
 #                        ANIMATIONS /// TRANSITIONS /// DRAW                              #
 ###########################################################################################
     def on_canvas_resize(self, event):
+        # Adjust UI elements when the window is resized
         w, h = event.width, event.height
 
         self.load_navbar_image(h)
@@ -66,12 +73,14 @@ class NavigationPanel(Window):
         if hasattr(self, 'top_bar'):
             self.canvas.coords(self.top_bar, 0, 0, w, 80)
 
+        # Reposition all items based on new window size
         for name, (x_ratio, y_ratio) in self.positions.items():
             item_id = getattr(self, name, None)
             if item_id:  
                 self.canvas.coords(item_id, int(w * x_ratio), int(h * y_ratio))
 
     def draw_top_bar(self):
+        # Draw the top bar rectangle and its features
         width = self.canvas.winfo_width()
         if width > 0:
             self.top_bar = self.canvas.create_rectangle(0, 0, width, 80, fill="white", outline="")
@@ -84,10 +93,12 @@ class NavigationPanel(Window):
             self.root.after(100, self.draw_top_bar)
 
     def add_top_bar_lines(self, width):
+        # Draw vertical separator lines on the top bar
         self.first_line = self.canvas.create_line(1370, 0, 1370, 81, fill="gray", width=1)
         self.second_line = self.canvas.create_line(1260, 0, 1260, 81, fill="gray", width=1)
 
     def set_active(self, selected):
+        # Set the active navigation icon and reset others
         self.canvas.itemconfig(self.dashboard, image=self.db_inactive)
         self.canvas.itemconfig(self.attendance, image=self.attend_inactive)
         self.canvas.itemconfig(self.schedule, image=self.sched_inactive)
@@ -107,12 +118,14 @@ class NavigationPanel(Window):
             self.active_nav = "add_class"
 
     def set_topbar_active(self, name):
+        # Handle top bar icon activation and popup windows
         if not hasattr(self, 'topbar_windows'):
             self.topbar_windows = {}
 
         popup_width = 500
         popup_height = 500
 
+        # Set popup size based on feature
         if name == "recitation":
             popup_width, popup_height = 400, 500
         elif name == "message":
@@ -124,6 +137,7 @@ class NavigationPanel(Window):
         else:
             popup_width, popup_height = 300, 500  
 
+        # If already active, deactivate and close popup
         if self.active_topbar == name:
             self.canvas.itemconfig(self.topbar_items[name], image=self.topbar_icons[name]["inactive"])
             self.active_topbar = None
@@ -133,6 +147,7 @@ class NavigationPanel(Window):
                 del self.topbar_windows[name]
 
         else:
+            # Deactivate all, close all popups, then activate selected
             for key, item_id in self.topbar_items.items():
                 self.canvas.itemconfig(item_id, image=self.topbar_icons[key]["inactive"])
                 if key in self.topbar_windows:
@@ -142,6 +157,7 @@ class NavigationPanel(Window):
             self.canvas.itemconfig(self.topbar_items[name], image=self.topbar_icons[name]["active"])
             self.active_topbar = name
 
+            # Create popup window for the feature
             popup = ctk.CTkToplevel(self.root)
             popup.withdraw()
             popup.overrideredirect(True)
@@ -154,6 +170,7 @@ class NavigationPanel(Window):
             frame.pack(fill="both", expand=True)
 
             def place_popup():
+                # Center or position the popup window
                 screen_width = popup.winfo_screenwidth()
                 screen_height = popup.winfo_screenheight()
 
@@ -178,6 +195,7 @@ class NavigationPanel(Window):
 
 
     def load_navbar_features(self):
+        # Load images for navigation bar icons (active/inactive)
         db_inactive = Image.open("attendance/public/dashboard=Default.png").resize((50, 50), Image.LANCZOS)
         db_active = Image.open("attendance/public/dashboard=Active.png").resize((50, 50), Image.LANCZOS)
         self.db_inactive = ImageTk.PhotoImage(db_inactive)
@@ -198,6 +216,7 @@ class NavigationPanel(Window):
         self.add_inactive = ImageTk.PhotoImage(add_inactive)
         self.add_active = ImageTk.PhotoImage(add_active)
 
+        # Place navigation icons on the canvas
         self.dashboard = self.canvas.create_image(20, 100, image=self.db_inactive, anchor="nw", tags="dashboard")
         self.attendance = self.canvas.create_image(19, 175, image=self.attend_inactive, anchor="nw", tags="attendance")
         self.schedule = self.canvas.create_image(19, 250, image=self.sched_inactive, anchor="nw", tags="schedule")
@@ -205,6 +224,7 @@ class NavigationPanel(Window):
 
         self.feature_ids = [self.dashboard, self.attendance, self.schedule, self.add_class]
 
+        # Bind click events to navigation icons
         self.canvas.tag_bind(self.dashboard, "<Button-1>", lambda e: self.on_nav_click("dashboard"))
         self.canvas.tag_bind(self.attendance, "<Button-1>", lambda e: self.on_nav_click("attendance"))
         self.canvas.tag_bind(self.schedule, "<Button-1>", lambda e: self.on_nav_click("schedule"))
@@ -213,28 +233,28 @@ class NavigationPanel(Window):
         self.active_nav = None
         self.set_active("dashboard")
 
-
+    # Hide dashboard widgets
     def hide_dashboard_ui(self):
         if hasattr(self, 'dashboard_widgets'):
             for widget in self.dashboard_widgets:
                 self.canvas.delete(widget)
             self.dashboard_widgets.clear()
 
-
+    # Hide attendance widgets
     def hide_attendance_ui(self):
         if hasattr(self, 'attendance_widgets'):
             for widget in self.attendance_widgets:
                 self.canvas.delete(widget)
             self.attendance_widgets.clear()
 
-
+    # Hide schedule widgets
     def hide_schedule_ui(self):
         if hasattr(self, 'schedule_widgets'):
             for widget in self.schedule_widgets:
                 self.canvas.delete(widget)
             self.schedule_widgets.clear()
 
-
+    # Hide add class widgets
     def hide_adclass_ui(self):
         if hasattr(self, 'adclass_widgets'):
             for widget in self.adclass_widgets:
@@ -243,6 +263,7 @@ class NavigationPanel(Window):
 
 
     def switch_section(self, section_name):
+        # Hide current section's widgets and show the selected section
         if hasattr(self, 'active_section'):
             if self.active_section == "dashboard":
                 self.hide_dashboard_ui()
@@ -266,6 +287,7 @@ class NavigationPanel(Window):
 
 
     def on_nav_click(self, section):
+        # Handle navigation icon click
         self.set_active(section)
         self.switch_section(section)
         
@@ -279,6 +301,7 @@ class NavigationPanel(Window):
 ###########################################################################################
 
     def top_bar_features(self):
+        # Load and place top bar icons (notification, recitation, message, status)
         self.topbar_icons = {
             "notification": {
                 "active": ImageTk.PhotoImage(Image.open("attendance/public/notif=active.png").resize((30, 30), Image.LANCZOS)),
@@ -305,6 +328,7 @@ class NavigationPanel(Window):
             "status": self.canvas.create_image(445, 23, image=self.topbar_icons["status"]["inactive"], anchor="nw"),
         }
 
+        # Bind click events to top bar icons
         for name in self.topbar_items:
             self.canvas.tag_bind(self.topbar_items[name], "<Button-1>", lambda e, n=name: self.set_topbar_active(n))
 
@@ -312,11 +336,10 @@ class NavigationPanel(Window):
 
 
     def account_settings(self): 
-        # settings dropdown
+        # Load and place settings dropdown and display picture
         settings_dropdown = Image.open("attendance/public/image 9.png").resize((15, 15), Image.LANCZOS)
         self.dd = ImageTk.PhotoImage(settings_dropdown)
 
-        # display picture
         dp = Image.open("attendance/public/display pic.png").resize((40, 40), Image.LANCZOS)
         self.dp = ImageTk.PhotoImage(dp)
 
@@ -325,6 +348,7 @@ class NavigationPanel(Window):
 
 
     def show_dashboard_ui(self):
+        # Draw dashboard section widgets
         self.dashboard_label = self.canvas.create_text(240, 140, text="Dashboard", font=("Tai Heritage Pro", 40, "bold"), fill="black")
         self.frame = ctk.CTkFrame(self.canvas, width=1385, height=340, corner_radius=20, fg_color="#ffffff")
         self.rect = self.canvas.create_window(200, 180, window=self.frame, anchor="nw")
@@ -339,21 +363,25 @@ class NavigationPanel(Window):
    
 
     def show_attendance_ui(self):
+        # Draw attendance section widgets
         self.attendance_label = self.canvas.create_text(240, 140, text="Attendance", font=("Tai Heritage Pro", 40, "bold"), fill="black")
         self.attendance_widgets = [self.attendance_label]
 
 
     def show_schedule_ui(self):
+        # Draw schedule section widgets
         self.schedule_label = self.canvas.create_text(240, 140, text="Schedule", font=("Tai Heritage Pro", 40, "bold"), fill="black")
         self.schedule_widgets = [self.schedule_label]
 
 
     def show_adclass_ui(self):
+        # Draw add class section widgets
         self.adclass_label = self.canvas.create_text(240, 140, text="Add Class", font=("Tai Heritage Pro", 40, "bold"), fill="black")
         self.adclass_widgets = [self.adclass_label]
 
 ###########################################################################################
 
 if __name__ == "__main__":
+    # Run the NavigationPanel if this file is executed directly
     app = NavigationPanel()
     app.run()

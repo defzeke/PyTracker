@@ -4,10 +4,12 @@ from PIL import Image, ImageTk
 class CaptchaWidget(ctk.CTkFrame):
     def __init__(self, master=None, **kwargs):
         super().__init__(master, **kwargs)
+        # Set up the frame appearance
         self.configure(width=300, height=80, fg_color="#f9f9f9", corner_radius=8)
         
         self.verified = False
 
+        # Checkbox button for user to click to verify
         self.checkbox_button = ctk.CTkButton(
             self,
             width=26,
@@ -23,6 +25,7 @@ class CaptchaWidget(ctk.CTkFrame):
         )
         self.checkbox_button.place(x=30, rely=0.5, anchor="center")
 
+        # Label next to the checkbox
         self.robot_label = ctk.CTkLabel(
             self,
             text="I'm not a robot",
@@ -31,6 +34,7 @@ class CaptchaWidget(ctk.CTkFrame):
         )
         self.robot_label.place(x=100, rely=0.5, anchor="center")
 
+        # Small badge label to mimic reCAPTCHA branding
         self.badge_label = ctk.CTkLabel(
             self,
             text="reCAPTCHA\nPrivacy - Terms",
@@ -40,18 +44,18 @@ class CaptchaWidget(ctk.CTkFrame):
         )
         self.badge_label.place(x=230, y=50)
 
-        self.status_label = ctk.CTkLabel(self, text="", text_color="green", font=("Arial", 14))
-        self.status_label.place(x=210, y=150, anchor="center")
-
+        # Add the captcha image (icon)
         self.put_captcha_image()
 
     def put_captcha_image(self):
+        # Load and display the captcha icon image
         captcha_img = Image.open("attendance/public/captcha.png").resize((37, 37), Image.LANCZOS)
         self.captcha = ImageTk.PhotoImage(captcha_img)
         self.captcha_label = ctk.CTkLabel(self, image=self.captcha, text="", fg_color="transparent")
         self.captcha_label.place(x=235, y=14)
 
     def verify_human(self):
+        # Simulate verification process when checkbox is clicked
         if not self.verified:
             self.checkbox_button.configure(fg_color="gray", text="...")  
             self.robot_label.configure(text="Verifying...", text_color="orange")
@@ -60,6 +64,7 @@ class CaptchaWidget(ctk.CTkFrame):
             self.robot_label.configure(text="You're already verified!", text_color="blue")
 
     def complete_verification(self):
+        # Mark as verified and update UI
         self.checkbox_button.configure(text="✓", fg_color="green")
         self.robot_label.configure(text="You're not a robot", text_color="green")
         self.verified = True
