@@ -21,10 +21,10 @@ class LogInFrame(ctk.CTkFrame):
         self.account_sign_in()
 
         # "Don't have an account?" text
-        self.canvas.create_text(265, 560, text="Don't have an account?", font=("Tai Heritage Pro", 15))
+        self.canvas.create_text(265, 570, text="Don't have an account?", font=("Tai Heritage Pro", 15))
 
         # "Register" clickable text
-        self.register_text = self.canvas.create_text(365, 560, text="Register", font=("Tai Heritage Pro", 15, "bold"), fill="lightblue")
+        self.register_text = self.canvas.create_text(365, 570, text="Register", font=("Tai Heritage Pro", 15, "bold"), fill="lightblue")
         self.canvas.tag_bind(self.register_text, "<Button-1>", self.to_register)
 
         # Initialize login data dictionary
