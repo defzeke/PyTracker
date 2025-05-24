@@ -7,22 +7,27 @@ from PIL import Image, ImageTk
 class LogInFrame(ctk.CTkFrame):
     def __init__(self, master=None, switch_to_register=None):
         super().__init__(master)
+        # Create the main canvas for the login UI
         self.canvas = ctk.CTkCanvas(self, width=580, height=681, bg="#272757", highlightthickness=0)
         self.canvas.pack(fill="both", expand=True)
         self.switch_to_register = switch_to_register
+
+        # Build the UI components
         self.container()
         self.input_panel()
         self.log_in_heading()
         self.remember_me()
         self.forgot_password()
         self.account_sign_in()
-        
+
+        # "Don't have an account?" text
         self.canvas.create_text(265, 560, text="Don't have an account?", font=("Tai Heritage Pro", 15))
 
+        # "Register" clickable text
         self.register_text = self.canvas.create_text(365, 560, text="Register", font=("Tai Heritage Pro", 15, "bold"), fill="lightblue")
-
         self.canvas.tag_bind(self.register_text, "<Button-1>", self.to_register)
 
+        # Initialize login data dictionary
         self.login_data = {
             "Control No.": [],
             "name": [],
@@ -32,32 +37,36 @@ class LogInFrame(ctk.CTkFrame):
             "email": []
         }
 
+        # Try loading registration and login CSV files
         try:
             # Load registration CSV
             self.registration_df = pd.read_csv("attendance/database/registration_main.csv")
-
             # Load login CSV
             self.login_df = pd.read_csv("attendance/database/login_main.csv")
 
         except FileNotFoundError:
+            # Show error if files are missing
             error_window = ctk.CTkToplevel(self, width=300, height=100)
             ctk.CTkLabel(error_window, text="Error: One or both of the CSV files (registration_main.csv or login_main.csv) not found.", font=("Tai Heritage Pro", 15)).pack(pady=20)
             self.registration_df = pd.DataFrame(columns=["Control No.", "name", "ID_number", "role", "password", "email"])
             self.login_df = pd.DataFrame(columns=["Control No.", "name", "ID_number", "role", "password", "email"])
 
         except pd.errors.EmptyDataError:
+            # Show error if files are empty
             error_window = ctk.CTkToplevel(self, width=300, height=100)
             ctk.CTkLabel(error_window, text="Error: One or both of the CSV files (registration_main.csv or login_main.csv) are empty.", font=("Tai Heritage Pro", 15)).pack(pady=20)
             self.registration_df = pd.DataFrame(columns=["Control No.", "name", "ID_number", "role", "password", "email"])
             self.login_df = pd.DataFrame(columns=["Control No.", "name", "ID_number", "role", "password", "email"])
 
         except pd.errors.ParserError:
+            # Show error if files can't be parsed
             error_window = ctk.CTkToplevel(self, width=300, height=100)
             ctk.CTkLabel(error_window, text="Error: Unable to parse one or both of the CSV files (registration_main.csv or login_main.csv).", font=("Tai Heritage Pro", 15)).pack(pady=20)
             self.registration_df = pd.DataFrame(columns=["Control No.", "name", "ID_number", "role", "password", "email"])
             self.login_df = pd.DataFrame(columns=["Control No.", "name", "ID_number", "role", "password", "email"])
 
         except Exception as e:
+            # Show any other error
             error_window = ctk.CTkToplevel(self, width=300, height=100)
             ctk.CTkLabel(error_window, text=f"An error occurred: {e}", font=("Tai Heritage Pro", 15)).pack(pady=20)
             self.registration_df = pd.DataFrame(columns=["Control No.", "name", "ID_number", "role", "password", "email"])
@@ -86,19 +95,20 @@ class LogInFrame(ctk.CTkFrame):
        '''
 
     def container(self):
+        # Draw the main container image
         container_pic = Image.open("attendance/public/Rectangle 9.png").resize((580, 681), Image.LANCZOS)
         self.login_container = ImageTk.PhotoImage(container_pic)
         self.canvas.create_image(0, 0, image=self.login_container, anchor="nw")
 
 
     def input_panel(self):
+        # Draw the input panels and icons for ID and password
         id_logo = Image.open("attendance/public/image 12.png").resize((30, 30), Image.LANCZOS)
         input_panel_pic = Image.open("attendance/public/Rectangle 8.png").resize((520, 75), Image.LANCZOS)
         pass_logo = Image.open("attendance/public/image 13.png").resize((30, 30), Image.LANCZOS)
 
 
-        '''1st INPUT PANEL'''
-        # INPUT PANEL
+        # ID input panel
         self.id_panel = ImageTk.PhotoImage (input_panel_pic) 
         self.canvas.create_image(31, 175, image=self.id_panel, anchor="nw") 
         # THE LITTLE PERSON LOGO 
@@ -109,8 +119,7 @@ class LogInFrame(ctk.CTkFrame):
         self.canvas.create_window(50, 190, anchor="nw", window=self.id_entry)
     
 
-        '''2nd INPUT PANEL'''
-        # INPUT PANEL
+        # Password input panel
         self.password_panel = ImageTk.PhotoImage(input_panel_pic)
         self.canvas.create_image(31, 285, image=self.password_panel, anchor="nw")
         # THE TEXT
@@ -122,16 +131,19 @@ class LogInFrame(ctk.CTkFrame):
 
 
     def log_in_heading(self):
+        # Draw the "LOGIN" heading
         self.canvas.create_text(290, 100, text="LOGIN", font=("Tai Heritage Pro", 70), fill="white")
 
 
     def remember_me(self):
+        # Add a "Remember me" checkbox
         self.check_var = ctk.BooleanVar()
         self.remember = ctk.CTkCheckBox(self, width=0, height=0, variable=self.check_var, command=self.submit_action, border_width=2, corner_radius=0, bg_color="#27274C", font=("Tai Heritage Pro", 15), text=" Remember me", text_color="white", checkmark_color="white")
         self.canvas.create_window(45, 390, anchor="nw", window=self.remember)
 
 
     def reset_entries(self):
+        # Clear the ID and password fields and error label
         if hasattr(self, "id_entry"):
             self.id_entry.delete(0, 'end')
             self.id_entry.lift()
@@ -145,6 +157,7 @@ class LogInFrame(ctk.CTkFrame):
             self.sign_in_button.lift()
 
     def submit_action(self):
+        # Placeholder for "Remember me" logic
         if self.check_var.get():
             print("remembered, (Need backend and database)")
         else:
@@ -152,10 +165,12 @@ class LogInFrame(ctk.CTkFrame):
 
 
     def forgot_password(self):
+        # Draw the "Forgot password?" text
         self.forgot = self.canvas.create_text(415, 391, anchor="nw", text="Forgot password?", font=("Tai Heritage Pro", 15))
 
 
     def account_sign_in(self):
+        # Draw the sign-in button and error label
         sign_in_img = Image.open("attendance/public/Rectangle 11.png").resize((520, 80), Image.LANCZOS)
         self.sign_ins = ImageTk.PhotoImage(sign_in_img)
 
@@ -169,11 +184,12 @@ class LogInFrame(ctk.CTkFrame):
         self.canvas.create_window(290, 600, window=self.error_label)  
 
     def to_register(self, event):
-            
+        # Switch to the register UI when "Register" is clicked
         if self.switch_to_register:
             self.switch_to_register()
 
     def login(self):
+        # Handle login logic
         try:
             id_number = self.id_entry.get().strip()
             password = self.pass_entry.get().strip()
@@ -228,6 +244,7 @@ class LogInFrame(ctk.CTkFrame):
 
 
 if __name__ == "__main__":
+    # For standalone testing of the login frame
     root = ctk.CTk()
     root.geometry("580x681")
     login = LogInFrame(root)
