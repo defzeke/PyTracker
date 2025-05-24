@@ -5,7 +5,7 @@ class CaptchaWidget(ctk.CTkFrame):
     def __init__(self, master=None, **kwargs):
         super().__init__(master, **kwargs)
         self.configure(width=300, height=80, fg_color="#f9f9f9", corner_radius=8)
-
+        
         self.verified = False
 
         self.checkbox_button = ctk.CTkButton(

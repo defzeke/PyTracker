@@ -1,8 +1,10 @@
 import customtkinter as ctk
 import pandas as pd
 import numpy as np
+import threading
 from PIL import Image, ImageTk
 from .Captcha import CaptchaWidget
+from .OTP import generate_otp, send_otp_email
 
 class RegisterFrame(ctk.CTkFrame):
     def __init__(self, master=None, switch_to_login=None):
@@ -21,7 +23,7 @@ class RegisterFrame(ctk.CTkFrame):
         self.role_pick()
         
         # Text asking if user already has account
-        self.canvas.create_text(200, 560, text="Already have an account?", font=("Tai Heritage Pro", 15))
+        self.canvas.create_text(263, 560, text="Already have an account?", font=("Tai Heritage Pro", 15))
         
         # Clickable 'Log In' text
         self.login_text = self.canvas.create_text(365, 560, text="Log In", font=("Tai Heritage Pro", 15, "bold"), fill="lightblue")
@@ -107,7 +109,7 @@ class RegisterFrame(ctk.CTkFrame):
 
     def register_heading(self):
         # Display large REGISTER heading text
-        self.canvas.create_text(290, 100, text="REGISTER", font=("Tai Heritage Pro", 70), fill="white")
+        self.register_heading_id = self.canvas.create_text(290, 100, text="REGISTER", font=("Tai Heritage Pro", 70), fill="white")
 
 
     def role_pick(self):
@@ -149,6 +151,81 @@ class RegisterFrame(ctk.CTkFrame):
 
 
 ##############################################################################################
+    def reset_to_role_pick(self):
+        if hasattr(self, "name_input_items"):
+            for item in self.name_input_items:
+                self.canvas.itemconfigure(item, state='hidden')
+            self.canvas.itemconfigure(self.win1, state='hidden')
+            self.canvas.itemconfigure(self.win2, state='hidden')
+            self.canvas.itemconfigure(self.win3, state='hidden')
+        if hasattr(self, "cred_input_items"):
+            for item in self.cred_input_items:
+                self.canvas.itemconfigure(item, state='hidden')
+            self.canvas.itemconfigure(self.email_win, state='hidden')
+            self.canvas.itemconfigure(self.password_win, state='hidden')
+            self.canvas.itemconfigure(self.confirm_password_win, state='hidden')
+        if hasattr(self, "captcha_widget"):
+            self.captcha_widget.place_forget()
+        if hasattr(self, "continue_text_button"):
+            self.canvas.itemconfigure(self.continue_text_button, fill="white", state='normal')
+        if hasattr(self, "back_text_button"):
+            self.canvas.coords(self.back_text_button, 120, 480)
+            self.canvas.itemconfigure(self.back_text_button, state='hidden')
+            self.canvas.tag_unbind(self.back_text_button, "<Button-1>")
+
+        # --- Hide OTP/verification widgets ---
+        if hasattr(self, "otp_entry"):
+            self.otp_entry.place_forget()
+        if hasattr(self, "sign_up_image_id"):
+            self.canvas.itemconfigure(self.sign_up_image_id, state='hidden')
+        if hasattr(self, "signup"):
+            self.canvas.itemconfigure(self.signup, state='hidden')
+        if hasattr(self, "email_verify_panel"):
+            self.canvas.itemconfigure(self.email_verify_panel, state='hidden')
+
+        # Clear registration entries
+        if hasattr(self, "first_name_entry"):
+            self.first_name_entry.delete(0, 'end')
+        if hasattr(self, "middle_name_entry"):
+            self.middle_name_entry.delete(0, 'end')
+        if hasattr(self, "last_name_entry"):
+            self.last_name_entry.delete(0, 'end')
+        if hasattr(self, "email_entry"):
+            self.email_entry.delete(0, 'end')
+        if hasattr(self, "password_entry"):
+            self.password_entry.delete(0, 'end')
+        if hasattr(self, "confirm_password_entry"):
+            self.confirm_password_entry.delete(0, 'end')
+
+        # Restore role pick panels/texts to normal (non-hover, non-selected) state
+        if hasattr(self, "student_panel_id"):
+            self.canvas.itemconfig(self.student_panel_id, image=self.student_img_normal)
+        if hasattr(self, "student_text_id"):
+            self.canvas.itemconfig(self.student_text_id, fill="white")
+        if hasattr(self, "prof_panel_id"):
+            self.canvas.itemconfig(self.prof_panel_id, image=self.prof_img_normal)
+        if hasattr(self, "prof_text_id"):
+            self.canvas.itemconfig(self.prof_text_id, fill="white")
+
+        # Show role pick panels/texts
+        self.canvas.itemconfigure(self.student_panel_id, state='normal')
+        self.canvas.itemconfigure(self.student_text_id, state='normal')
+        self.canvas.itemconfigure(self.prof_panel_id, state='normal')
+        self.canvas.itemconfigure(self.prof_text_id, state='normal')
+
+        # Deselect role and reset stage
+        self.selected_role = None
+        self.stage = "role"
+        self.continue_enabled = False
+
+    def capitalize_name_entry(self, entry):
+        value = entry.get()
+        # Capitalize first letter and every letter after a space
+        capitalized = ' '.join(word.capitalize() for word in value.split(' '))
+        if value != capitalized:
+            entry.delete(0, 'end')
+            entry.insert(0, capitalized)
+    
     def to_login(self, event):
         # Switch to login frame when 'Log In' text is clicked
         if self.switch_to_login:
@@ -195,17 +272,33 @@ class RegisterFrame(ctk.CTkFrame):
         self.canvas.itemconfig(self.continue_text_button, fill="lightblue")
         self.continue_enabled = True
 
-    def show_error(self, message):
-        # Display an error message on the canvas
+    def show_error(self, message, persist=False):
         if hasattr(self, "error_text"):
             self.canvas.itemconfig(self.error_text, text=message, state="normal")
         else:
-            self.error_text = self.canvas.create_text(290, 530, text=message,
-                                                    font=("Tai Heritage Pro", 15),
-                                                    fill="red")
-            
-        self.after(3000, lambda: self.canvas.itemconfig(self.error_text, state="hidden"))
+            self.error_text = self.canvas.create_text(
+                290, 590,
+                text=message,
+                font=("Tai Heritage Pro", 15),
+                fill="red"
+            )
+        # Always auto-hide the error after 10 seconds, regardless of 'persist'
+        self.after(10000, lambda: self.canvas.itemconfig(self.error_text, state="hidden"))
 
+    def is_strong_password(self, password):
+        import re
+        errors = []
+        if len(password) < 8:
+            errors.append("at least 8 characters")
+        if not re.search(r"[A-Z]", password):
+            errors.append("an uppercase letter")
+        if not re.search(r"[a-z]", password):
+            errors.append("a lowercase letter")
+        if not re.search(r"\d", password):
+            errors.append("a number")
+        if not re.search(r"[!\"#$%&'()*+,\-./:;<=>?@[\\\]^_`{|}~]", password):
+            errors.append("a special character")
+        return errors
 
     def continue_register(self, event=None):
         # Advance to the next stage of registration form based on current stage
@@ -231,6 +324,10 @@ class RegisterFrame(ctk.CTkFrame):
                 self.show_credentials_input()
 
         elif self.stage == "credentials":
+            if hasattr(self, "captcha_widget") and not self.captcha_widget.verified:
+                self.show_error("Please verify the CAPTCHA before continuing.")
+                return
+
             email = self.email_entry.get().strip()
             password = self.password_entry.get().strip()
             confirm = self.confirm_password_entry.get().strip()
@@ -240,6 +337,21 @@ class RegisterFrame(ctk.CTkFrame):
             elif password != confirm:
                 self.show_error("Passwords do not match.")
             else:
+                pw_errors = self.is_strong_password(password)
+                if pw_errors:
+                    self.show_error("Password must contain " + ", ".join(pw_errors) + ".")
+                    return
+                # Email domain validation based on role
+                if self.selected_role == "student":
+                    if not email.endswith("@iskolarngbayan.pup.edu.ph"):
+                        self.show_error("Student email must end with @iskolarngbayan.pup.edu.ph")
+                        return
+                elif self.selected_role == "prof":
+                    if not email.endswith("@pup.edu.ph"):
+                        self.show_error("Professor email must end with @pup.edu.ph")
+                        return
+                self.show_email_verify()
+
                 self.registration_data["email"] = email
                 self.registration_data["password"] = password
                 self.registration_data["role"] = self.selected_role
@@ -298,19 +410,34 @@ class RegisterFrame(ctk.CTkFrame):
                         self.switch_to_login()
 
     def back_to_role(self, event=None):
-        # Go back from name input to role selection
+        # Go back from name input or credentials input to role selection
+
+        # Hide name input items if present
         if hasattr(self, "name_input_items"):
             for item in self.name_input_items:
                 self.canvas.itemconfigure(item, state='hidden')
 
+        # Remove name entry widgets if present
+        if hasattr(self, "win1"):
+            self.canvas.delete(self.win1)
+        if hasattr(self, "win2"):
+            self.canvas.delete(self.win2)
+        if hasattr(self, "win3"):
+            self.canvas.delete(self.win3)
+        if hasattr(self, "first_name_entry"):
+            self.first_name_entry.destroy()
+        if hasattr(self, "middle_name_entry"):
+            self.middle_name_entry.destroy()
+        if hasattr(self, "last_name_entry"):
+            self.last_name_entry.destroy()
 
-        self.canvas.delete(self.win1)
-        self.canvas.delete(self.win2)
-        self.canvas.delete(self.win3)
-
-        self.first_name_entry.destroy()
-        self.middle_name_entry.destroy()
-        self.last_name_entry.destroy()
+        # Remove credentials entry widgets if present
+        if hasattr(self, "email_entry"):
+            self.email_entry.delete(0, 'end')
+        if hasattr(self, "password_entry"):
+            self.password_entry.delete(0, 'end')
+        if hasattr(self, "confirm_password_entry"):
+            self.confirm_password_entry.delete(0, 'end')
 
         if hasattr(self, "back_text_button"):
             self.canvas.itemconfigure(self.back_text_button, state='hidden')
@@ -363,13 +490,71 @@ class RegisterFrame(ctk.CTkFrame):
         self.canvas.tag_unbind(self.back_text_button, "<Button-1>")
         self.canvas.tag_bind(self.back_text_button, "<Button-1>", self.back_to_role)
 
+    def back_to_credentials(self, event=None):
+        self.stage = "credentials"
+
+        # Hide email verification widgets if you have any (add them to a list if needed)
+        if hasattr(self, "otp_entry"):
+            self.otp_entry.place_forget()
+        if hasattr(self, "sign_up_image_id"):
+            self.canvas.itemconfigure(self.sign_up_image_id, state='hidden')
+        if hasattr(self, "signup"):
+            self.canvas.itemconfigure(self.signup, state='hidden')
+        if hasattr(self, "email_verify_panel"):
+            self.canvas.itemconfigure(self.email_verify_panel, state='hidden')
+        if hasattr(self, "register_heading_id"):
+            self.canvas.itemconfigure(self.register_heading_id, state='normal')
+
+        # Show credentials input widgets
+        if hasattr(self, "cred_input_items"):
+            for item in self.cred_input_items:
+                self.canvas.itemconfigure(item, state='normal')
+            self.canvas.itemconfigure(self.email_win, state='normal')
+            self.canvas.itemconfigure(self.password_win, state='normal')
+            self.canvas.itemconfigure(self.confirm_password_win, state='normal')
+
+        # --- Always recreate captcha when returning from OTP ---
+        if hasattr(self, "captcha_widget"):
+            self.captcha_widget.destroy()
+            del self.captcha_widget
+        self.captcha_widget = CaptchaWidget(self)
+        self.captcha_widget.place(x=140, y=370)
 
 
+        # Hide name input widgets
+        if hasattr(self, "name_input_items"):
+            for item in self.name_input_items:
+                self.canvas.itemconfigure(item, state='hidden')
+            self.canvas.itemconfigure(self.win1, state='hidden')
+            self.canvas.itemconfigure(self.win2, state='hidden')
+            self.canvas.itemconfigure(self.win3, state='hidden')
 
+        # Bring credentials widgets to the front
+        self.canvas.lift(self.email_win)
+        self.canvas.lift(self.password_win)
+        self.canvas.lift(self.confirm_password_win)
+        self.email_entry.lift()
+        self.password_entry.lift()
+        self.confirm_password_entry.lift()
+        self.email_entry.update_idletasks()
+        self.password_entry.update_idletasks()
+        self.confirm_password_entry.update_idletasks()
 
+        self.canvas.itemconfigure(self.continue_text_button, state='normal')
 
+        # Move the back button back to its original position (e.g., y=480)
+        self.canvas.coords(self.back_text_button, 120, 480)
+        self.canvas.itemconfigure(self.back_text_button, state='normal')
+        self.canvas.tag_unbind(self.back_text_button, "<Button-1>")
+        self.canvas.tag_bind(self.back_text_button, "<Button-1>", self.back_to_name)
 
+        # Bind back button to go back to name input
+        self.canvas.tag_unbind(self.back_text_button, "<Button-1>")
+        self.canvas.tag_bind(self.back_text_button, "<Button-1>", self.back_to_name)
 
+    def captcha_verified(self):
+        self.canvas.itemconfigure(self.continue_text_button, fill="lightblue", state='normal')
+        self.continue_enabled = True
 
 ##############################################################################################
 
@@ -390,6 +575,7 @@ class RegisterFrame(ctk.CTkFrame):
                                             fg_color="#525270", bg_color="#525270", border_width=0, corner_radius=0,
                                             placeholder_text="First Name")
         self.win1 = self.canvas.create_window(50, 190, anchor="nw", window=self.first_name_entry)
+        self.first_name_entry.bind("<KeyRelease>", lambda e: self.capitalize_name_entry(self.first_name_entry))
 
 
         # Middle Name Entry
@@ -398,6 +584,7 @@ class RegisterFrame(ctk.CTkFrame):
                                             fg_color="#525270", bg_color="#525270", border_width=0, corner_radius=0,
                                             placeholder_text="Middle Name")
         self.win2 = self.canvas.create_window(50, 290, anchor="nw", window=self.middle_name_entry)
+        self.middle_name_entry.bind("<KeyRelease>", lambda e: self.capitalize_name_entry(self.middle_name_entry))
 
 
         # Last Name Entry
@@ -406,6 +593,9 @@ class RegisterFrame(ctk.CTkFrame):
                                             fg_color="#525270", bg_color="#525270", border_width=0, corner_radius=0,
                                             placeholder_text="Last Name")
         self.win3 = self.canvas.create_window(50, 390, anchor="nw", window=self.last_name_entry)
+        self.last_name_entry.bind("<KeyRelease>", lambda e: self.capitalize_name_entry(self.last_name_entry))
+
+
 
         self.name_input_items.extend([panel1, self.win1, panel2, self.win2, panel3, self.win3])
 
@@ -414,7 +604,10 @@ class RegisterFrame(ctk.CTkFrame):
 
         # Add or show back button
         if hasattr(self, "back_text_button"):
+            self.canvas.coords(self.back_text_button, 120, 480)  # Original position
             self.canvas.itemconfigure(self.back_text_button, state='normal')
+            self.canvas.tag_unbind(self.back_text_button, "<Button-1>")
+            self.canvas.tag_bind(self.back_text_button, "<Button-1>", self.back_to_role)
         else:
             self.back_text_button = self.canvas.create_text(120, 480, text="<-- Back", font=("Tai Heritage Pro", 15, "bold"), fill="lightblue")
             self.canvas.tag_bind(self.back_text_button, "<Button-1>", self.back_to_role)
@@ -422,17 +615,13 @@ class RegisterFrame(ctk.CTkFrame):
     
 
     def show_credentials_input(self):
-        # Show email/password input + CAPTCHA
         self.stage = "credentials"
 
-        # Display CAPTCHA widget
-        if not hasattr(self, "captcha_widget"):
-            self.captcha_widget = CaptchaWidget(self)
-            self.captcha_widget.place(x=140, y=370)  
-
-        else:
-            self.captcha_widget.place(x=140, y=370)
-
+        if hasattr(self, "captcha_widget"):
+            self.captcha_widget.destroy()
+            del self.captcha_widget
+        self.captcha_widget = CaptchaWidget(self)
+        self.captcha_widget.place(x=140, y=370)
 
         # Hide name inputs
         if hasattr(self, "name_input_items"):
@@ -517,9 +706,117 @@ class RegisterFrame(ctk.CTkFrame):
         self.canvas.itemconfigure(self.back_text_button, state='normal')
         self.canvas.tag_unbind(self.back_text_button, "<Button-1>")
         self.canvas.tag_bind(self.back_text_button, "<Button-1>", self.back_to_name)
+
     
+    def show_email_verify(self):
+        self.stage = "email_verify"
+
+        email = self.email_entry.get().strip()
+        otp = generate_otp()
+        self.generated_otp = otp
+
+        def send_otp_thread():
+            if send_otp_email(email, otp):
+                print("OTP sent successfully.")
+            else:
+                self.after(0, lambda: self.show_error("Failed to send OTP. Please try again later."))
+
+        threading.Thread(target=send_otp_thread, daemon=True).start()
+
+
+        # Hide name input widgets
+        if hasattr(self, "name_input_items"):
+            for item in self.name_input_items:
+                self.canvas.itemconfigure(item, state='hidden')
+            self.canvas.itemconfigure(self.win1, state='hidden')
+            self.canvas.itemconfigure(self.win2, state='hidden')
+            self.canvas.itemconfigure(self.win3, state='hidden')
+        # Hide credentials input widgets
+        if hasattr(self, "cred_input_items"):
+            for item in self.cred_input_items:
+                self.canvas.itemconfigure(item, state='hidden')
+            self.canvas.itemconfigure(self.email_win, state='hidden')
+            self.canvas.itemconfigure(self.password_win, state='hidden')
+            self.canvas.itemconfigure(self.confirm_password_win, state='hidden')
+        # Hide CAPTCHA if present
+        if hasattr(self, "captcha_widget"):
+            self.captcha_widget.destroy()
+            del self.captcha_widget
+
+        self.canvas.itemconfigure(self.continue_text_button, state='hidden')
+        self.canvas.coords(self.back_text_button, 80, 435)
+        self.canvas.itemconfigure(self.back_text_button, state='normal')
+        self.canvas.tag_unbind(self.back_text_button, "<Button-1>")
+        self.canvas.tag_bind(self.back_text_button, "<Button-1>", self.back_to_credentials)
+
+
+        self.otp_entries = []
+        otp_length = 6
+        start_x = 170  
+        y = 370        
+        gap = 50      
+        def only_digit(char):
+            return char.isdigit()
+
+        vcmd = (self.register(only_digit), '%S')
+
+        for i in range(otp_length):
+            entry = ctk.CTkEntry(
+                self,
+                width=30,
+                font=("Tai Heritage Pro", 22),
+                justify="center",
+                validate="key",
+                validatecommand=vcmd,
+                state="normal" if i == 0 else "disabled"  # Only first is enabled
+            )
+            win = self.canvas.create_window(start_x + i*gap, y, window=entry)
+            self.otp_entries.append(entry)
+            # Draw underline
+            self.canvas.create_line(start_x + i*gap - 15, y+20, start_x + i*gap + 15, y+20, fill="white", width=2)
+
+            # Bind to move focus and enable/disable logic
+            def on_key(event, idx=i):
+                value = self.otp_entries[idx].get()
+                # If a digit is entered, enable the next entry
+                if value and idx < otp_length - 1:
+                    self.otp_entries[idx+1].configure(state="normal")
+                    self.otp_entries[idx+1].focus_set()
+                # If entry is cleared, disable all next entries
+                elif not value:
+                    for j in range(idx+1, otp_length):
+                        self.otp_entries[j].delete(0, 'end')
+                        self.otp_entries[j].configure(state="disabled")
+            entry.bind("<KeyRelease>", on_key)
+
+
+        otp_note_img = Image.open("attendance/public/otp rectangle.png").resize((520, 170), Image.LANCZOS)   
+        self.note = ImageTk.PhotoImage(otp_note_img)
+        self.otp_note_image_id = self.canvas.create_image(31, 150, image=self.note, anchor="nw")
+
+        signup_img = Image.open("attendance/public/Rectangle 11.png").resize((520, 80), Image.LANCZOS)   
+        self.sign_up = ImageTk.PhotoImage(signup_img)
+        self.otp_sent_text_id = self.canvas.create_text(
+            291, 235, 
+            text=f"We've sent an OTP verification code to:\n{email}",
+            font=("Tai Heritage Pro", 20),
+            fill="white",
+            anchor="center",
+            justify="center"
+        )
+
+
+        self.sign_up_image_id = self.canvas.create_image(31, 450, image=self.sign_up, anchor="nw")
+        self.sign_up_button = ctk.CTkButton(self, text="Sign Up", font=("Tai Heritage Pro", 20), fg_color="#686882", bg_color="#686882", hover=False)
+        self.signup = self.canvas.create_window(31 + 260, 450 + 40, window=self.sign_up_button)
+
+
     
-# Run the registration frame standalone
+        self.canvas.itemconfigure(self.back_text_button, state='normal')
+        self.canvas.tag_unbind(self.back_text_button, "<Button-1>")
+        self.canvas.tag_bind(self.back_text_button, "<Button-1>", self.back_to_credentials)
+
+
 if __name__ == "__main__":
     root = ctk.CTk()
     root.geometry("580x681")
