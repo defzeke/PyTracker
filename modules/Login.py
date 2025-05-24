@@ -131,6 +131,19 @@ class LogInFrame(ctk.CTkFrame):
         self.canvas.create_window(45, 390, anchor="nw", window=self.remember)
 
 
+    def reset_entries(self):
+        if hasattr(self, "id_entry"):
+            self.id_entry.delete(0, 'end')
+            self.id_entry.lift()
+        if hasattr(self, "pass_entry"):
+            self.pass_entry.delete(0, 'end')
+            self.pass_entry.lift()
+        if hasattr(self, "error_label"):
+            self.error_label.configure(text="")
+            self.error_label.lift()
+        if hasattr(self, "sign_in_button"):
+            self.sign_in_button.lift()
+
     def submit_action(self):
         if self.check_var.get():
             print("remembered, (Need backend and database)")
@@ -147,11 +160,13 @@ class LogInFrame(ctk.CTkFrame):
         self.sign_ins = ImageTk.PhotoImage(sign_in_img)
 
         self.sign_in_image_id = self.canvas.create_image(31, 450, image=self.sign_ins, anchor="nw")
-
         self.canvas.tag_bind(self.sign_in_image_id, "<Button-1>", lambda event: self.login())
 
         self.sign_in_button = ctk.CTkButton(self, text="Sign In", font=("Tai Heritage Pro", 20), fg_color="#686882", bg_color="#686882", command=self.login, hover=False)
         self.canvas.create_window(31 + 260, 450 + 40, window=self.sign_in_button)
+
+        self.error_label = ctk.CTkLabel(self, text="", font=("Tai Heritage Pro", 15), text_color="red", bg_color="#26264B")
+        self.canvas.create_window(290, 600, window=self.error_label)  
 
     def to_register(self, event):
             
@@ -160,37 +175,47 @@ class LogInFrame(ctk.CTkFrame):
 
     def login(self):
         try:
-            # Get user input
-            id_number = self.id_entry.get()
-            password = self.pass_entry.get()
+            id_number = self.id_entry.get().strip()
+            password = self.pass_entry.get().strip()
 
-            # Check if user exists in login CSV
-            user_exists = self.login_df[(self.login_df['ID_number'] == id_number) & (self.login_df['password'] == password)]
+            # Clear previous error
+            self.error_label.configure(text="")
+
+            # Check for empty fields
+            if not id_number or not password:
+                self.error_label.configure(text="Please fill in all fields.")
+                self.after(3000, lambda: self.error_label.configure(text=""))
+                return
+
+            # Check if user exists in login CSV (case-insensitive for role)
+            user_exists = self.login_df[
+                (self.login_df['ID_number'] == id_number) & (self.login_df['password'] == password)
+            ]
 
             if not user_exists.empty:
-                # Get user role
-                user_role = user_exists['role'].iloc[0]
-
-                # Proceed to respective page based on user role
+                user_role = user_exists['role'].iloc[0].strip().lower()
                 if user_role == 'admin':
-                    # Proceed to admin page
+                    self.error_label.configure(text="")  # Clear error
                     self.proceed_to_admin_page()
-                elif user_role == 'user':
-                    # Proceed to user page
+                elif user_role == 'student' or user_role == 'teacher':
+                    self.error_label.configure(text="")  # Clear error
                     self.proceed_to_user_page()
                 else:
-                    # Handle unknown user role
-                    ctk.CTkToplevel(self, text="Error", width=300, height=100)
-                    ctk.CTkLabel(self, text="Error: Unknown user role.", font=("Tai Heritage Pro", 15)).pack(pady=20)
+                    self.error_label.configure(text="Error: Unknown user role.")
+                    self.after(3000, lambda: self.error_label.configure(text=""))
             else:
-                # Handle invalid login credentials
-                ctk.CTkToplevel(self, text="Error", width=300, height=100)
-                ctk.CTkLabel(self, text="Error: Invalid login credentials.", font=("Tai Heritage Pro", 15)).pack(pady=20)
+                # Check if ID exists but password is wrong
+                id_exists = self.login_df[self.login_df['ID_number'] == id_number]
+                if not id_exists.empty:
+                    self.error_label.configure(text="Incorrect password.")
+                    self.after(3000, lambda: self.error_label.configure(text=""))
+                else:
+                    self.error_label.configure(text="Account not found.")
+                    self.after(3000, lambda: self.error_label.configure(text=""))
 
         except Exception as e:
-            # Handle any exceptions
-            ctk.CTkToplevel(self, text="Error", width=300, height=100)
-            ctk.CTkLabel(self, text=f"An error occurred: {e}", font=("Tai Heritage Pro", 15)).pack(pady=20)
+            self.error_label.configure(text=f"An error occurred: {e}")
+            self.after(3000, lambda: self.error_label.configure(text=""))
 
     def proceed_to_admin_page(self):
         # Implement admin page logic here

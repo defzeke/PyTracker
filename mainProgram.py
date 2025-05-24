@@ -45,10 +45,12 @@ class Main(Window):
     def show_register(self):
         self.login_ui.lower()  
         self.register_ui.lift()  
+        self.register_ui.reset_to_role_pick()
 
     def show_login(self):
         self.register_ui.lower() 
         self.login_ui.lift() 
+        self.login_ui.reset_entries() 
 
     def run(self):
         self.root.mainloop()
