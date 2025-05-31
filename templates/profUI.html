@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=Actor&family=Roboto:ital,wght@0,100..900;1,100..900&family=Tai+Heritage+Pro:wght@400;700&display=swap');
+    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='profui.css') }}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PyTracker</title>
+</head>
+<body>
+
+    <div id="sidebar">
+        <img id="dashboard-logo" class="sidebar-icon active" 
+            src="{{ url_for('static', filename='images/active dashboard.png') }}" 
+            data-active="{{ url_for('static', filename='images/active dashboard.png') }}"
+            data-inactive="{{ url_for('static', filename='images/inactive dashboard.png') }}"
+            alt="Dashboard Logo" draggable="false">
+
+        <img id="attendance-logo" class="sidebar-icon"
+            src="{{ url_for('static', filename='images/inactive attendance.png') }}"
+            data-active="{{ url_for('static', filename='images/active attendance.png') }}"
+            data-inactive="{{ url_for('static', filename='images/inactive attendance.png') }}"
+            alt="Attendance Logo" draggable="false">
+
+        <img id="addclass-logo" class="sidebar-icon"
+            src="{{ url_for('static', filename='images/inactive addclass.png') }}"
+            data-active="{{ url_for('static', filename='images/active addclass.png') }}"
+            data-inactive="{{ url_for('static', filename='images/inactive addclass.png') }}"
+            alt="Add Class Logo" draggable="false">
+    </div>
+
+
+    <div id="topbar">
+        <img id="status-logo" class="topbar-icon" src="{{ url_for('static', filename='images/inactive status.png') }}"
+            data-active="{{ url_for('static', filename='images/active status.png') }}"
+            data-inactive="{{ url_for('static', filename='images/inactive status.png') }}"
+            alt="Status Logo" draggable="false">
+        
+        
+    </div>
+
+    <script src="{{ url_for('static', filename='sidebarui.js') }}"></script>
+    <script src="{{ url_for('static', filename='topbarui.js') }}"></script>
+</body>
+</html>

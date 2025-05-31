@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=Actor&family=Roboto:ital,wght@0,100..900;1,100..900&family=Tai+Heritage+Pro:wght@400;700&display=swap');
+    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='verify.css') }}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   
+    <title>PyTracker</title>
+</head>
+
+<script src="{{ url_for('static', filename='verification.js') }}"></script>
+<script src="https://www.google.com/recaptcha/api.js" async defer></script>
+
+<body>
+    <img class="container" src="{{ url_for('static', filename='images/logincontainer.png') }}" alt="Register Container" draggable="false">
+    <img class="otp-container" style="display:none;" src="{{ url_for('static', filename='images/otp text container.png') }}" alt="OTP Container" draggable="false">
+
+    <h1 class="form-heading-text">REGISTER</h1>
+
+    <form id="verify-form" action="/signup" method="POST">
+        <div id="captcha-section">
+            <div class="g-recaptcha" data-sitekey="6LcUSlErAAAAADWqQPny2a6nBKUrWugrY-c2ClZD" data-callback="onCaptchaSuccess"></div>
+        </div>
+        <div id="otp-section" style="display:none; opacity:0; transition:opacity 0.5s;">
+            <p id="otp-text" style="color:#fff; text-align:center;">We've sent a verification code to your email:</p>
+            <div id="otp-inputs">
+                <input type="text" class="otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]*" required>
+                <input type="text" class="otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]*" required>
+                <input type="text" class="otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]*" required>
+                <input type="text" class="otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]*" required>
+                <input type="text" class="otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]*" required>
+                <input type="text" class="otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]*" required>
+            </div>
+            <input type="hidden" id="otp-input" name="otp" required>
+        </div>
+        <button id="signup-btn" type="submit" disabled>Sign Up</button>
+    </form>
+
+    <a href="/" id="signin-link">
+        Already have an account? <span class="signin-text">Sign In</span>
+    </a>
+
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+</body>
+</html>

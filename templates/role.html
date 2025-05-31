@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=Actor&family=Roboto:ital,wght@0,100..900;1,100..900&family=Tai+Heritage+Pro:wght@400;700&display=swap');
+    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='role.css') }}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PyTracker</title>
+</head>
+<body>
+    <img class="container" src="{{ url_for('static', filename='images/logincontainer.png') }}" alt="Login Container" draggable="false">
+
+    <h1 class="form-heading-text">REGISTER</h1>
+
+    <form action="/credentials" method="POST">
+        <div class="role-selection">
+            <label class="role-btn">
+                <input type="radio" name="role" value="student" required>
+                <span>Student</span>
+            </label>
+            <label class="role-btn">
+                <input type="radio" name="role" value="professor" required>
+                <span>Professor</span>
+            </label>
+        </div>
+        <button id="continue-btn" type="submit">Continue</button>
+    </form>
+
+    <a href="/" id="signin-link">
+        Already have an account? <span class="signin-text">Sign In</span>
+    </a>
+
+</body>
+</html>

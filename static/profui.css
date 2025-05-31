@@ -1,0 +1,57 @@
+html, body {
+    margin: 0;
+    padding: 0;
+}
+
+#sidebar {
+    position: fixed;
+    width: 85px;
+    height: 950px;
+    background: #272757;
+    top: 0;
+    left: 0;
+}
+
+#topbar {
+    position: fixed;
+    width: calc(100% - 85px);
+    height: 85px;
+    background: #fff;
+    top: 0;
+    left: 85px;
+    border-bottom: 1.5px solid rgba(39, 39, 87, 0.15); /* Softer border */
+    z-index: 1;
+    box-shadow: 0 4px 16px rgba(39, 39, 87, 0.15); /* Drop shadow */
+}
+
+#dashboard-logo {
+    position: absolute;
+    top: 110px;
+    left: 15px;
+    width: 52px;
+    height: 52px;
+}
+
+#attendance-logo {
+    position: absolute;
+    top: 180px;
+    left: 15px;
+    width: 52px;
+    height: 52px;
+}
+
+#addclass-logo {
+    position: absolute;
+    top: 245px;
+    left: 12.5px;
+    width: 58px;
+    height: 58px;
+}
+
+#status-logo {
+    position: absolute;
+    top: 30%;
+    left: 20%;
+    width: 35px;
+    height: 35px;
+}

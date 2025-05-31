@@ -1,0 +1,181 @@
+.tai-heritage-pro-regular {
+  font-family: "Tai Heritage Pro", serif;
+  font-weight: 400;
+  font-style: normal;
+}
+
+body {
+    background-color: #272757; 
+}
+
+.container {
+    position: absolute;
+    top: 48%;
+    left: 75%;
+    transform: translate(-50%, -50%); 
+    width: 560px;  
+    height: 690px;
+}
+
+.form-heading-text {
+    font-family: "Tai Heritage Pro", serif;
+    font-weight: 150;
+    font-size: 70px;
+    color: #FFFFFF;
+    text-align: center;
+    margin-bottom: 20px;
+    position: absolute;
+    top: 11%;
+    left: 75%;
+    transform: translateX(-50%);
+}
+
+#id-number {
+    border-radius: 50px;
+    background-color: rgba(255,255,255,0.2); 
+    padding: 12px 18px;
+    border: none;
+    font-family: "Tai Heritage Pro", serif;
+    font-size: 18px;
+    width: 26%;
+    height: 5.5%;
+    margin-bottom: 20px;
+    outline: none;
+    position: absolute; 
+    top: 33%;
+    left: 75%;
+    transform: translateX(-50%);
+    color: #fff; 
+}
+
+#password {
+    border-radius: 50px;
+    background-color: rgba(255,255,255,0.2); 
+    padding: 12px 18px;
+    border: none;
+    font-family: "Tai Heritage Pro", serif;
+    font-size: 18px;
+    width: 26%;
+    height: 5.5%;
+    margin-bottom: 20px;
+    outline: none;
+    position: absolute; 
+    top: 45%;
+    left: 75%;
+    transform: translateX(-50%);
+    color: #fff; 
+}
+
+#id-number::placeholder, #password::placeholder {
+    color: #FFFFFF;
+    opacity: 50%; 
+    font-family: "Tai Heritage Pro", serif;
+    font-weight: 100;
+    font-size: 17px;
+}
+
+.remember-me {
+    position: absolute;
+    top: 56%;
+    left: 65.5%;
+    transform: translateX(-50%);
+    color: #fff;
+    font-family: "Tai Heritage Pro", serif;
+    font-size: 16px;
+    user-select: none;
+    display: flex;
+    align-items: center;   
+    gap: 8px;
+}
+
+.remember-me input[type="checkbox"] {
+    background-color: #fff;      
+    border-radius: 0;            
+    border: 2px solid #ccc;      
+    width: 18px;                 
+    height: 18px;                
+    accent-color: #fff;         
+    margin-top: 2px; 
+}
+
+.forgot-password {
+    position: absolute;
+    top: 56%;
+    left: 84%;
+    transform: translateX(-50%);
+    color: #fff;
+    font-family: "Tai Heritage Pro", serif;
+    font-size: 16px;
+    text-decoration: none;   
+    cursor: pointer;
+    transition: color 0.2s;
+}
+.forgot-password:hover {
+    color: #b3b3ff;
+}
+
+.login-logo-password {
+    position: absolute;
+    top: 47.4%;
+    left: 86.5%;
+    transform: translateX(-50%);
+    width: 30px;    
+    height: auto;   
+}
+
+.login-logo-id {
+    position: absolute;
+    top: 35.5%;
+    left: 86.5%;
+    transform: translateX(-50%);
+    width: 30px;    
+    height: auto;   
+}
+
+#sign-in-btn {
+    position: absolute;
+    top: 62%;
+    left: 75%;
+    transform: translateX(-50%);
+    width: 28%;
+    padding: 14px 0;
+    background-color: #fff;
+    color: #272757;
+    font-family: "Tai Heritage Pro", serif;
+    font-size: 20px;
+    font-weight: 700;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    opacity: 90%;
+}
+
+#sign-in-btn:hover {
+    background-color: #b3b3ff;
+    color: #fff;
+}
+
+#register-link {
+    position: absolute;
+    top: 71%;              
+    left: 75%;
+    transform: translateX(-50%);
+    color: #fff;
+    font-family: "Tai Heritage Pro", serif;
+    font-size: 16px;
+    font-weight: 100;
+    text-decoration: none;
+    cursor: pointer;
+    background: none;
+    border-radius: 0;
+}
+
+#register-link .register-text {
+    transition: color 0.2s;
+}
+
+#register-link:hover .register-text {
+    color: #b3b3ff;
+}

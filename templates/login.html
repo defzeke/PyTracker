@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=Actor&family=Roboto:ital,wght@0,100..900;1,100..900&family=Tai+Heritage+Pro:wght@400;700&display=swap');
+    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='login.css') }}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PyTracker</title>
+</head>
+<body>
+    <img class="container" src="{{ url_for('static', filename='images/logincontainer.png') }}" alt="Login Container" draggable="false">
+    <img class="login-logo-password" src="{{ url_for('static', filename='images/password logo.png') }}" alt="Password Logo">
+    <img class="login-logo-id" src="{{ url_for('static', filename='images/id logo.png') }}" alt="ID Logo">
+    
+    <h1 class="form-heading-text">LOGIN</h1>
+
+    <form action="/submit" method="POST">
+        <input type="text" id="id-number" name="identification" placeholder=" Enter your ID number">
+
+        <input type="password" id="password" name="password" placeholder=" Enter your Password">
+
+        <label for="remember-me" class="remember-me">
+        <input type="checkbox" id="remember-me" name="remember_me" style="margin-right: 8px;">
+        Remember Me
+        </label>
+
+        <a href="/forgot-password" class="forgot-password">Forgot Password?</a>
+
+        <button id="sign-in-btn" type="submit">Sign In</button>
+    </form>
+    <a href="/step2" id="register-link">
+            Don't have an account? <span class="register-text">Register</span>
+    </a>
+</body>
+</html>

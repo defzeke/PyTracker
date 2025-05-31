@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=Actor&family=Roboto:ital,wght@0,100..900;1,100..900&family=Tai+Heritage+Pro:wght@400;700&display=swap');
+    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='register.css') }}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PyTracker</title>
+</head>
+<body>
+    <img class="container" src="{{ url_for('static', filename='images/logincontainer.png') }}" alt="Register Container" draggable="false">
+
+    <h1 class="form-heading-text">REGISTER</h1>
+
+    <form action="/register2" method="POST">
+        <input type="text" id="first-name" name="first_name" placeholder=" First Name" required>
+        <input type="text" id="middle-name" name="middle_name" placeholder=" Middle Name" required>
+        <input type="text" id="last-name" name="last_name" placeholder=" Last Name" required>
+        
+        <button type="submit" id="continue-btn">Continue</button>
+    </form>
+
+    <a href="/" id="signin-link">
+        Already have an account? <span class="signin-text">Sign In</span>
+    </a>
+
+</body>
+</html>
