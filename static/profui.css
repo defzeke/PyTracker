@@ -1,12 +1,13 @@
 html, body {
     margin: 0;
     padding: 0;
+    background-color: #E3E9ED;
 }
 
 #sidebar {
     position: fixed;
     width: 85px;
-    height: 950px;
+    height: 100%;
     background: #272757;
     top: 0;
     left: 0;
@@ -14,44 +15,309 @@ html, body {
 
 #topbar {
     position: fixed;
+    display: flex;
+    align-items: center;
     width: calc(100% - 85px);
     height: 85px;
     background: #fff;
     top: 0;
     left: 85px;
-    border-bottom: 1.5px solid rgba(39, 39, 87, 0.15); /* Softer border */
+    border-bottom: 1.5px solid rgba(39, 39, 87, 0.15); 
     z-index: 1;
-    box-shadow: 0 4px 16px rgba(39, 39, 87, 0.15); /* Drop shadow */
+    box-shadow: 0 4px 16px rgba(39, 39, 87, 0.15); 
+    padding: 0 40px;
+    gap: 32px; /* adjust as needed */
 }
 
-#dashboard-logo {
+.sidebar-icon {
     position: absolute;
-    top: 110px;
     left: 15px;
     width: 52px;
     height: 52px;
+}
+#dashboard-logo {
+    top: 110px;
 }
 
 #attendance-logo {
-    position: absolute;
     top: 180px;
-    left: 15px;
-    width: 52px;
-    height: 52px;
 }
 
 #addclass-logo {
-    position: absolute;
     top: 245px;
     left: 12.5px;
     width: 58px;
     height: 58px;
 }
-
-#status-logo {
+.topbar-icon {
     position: absolute;
     top: 30%;
-    left: 20%;
     width: 35px;
     height: 35px;
 }
+
+#status-logo {
+    left: 20%;
+}
+
+#message-logo {
+    left: 26%;
+}
+
+#recitation-logo {
+    top: 27.5%;
+    left: 32%;
+    width: 40px;
+    height: 40px;
+}
+
+#notification-logo {
+    top: 35%;
+    left: 63.3%;
+    width: 30px;
+    height: 30px;
+}
+
+.vertical-line {
+    position: absolute;
+    width: 1px;
+    height: 100%;
+    background: rgba(39, 39, 87, 0.5);
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+#first-line { left: 60%; }
+#second-line { left: 68%; }
+
+.header-text {
+    position: absolute;
+    top: 12%;
+    left: 14%;
+    transform: translate(-50%, -50%);
+    font-size: 40px;
+    color: #000;
+}
+
+#attendance-dashboard {
+    position: fixed;
+    width: 80%;
+    height: 33%;
+    top: 20%;
+    left: 12%;
+    background-color: #F5F7FA;
+    overflow-y: auto;
+    border-radius: 15px;
+}
+
+#weather {
+    position: fixed;
+    width: 40%;
+    height: 33%;
+    top: 57%;
+    left: 12%;
+    background-color: #F5F7FA;
+    overflow-y: auto;
+    border-radius: 15px;
+}
+
+#histogram {
+    position: fixed;
+    width: 38%;
+    height: 33%;
+    top: 57%;
+    left: 54%;
+    background-color: #F5F7FA;
+    overflow-y: auto;
+    border-radius: 15px;
+}
+
+#addclass-form {
+    position: fixed;
+    width: 70%;
+    height: 70%;
+    top: 17%;
+    left: 18%;
+    background-color: #F5F7FA;
+    overflow-y: auto;
+    border-radius: 15px;
+}
+
+#course-dropdown {
+    position: fixed;
+    top: 44%;
+    left: 27%;
+    background-color: #E3E9ED;
+    overflow-y: auto;
+    border-radius: 15px;
+}
+
+#section-dropdown {
+    position: fixed;
+    top: 60%;
+    left: 27%;
+    background-color: #E3E9ED;
+    overflow-y: auto;
+    border-radius: 15px;
+}
+
+#subject-dropdown {
+    position: fixed;
+    top: 52%;
+    left: 27%;
+    background-color: #E3E9ED;
+    overflow-y: auto;
+    border-radius: 15px;
+}
+
+#time-dropdown {
+    position: fixed;
+    top: 68%;
+    left: 27%;
+    background-color: #E3E9ED;
+    overflow-y: auto;
+    border-radius: 15px;
+}
+
+.custom-dropdown {
+    width: 50%;
+    height: 6%;
+    border-radius: 15px;
+    border: 1.5px solid #E3E9ED;
+    background: #E3E9ED;
+    font-size: 16px;
+    color: #272757;
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg fill='black' height='16' viewBox='0 0 24 24' width='16' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 16px center;
+    background-size: 20px 20px;
+}
+
+.popover-panel {
+    position: absolute;
+    top: 8%; 
+    min-width: 320px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+    z-index: 1001;
+    padding: 16px 0;
+    border: 1px solid #e3e9ed;
+}
+
+.popover-panel::before {
+    content: "";
+    position: absolute;
+    top: -15%; 
+    left: 46%; 
+    width: 0;
+    height: 0;
+    border-left: 12px solid transparent;
+    border-right: 12px solid transparent;
+    border-bottom: 16px solid #fff; 
+    filter: drop-shadow(0 -2px 2px rgba(0,0,0,0.06));
+    z-index: 1002;
+}
+
+.popover-content {
+    padding: 0 24px;
+}
+
+#notification-popover {
+    left: 59.6%;
+}
+
+#status-popover {
+    left: 16.6%;
+}
+
+#message-popover {
+    left: 22.7%;
+}
+
+#recitation-popover {
+    left: 28.5%;
+}
+
+.btns {
+    width: 20%;
+    height: 8%;
+    box-sizing: border-box;
+    text-align: center;
+}
+
+.btns#clear-btn {
+    background: #dc143c;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 32px;
+    font-size: 16px;
+    cursor: pointer;
+    margin-right: 12px;
+    transition: background 0.2s;
+}
+.btns#clear-btn:hover {
+    background: #a80f2c;
+}
+
+.btns#add-btn {
+    background: #22bb33;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 32px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.btns#add-btn:hover {
+    background: #178a24;
+}
+
+#clear-btn {
+    position: absolute;
+    top: 75%;
+    left: 13%;
+}
+
+#add-btn {
+    position: absolute;
+    top: 75%;
+    left: 64%;
+}
+
+#classes-dropdown {
+    position: fixed;
+    width: 15%;
+    top: 20%;
+    left: 8%;
+    background-color: #fff;
+    overflow-y: auto;
+    border-radius: 15px;
+}
+
+#subjects-dropdown {
+    position: fixed;
+    width: 15%;
+    top: 20%;
+    left: 28%;
+    background-color: #fff;
+    overflow-y: auto;
+    border-radius: 15px;
+}
+
+#sections-dropdown {
+    position: fixed;
+    width: 15%;
+    top: 20%;
+    left: 48%;
+    background-color: #fff;
+    overflow-y: auto;
+    border-radius: 15px;
+}
+

@@ -37,11 +37,134 @@
             data-active="{{ url_for('static', filename='images/active status.png') }}"
             data-inactive="{{ url_for('static', filename='images/inactive status.png') }}"
             alt="Status Logo" draggable="false">
+
+        <img id="message-logo" class="topbar-icon" src="{{ url_for('static', filename='images/inactive message.png') }}"
+            data-active="{{ url_for('static', filename='images/active message.png') }}"
+            data-inactive="{{ url_for('static', filename='images/inactive message.png') }}"
+            alt="Status Logo" draggable="false">
         
+        <img id="recitation-logo" class="topbar-icon" src="{{ url_for('static', filename='images/inactive recitation.png') }}"
+            data-active="{{ url_for('static', filename='images/active recitation.png') }}"
+            data-inactive="{{ url_for('static', filename='images/inactive recitation.png') }}"
+            alt="Status Logo" draggable="false">
         
+        <div id="first-line" class="vertical-line"></div>
+        <div id="second-line" class="vertical-line"></div>
+
+        <img id="notification-logo" class="topbar-icon" src="{{ url_for('static', filename='images/inactive notification.png') }}"
+            data-active="{{ url_for('static', filename='images/active notification.png') }}"
+            data-inactive="{{ url_for('static', filename='images/inactive notification.png') }}"
+            alt="Notification Logo" draggable="false">
     </div>
+
+
+
+
+    <div id="notification-popover" class="popover-panel" style="display:none;">
+        <div class="popover-content">
+            <p>No new notifications</p>
+        </div>
+    </div>
+
+    <div id="status-popover" class="popover-panel" style="display:none;">
+        <div class="popover-content">
+            <p>Status content here</p>
+        </div>
+    </div>
+
+    <div id="message-popover" class="popover-panel" style="display:none;">
+        <div class="popover-content">
+            <p>Messages content here</p>
+        </div>
+    </div>
+
+    <div id="recitation-popover" class="popover-panel" style="display:none;">
+        <div class="popover-content">
+            <p>Recitation content here</p>
+        </div>
+    </div>
+
+
+
+
+
+
+
+
+    <div id="dashboard-content">
+        <h1 class="header-text">Dashboard</h1>
+        <div id="attendance-dashboard"></div>
+        <div id="weather"></div>
+        <div id="histogram"></div>
+
+    </div>
+
+    <div id="attendance-content">
+        <h1 class="header-text">Attendance</h1>
+
+        <div id="select-content">
+            <!-- Class Dropdown -->
+            <select id="classes-dropdown" class="custom-dropdown" required>
+                <option value="" disabled selected hidden>&nbsp;&nbsp;&nbsp;&nbsp;Select Class</option>
+                <option value="class1">&nbsp;&nbsp;&nbsp;&nbsp;Class 1</option>
+                <option value="class2">&nbsp;&nbsp;&nbsp;&nbsp;Class 2</option>
+                <option value="class3">&nbsp;&nbsp;&nbsp;&nbsp;Class 3</option>
+            </select>
+
+            <!-- Subject Dropdown -->
+            <select id="subjects-dropdown" class="custom-dropdown" required>
+                <option value="" disabled selected hidden>&nbsp;&nbsp;&nbsp;&nbsp;Select Subject</option>
+                <option value="subject1">&nbsp;&nbsp;&nbsp;&nbsp;Subject 1</option>
+                <option value="subject2">&nbsp;&nbsp;&nbsp;&nbsp;Subject 2</option>
+                <option value="subject3">&nbsp;&nbsp;&nbsp;&nbsp;Subject 3</option>
+            </select>
+
+            <!-- Section Dropdown -->
+            <select id="sections-dropdown" class="custom-dropdown" required>
+                <option value="" disabled selected hidden>&nbsp;&nbsp;&nbsp;&nbsp;Select Section</option>
+                <option value="section1">&nbsp;&nbsp;&nbsp;&nbsp;Section 1</option>
+                <option value="section2">&nbsp;&nbsp;&nbsp;&nbsp;Section 2</option>
+                <option value="section3">&nbsp;&nbsp;&nbsp;&nbsp;Section 3</option>
+            </select>
+        </div>
+    </div>
+
+
+
+    
+    <div id="addclass-content">
+        <div id="addclass-form">
+            <select id="course-dropdown" class="custom-dropdown" required>
+                <option value="" disabled selected hidden>&nbsp;&nbsp;&nbsp;&nbsp;Course</option>
+                <option value="option1">&nbsp;&nbsp;&nbsp;&nbsp;Option 1</option>
+                <option value="option2">&nbsp;&nbsp;&nbsp;&nbsp;Option 2</option>
+                <option value="option3">&nbsp;&nbsp;&nbsp;&nbsp;Option 3</option>
+            </select>
+
+            <select id="section-dropdown" class="custom-dropdown" required>
+                <option value="" disabled selected hidden>&nbsp;&nbsp;&nbsp;&nbsp;Year and Section</option>
+                <option value="option1">&nbsp;&nbsp;&nbsp;&nbsp;Option 1</option>
+                <option value="option2">&nbsp;&nbsp;&nbsp;&nbsp;Option 2</option>
+                <option value="option3">&nbsp;&nbsp;&nbsp;&nbsp;Option 3</option>
+            </select>
+
+            <select id="subject-dropdown" class="custom-dropdown" required>
+                <option value="" disabled selected hidden>&nbsp;&nbsp;&nbsp;&nbsp;Subject Code</option>
+                <option value="option1">&nbsp;&nbsp;&nbsp;&nbsp;Option 1</option>
+                <option value="option2">&nbsp;&nbsp;&nbsp;&nbsp;Option 2</option>
+                <option value="option3">&nbsp;&nbsp;&nbsp;&nbsp;Option 3</option>
+            </select>
+            
+            <button type="button" class="btns" id="clear-btn">Clear</button>
+            <button type="button" class="btns" id="add-btn">Add Class</button>
+            
+        </div>
+            
+    </div>
+
 
     <script src="{{ url_for('static', filename='sidebarui.js') }}"></script>
     <script src="{{ url_for('static', filename='topbarui.js') }}"></script>
+    <script src="{{ url_for('static', filename='addclass.js') }}"></script>
 </body>
 </html>
