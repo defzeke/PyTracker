@@ -58,3 +58,28 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
+
+
+// --- Topbar tooltip logic ---
+document.addEventListener('DOMContentLoaded', function() {
+    let tooltipTimeout;
+    let tooltipEl = document.createElement('div');
+    tooltipEl.className = 'topbar-tooltip';
+    document.body.appendChild(tooltipEl);
+
+    document.querySelectorAll('.topbar-icon').forEach(icon => {
+        icon.addEventListener('mouseenter', function(e) {
+            tooltipTimeout = setTimeout(() => {
+                tooltipEl.textContent = icon.getAttribute('data-tooltip');
+                const rect = icon.getBoundingClientRect();
+                tooltipEl.style.top = (rect.bottom + 8) + 'px'; // show below icon
+                tooltipEl.style.left = (rect.left + rect.width / 2 - tooltipEl.offsetWidth / 2) + 'px';
+                tooltipEl.style.opacity = 1;
+            }, 500); // 1 second delay
+        });
+        icon.addEventListener('mouseleave', function() {
+            clearTimeout(tooltipTimeout);
+            tooltipEl.style.opacity = 0;
+        });
+    });
+});

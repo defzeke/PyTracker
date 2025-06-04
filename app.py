@@ -5,7 +5,7 @@ app = Flask(__name__)
 
 @app.route("/")
 def home():
-    return render_template("profUI.html")
+    return render_template("login.html")
 
 @app.route("/step2")
 def step2():

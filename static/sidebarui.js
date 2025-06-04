@@ -30,4 +30,26 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('dashboard-content').style.display = 'block';
     document.getElementById('attendance-content').style.display = 'none';
     document.getElementById('addclass-content').style.display = 'none';
+
+    // --- Tooltip logic starts here ---
+    let tooltipTimeout;
+    let tooltipEl = document.createElement('div');
+    tooltipEl.className = 'sidebar-tooltip';
+    document.body.appendChild(tooltipEl);
+
+    document.querySelectorAll('.sidebar-icon').forEach(icon => {
+        icon.addEventListener('mouseenter', function(e) {
+            tooltipTimeout = setTimeout(() => {
+                tooltipEl.textContent = icon.getAttribute('data-tooltip');
+                const rect = icon.getBoundingClientRect();
+                tooltipEl.style.top = (rect.top + rect.height / 2 - 20) + 'px';
+                tooltipEl.style.left = (rect.right + 12) + 'px';
+                tooltipEl.style.opacity = 1;
+            }, 500); // 2 seconds
+        });
+        icon.addEventListener('mouseleave', function() {
+            clearTimeout(tooltipTimeout);
+            tooltipEl.style.opacity = 0;
+        });
+    });
 });
