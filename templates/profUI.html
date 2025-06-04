@@ -4,6 +4,10 @@
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Actor&family=Roboto:ital,wght@0,100..900;1,100..900&family=Tai+Heritage+Pro:wght@400;700&display=swap');
     </style>
+    <!-- Cropper.js CSS -->
+    <link  href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet"/>
+    <!-- Cropper.js JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='profui.css') }}">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -16,37 +20,78 @@
             src="{{ url_for('static', filename='images/active dashboard.png') }}" 
             data-active="{{ url_for('static', filename='images/active dashboard.png') }}"
             data-inactive="{{ url_for('static', filename='images/inactive dashboard.png') }}"
-            alt="Dashboard Logo" draggable="false">
+            alt="Dashboard Logo" draggable="false" data-tooltip="Dashboard">
 
         <img id="attendance-logo" class="sidebar-icon"
             src="{{ url_for('static', filename='images/inactive attendance.png') }}"
             data-active="{{ url_for('static', filename='images/active attendance.png') }}"
             data-inactive="{{ url_for('static', filename='images/inactive attendance.png') }}"
-            alt="Attendance Logo" draggable="false">
+            alt="Attendance Logo" draggable="false" data-tooltip="Attendance">
 
         <img id="addclass-logo" class="sidebar-icon"
             src="{{ url_for('static', filename='images/inactive addclass.png') }}"
             data-active="{{ url_for('static', filename='images/active addclass.png') }}"
             data-inactive="{{ url_for('static', filename='images/inactive addclass.png') }}"
-            alt="Add Class Logo" draggable="false">
+            alt="Add Class Logo" draggable="false" data-tooltip="Add Class">
     </div>
 
 
+
+
+
+
+
+
     <div id="topbar">
+        <img id="profile-logo" class="topbar-icon"
+    src="{{ url_for('static', filename='images/profile.png') }}"
+    alt="Profile" draggable="false" data-tooltip="Profile">
+
+    <div id="profile-popover" class="popover-panel">
+        <div class="popover-content" style="display: flex; flex-direction: column; gap: 12px;">
+            <button id="account-settings-btn" class="btns">Account Settings</button>
+            <button id="dark-mode-btn" class="btns">Dark Mode</button>
+            <button id="logout-btn" class="btns">Logout</button>
+        </div>
+    </div>
+
+    <div id="account-settings-popover" class="popover-panel">
+        <div class="popover-content" style="display: flex; flex-direction: column; gap: 12px;">
+            <span style="font-weight:bold; margin-bottom:8px;">Account Settings</span>
+            <button id="change-dp-btn" class="btns">Change Display Picture</button>
+            <button id="change-pass-btn" class="btns">Change Password</button>
+            <input type="file" id="profile-upload" accept="image/*" style="display:none;">
+            <button id="close-account-settings" class="btns" style="background:#eee; color:#272757;">Close</button>
+        </div>
+    </div>
+
+    <div id="cropper-modal" style="display:none; position:fixed; z-index:3000; left:0; top:0; width:100vw; height:100vh; background:rgba(0,0,0,0.5); align-items:center; justify-content:center;">
+        <div style="background:#fff; padding:24px; border-radius:12px; max-width:90vw; max-height:90vh;">
+            <img id="cropper-image" style="max-width:60vw; max-height:60vh; display:block; margin:auto;">
+            <div style="text-align:center; margin-top:16px;">
+                <button id="cropper-cancel" class="btns">Cancel</button>
+                <button id="cropper-save" class="btns">Save</button>
+            </div>
+        </div>
+    </div>
+
+
+
+
         <img id="status-logo" class="topbar-icon" src="{{ url_for('static', filename='images/inactive status.png') }}"
             data-active="{{ url_for('static', filename='images/active status.png') }}"
             data-inactive="{{ url_for('static', filename='images/inactive status.png') }}"
-            alt="Status Logo" draggable="false">
+            alt="Status Logo" draggable="false" data-tooltip="Status">
 
         <img id="message-logo" class="topbar-icon" src="{{ url_for('static', filename='images/inactive message.png') }}"
             data-active="{{ url_for('static', filename='images/active message.png') }}"
             data-inactive="{{ url_for('static', filename='images/inactive message.png') }}"
-            alt="Status Logo" draggable="false">
+            alt="Status Logo" draggable="false" data-tooltip="Messages">
         
         <img id="recitation-logo" class="topbar-icon" src="{{ url_for('static', filename='images/inactive recitation.png') }}"
             data-active="{{ url_for('static', filename='images/active recitation.png') }}"
             data-inactive="{{ url_for('static', filename='images/inactive recitation.png') }}"
-            alt="Status Logo" draggable="false">
+            alt="Status Logo" draggable="false" data-tooltip="Recitation">
         
         <div id="first-line" class="vertical-line"></div>
         <div id="second-line" class="vertical-line"></div>
@@ -54,7 +99,7 @@
         <img id="notification-logo" class="topbar-icon" src="{{ url_for('static', filename='images/inactive notification.png') }}"
             data-active="{{ url_for('static', filename='images/active notification.png') }}"
             data-inactive="{{ url_for('static', filename='images/inactive notification.png') }}"
-            alt="Notification Logo" draggable="false">
+            alt="Notification Logo" draggable="false" data-tooltip="Notifications">
     </div>
 
 
@@ -101,6 +146,20 @@
 
     <div id="attendance-content">
         <h1 class="header-text">Attendance</h1>
+        <button type="button" class="btns" id="take-attendance-btn">Take Attendance</button>
+
+        <img src="{{ url_for('static', filename='images/inactive calendar.png') }}" 
+            alt="Attendance Image" id="calendar-image" 
+            data-active="{{ url_for('static', filename='images/active calendar.png') }}"
+            data-inactive="{{ url_for('static', filename='images/inactive calendar.png') }}"
+            draggable="false">
+
+        <div id="calendar-popover" class="popover-panel" style="display:none; min-width:320px; left:80%; top:27%;">
+            <div class="popover-content">
+                <h3 style="margin:0 0 12px 0;">Calendar</h3>
+                <p>[Calendar goes here]</p>
+            </div>
+        </div>
 
         <div id="select-content">
             <!-- Class Dropdown -->
@@ -127,6 +186,7 @@
                 <option value="section3">&nbsp;&nbsp;&nbsp;&nbsp;Section 3</option>
             </select>
         </div>
+    
     </div>
 
 
@@ -166,5 +226,7 @@
     <script src="{{ url_for('static', filename='sidebarui.js') }}"></script>
     <script src="{{ url_for('static', filename='topbarui.js') }}"></script>
     <script src="{{ url_for('static', filename='addclass.js') }}"></script>
+    <script src="{{ url_for('static', filename='calendar.js') }}"></script>
+    <script src="{{ url_for('static', filename='settings.js') }}"></script>
 </body>
 </html>
