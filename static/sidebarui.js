@@ -53,3 +53,21 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
+
+document.addEventListener('DOMContentLoaded', function() {
+    const sidebar = document.getElementById('sidebar');
+    const extender = document.getElementById('extender-logo');
+    let sidebarHidden = false;
+
+    extender.addEventListener('click', function(e) {
+        sidebarHidden = !sidebarHidden;
+        if (sidebarHidden) {
+            sidebar.classList.add('sidebar-hidden');
+            extender.classList.add('sidebar-at-edge');
+        } else {
+            sidebar.classList.remove('sidebar-hidden');
+            extender.classList.remove('sidebar-at-edge');
+        }
+    });
+});
+

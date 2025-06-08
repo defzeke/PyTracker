@@ -180,3 +180,12 @@ body {
     color: #b3b3ff;
 }
 
+.error-popup {
+    color: red;
+    text-align: center;
+    font-size: 100%;
+    top: 77%;
+    left: 75%;
+    transform: translate(-50%, -50%);
+    position: absolute;
+}
