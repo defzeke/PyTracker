@@ -236,19 +236,19 @@ html, body {
 }
 
 #notification-popover {
-    left: 59.6%;
+    left: 57.8%;
 }
 
 #status-popover {
-    left: 16.6%;
+    left: 12.5%;
 }
 
 #message-popover {
-    left: 22.7%;
+    left: 19%;
 }
 
 #recitation-popover {
-    left: 28.5%;
+    left: 25.3%;
 }
 
 .btns {
@@ -397,7 +397,7 @@ html, body {
 }
 
 #profile-logo {
-    width: 2.3%;
+    width: 2.2%;
     height: 46%;
     object-fit: cover;
     border-radius: 50%;

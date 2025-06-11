@@ -1,0 +1,6 @@
+SQL table names
+1. attendance_database
+2. classes_database
+3. enrollment_database
+4. login_main
+5. registration_main
