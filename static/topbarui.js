@@ -78,3 +78,29 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
+
+document.addEventListener('DOMContentLoaded', function() {
+    const topbarIcons = document.querySelectorAll('.topbar-icon');
+    const tooltip = document.getElementById('topbar-tooltip');
+    let tooltipTimer = null;
+
+    topbarIcons.forEach(icon => {
+        icon.addEventListener('mouseenter', function(e) {
+            tooltipTimer = setTimeout(() => {
+                const tooltipText = icon.getAttribute('data-tooltip');
+                if (tooltipText) {
+                    tooltip.textContent = tooltipText;
+                    tooltip.style.opacity = 1;
+                    // Position tooltip below the icon
+                    const rect = icon.getBoundingClientRect();
+                    tooltip.style.left = rect.left + window.scrollX + rect.width / 2 - tooltip.offsetWidth / 2 + 'px';
+                    tooltip.style.top = rect.bottom + window.scrollY + 8 + 'px';
+                }
+            }, 500); 
+        });
+        icon.addEventListener('mouseleave', function() {
+            clearTimeout(tooltipTimer);
+            tooltip.style.opacity = 0;
+        });
+    });
+});
