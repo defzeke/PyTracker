@@ -18,9 +18,9 @@
 
     
     <form action="/" method="POST">
-        <input type="text" id="id-number" name="identification" placeholder=" Enter your ID number" required>
+        <input type="text" id="id-number" name="identification" placeholder=" Enter your ID number" required value="{{ remembered_id|default('') }}">
 
-        <input type="password" id="password" name="password" placeholder=" Enter your Password" required>
+        <input type="password" id="password" name="password" placeholder=" Enter your Password" required value="{{ remembered_password|default('') }}">
 
         <label for="remember-me" class="remember-me">
         <input type="checkbox" id="remember-me" name="remember_me" style="margin-right: 8px;">

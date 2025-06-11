@@ -30,19 +30,7 @@ body {
     transform: translateX(-50%);
 }
 
-#first-name {
-    top: 31.5%;
-}
-
-#middle-name {
-    top: 41%;
-}
-
-#last-name {
-    top: 50.5%;
-}
-
-#first-name, #middle-name, #last-name {
+#first-name, #middle-name, #last-name, #id-number {
     border-radius: 50px;
     background-color: rgba(255,255,255,0.2); 
     padding: 12px 18px;
@@ -59,7 +47,27 @@ body {
     color: #fff; 
 }
 
-#first-name::placeholder, #middle-name::placeholder, #last-name::placeholder {
+#first-name {
+    top: 31.5%;
+    width: 11.5%;
+    left: 67.8%;
+}
+
+#middle-name {
+    top: 31.5%;
+    width: 11.5%;
+    left: 82.1%;
+}
+
+#last-name {
+    top: 41%;
+}
+
+#id-number {
+    top: 50.5%;
+}
+
+#first-name::placeholder, #middle-name::placeholder, #last-name::placeholder, #id-number::placeholder {
     color: #FFFFFF;
     opacity: 50%; 
     font-family: "Tai Heritage Pro", serif;

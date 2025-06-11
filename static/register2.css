@@ -86,9 +86,57 @@ body {
     top: 40%;
 }
 
+.dropdown-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 19px; 
+    position: absolute;
+    top: 40%;
+    left: 75%;
+    transform: translateX(-50%);
+    width: 28%; 
+    height: auto;
+}
 
+.dropdown-row select {
+    border-radius: 50px;
+    background-color: rgba(255,255,255,0.2);
+    padding: 18.5px 18px;     
+    border: none;
+    font-family: "Tai Heritage Pro", serif;
+    font-size: 18px;
+    width: 100%;
+    color: #A9a9b8;
+    outline: none;
+    height: 9.5%;         
+}
 
-#email, #year-section, #password, #confirm-password {
+.dropdown-row select option{
+    color: #000;
+}
+
+.disabled-dropdown {
+    cursor: not-allowed !important;
+    opacity: 0.5;
+}
+
+.dropdown-row select option[disabled] {
+    display: none;
+}
+
+.dropdown-row select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg fill='white' height='18' viewBox='0 0 24 24' width='18' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>");
+    background-repeat: no-repeat;
+    background-position: 94% center; 
+    background-size: 24px 24px;
+    padding-right: 100px; 
+}
+
+#email, #password, #confirm-password {
     border-radius: 50px;
     background-color: rgba(255,255,255,0.2); 
     padding: 12px 18px;
@@ -107,14 +155,14 @@ body {
 
 #password {
     top: 50%;
-    width: 11%;
-    left: 67.5%;
+    width: 11.5%;
+    left: 67.8%;
 }
 
 #confirm-password {
     top: 50%;
-    width: 11%;
-    left: 82.5%;
+    width: 11.5%;
+    left: 82.2%;
 }
 
 #email::placeholder, #year-section::placeholder, #password::placeholder, #confirm-password::placeholder {
@@ -123,4 +171,13 @@ body {
     font-family: "Tai Heritage Pro", serif;
     font-weight: 100;
     font-size: 17px;
+}
+
+#password-strength {
+    position: absolute;
+    top: 59%;          
+    left: 82.7%;
+    transform: translateX(-50%);
+    color: #fff;
+    font-size: 16px;
 }
