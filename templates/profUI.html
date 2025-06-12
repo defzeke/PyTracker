@@ -239,4 +239,9 @@
     <script src="{{ url_for('static', filename='calendar.js') }}"></script>
     <script src="{{ url_for('static', filename='settings.js') }}"></script>
 </body>
+<script>
+    document.getElementById("logout-btn").addEventListener("click", function() {
+        window.location.href = "{{url_for('logout')}}";
+    });
+</script>
 </html>

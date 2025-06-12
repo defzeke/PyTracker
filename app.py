@@ -98,7 +98,10 @@ def login():
     # Render the login page with any error messages and remembered credentials
     return render_template("login.html", error=error, remembered_id=remembered_id, remembered_password=remembered_password)
 
-
+@app.route("/logout:)")
+def logout():
+    session.clear()
+    return redirect(url_for('login'))
 
 
 @app.route("/admin")
@@ -112,7 +115,6 @@ def profUI():
 @app.route("/student")
 def studentUI():
     return render_template("studentUI.html")
-
 
 
 
