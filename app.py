@@ -370,10 +370,6 @@ def register2_details():
     return render_template("register2.html", role=session.get('role'))
 
 
-
-
-from datetime import datetime, timedelta
-
 @app.route('/otp', methods=['GET', 'POST'])
 def verify():
     """
