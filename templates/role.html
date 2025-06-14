@@ -7,7 +7,8 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='role.css') }}">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PyTracker</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/pytrack hat logo.png') }}">
+    <title>Register - PyTracker</title>
 </head>
 <body>
     <img class="container" src="{{ url_for('static', filename='images/logincontainer.png') }}" alt="Login Container" draggable="false">
@@ -21,16 +22,51 @@
                 <span>Student</span>
             </label>
             <label class="role-btn">
-                <input type="radio" name="role" value="professor" required>
+                <input type="radio" name="role" value="teacher" required>
                 <span>Professor</span>
             </label>
         </div>
+
+        <div style="margin: 30px 0; text-align: center;">
+            <label id="terms-label" style="cursor:pointer;">
+                <input type="radio" id="terms-radio" name="terms" value="accept" style="accent-color:#b3b3ff;" required readonly>
+                <span style="color:#fff; font-family:'Tai Heritage Pro',serif;">
+                    I accept the <a href="#" id="show-terms" style="color:#b3b3ff; text-decoration:underline;">Terms and Conditions</a>
+                </span>
+            </label>
+        </div>
+
+        <div id="terms-modal" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100vw; height:100vh; background:rgba(0,0,0,0.6);">
+            <div style="background:#fff; color:#222; width:90%; max-width:500px; max-height:80vh; margin:5vh auto; border-radius:12px; overflow:hidden; display:flex; flex-direction:column;">
+                <div style="padding:24px 24px 0 24px; font-size:1.3em; font-weight:bold; color:#d32f2f;">Terms and Conditions</div>
+                <div id="terms-content" style="padding:16px 24px; overflow-y:auto; flex:1; font-size:1em; line-height:1.6; border-bottom:1px solid #eee;">
+                    <ul>
+                        <li><strong>Account Responsibility:</strong> You are responsible for maintaining the confidentiality of your account credentials and for all activities that occur under your account.</li>
+                        <li><strong>Accurate Information:</strong> You agree to provide accurate and truthful information during registration. Providing false information may result in suspension or termination of your account.</li>
+                        <li><strong>Use of Service:</strong> PyTracker is intended for academic and attendance tracking purposes only. Any misuse of the system may result in disciplinary action.</li>
+                        <li><strong>Privacy:</strong> Your personal information will be used solely for school-related purposes and will not be shared with unauthorized third parties.</li>
+                        <li><strong>Security:</strong> Do not share your OTP or password with anyone. Report any suspicious activity to your school administrator immediately.</li>
+                        <li><strong>Changes to Terms:</strong> The school reserves the right to update these terms and conditions at any time. Continued use of PyTracker constitutes acceptance of any changes.</li>
+                    </ul>
+                    <p>If you do not agree to these terms, please do not register or use PyTracker.</p>
+                </div>
+                <div style="padding:16px 24px; text-align:right;">
+                    <button id="accept-terms" disabled>I accept</button>
+                    <button id="close-terms" style="background:none; color:#d32f2f; border:none; font-size:1em; margin-left:10px; cursor:pointer;">Close</button>
+                </div>
+            </div>
+        </div>
+
+
+
         <button id="continue-btn" type="submit">Continue</button>
     </form>
 
     <a href="/" id="signin-link">
         Already have an account? <span class="signin-text">Sign In</span>
     </a>
+
+    <script src="{{ url_for('static', filename='terms_and_conditions.js') }}"></script>
 
 </body>
 </html>
