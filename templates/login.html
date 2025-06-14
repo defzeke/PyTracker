@@ -24,14 +24,16 @@
         <input type="password" id="password" name="password" placeholder=" Enter your Password" required value="{{ remembered_password|default('') }}">
 
         <label for="remember-me" class="remember-me">
-        <input type="checkbox" id="remember-me" name="remember_me" style="margin-right: 8px;">
-        Remember Me
+            <input type="checkbox" id="remember-me" name="remember_me" style="margin-right: 8px;">
+            Remember Me
         </label>
 
-        <a href="/forgot-password" class="forgot-password">Forgot Password?</a>
+        
 
         <button id="sign-in-btn" type="submit">Sign In</button>
     </form>
+
+    <a href="/forgot-password" class="forgot-password">Forgot Password?</a>
 
 
     <a href="/step2" id="register-link">
