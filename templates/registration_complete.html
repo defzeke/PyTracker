@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/pytrack hat logo.png') }}">
+    <title>Registration Successful - PyTracker</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='registration_complete.css') }}">
+    <style>
+        body {
+            background-color: #272757;
+            font-family: 'Roboto', Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+        .checkmark-circle {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #fff;
+            margin: 0 auto 24px auto;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+            animation: pop 0.6s cubic-bezier(.36,1.01,.32,1.01);
+        }
+        @keyframes pop {
+            0% { transform: scale(0.5);}
+            80% { transform: scale(1.1);}
+            100% { transform: scale(1);}
+        }
+        .checkmark {
+            width: 60px;
+            height: 60px;
+            stroke: #4BB543;
+            stroke-width: 6;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            fill: none;
+            stroke-dasharray: 48;
+            stroke-dashoffset: 48;
+            animation: dash 0.8s 0.3s ease forwards;
+        }
+        @keyframes dash {
+            to { stroke-dashoffset: 0; }
+        }
+        .success-message {
+            color: #fff;
+            font-size: 2rem;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 12px;
+        }
+        .desc-message {
+            color: #bbb;
+            font-size: 1rem;
+            text-align: center;
+            margin-bottom: 32px;
+        }
+        .back-btn {
+            display: inline-block;
+            padding: 10px 28px;
+            background: #4BB543;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 500;
+            text-decoration: none;
+            transition: background 0.2s;
+        }
+        .back-btn:hover {
+            background: #388e3c;
+        }
+    </style>
+</head>
+<body>
+    <div class="checkmark-circle">
+        <svg class="checkmark" viewBox="0 0 52 52">
+            <path d="M14 27l7 7 17-17"/>
+        </svg>
+    </div>
+    <div class="success-message">Registration Successful!</div>
+    <div class="desc-message">
+        {% if role == "Student" %}
+            You can now log in to your PyTracker account.
+        {% elif role == "Teacher" %}
+            Your registration is pending approval. You will be notified once approved.
+        {% else %}
+            Thank you for registering!
+        {% endif %}
+    </div>
+    <a href="{{ url_for('login') }}" class="back-btn">Go to Login</a>
+</body>
+</html>
