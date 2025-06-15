@@ -7,7 +7,8 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='register.css') }}">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PyTracker</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/pytrack hat logo.png') }}">
+    <title>Register - PyTracker</title>
 </head>
 <body>
     <img class="container" src="{{ url_for('static', filename='images/logincontainer.png') }}" alt="Register Container" draggable="false">
@@ -17,7 +18,7 @@
     <form action="/register2" method="POST">
         <input type="hidden" name="role" value="{{ role }}">
         <input type="text" id="first-name" name="first_name" placeholder=" First Name" required>
-        <input type="text" id="middle-name" name="middle_name" placeholder=" Middle Name" required>
+        <input type="text" id="middle-name" name="middle_name" placeholder=" Middle Name">
         <input type="text" id="last-name" name="last_name" placeholder=" Last Name" required>
         <input type="text" id="id-number" name="id-number" placeholder=" ID number" required>
         
@@ -28,6 +29,11 @@
         Already have an account? <span class="signin-text">Sign In</span>
     </a>
 
+    {% if error %}
+    <script>
+        alert({{ error|tojson }});
+    </script>
+    {% endif %}
 
 
 
@@ -76,7 +82,7 @@
 
         // Check ID number length
         if (idNumber.length !== 15) {
-            errorMsg = "input a valid id number";
+            errorMsg = "Please input a valid ID number.";
         } else if (role === "student" && !idNumber.includes("SD")) {
             errorMsg = "Please enter a valid student ID number containing 'SD'.";
         } else if (role === "professor" && !idNumber.includes("TC")) {

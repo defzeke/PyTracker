@@ -4,6 +4,9 @@ document.querySelector('form').addEventListener('submit', function(e) {
     const email = document.getElementById('email').value.trim();
     let errorMsg = "";
 
+    if ((role === "teacher" || role === "professor") && !email.endsWith("@gmail.com")) {
+        errorMsg = "Professors email must end with @gmail.com";
+    }
     if (role === "student" && !email.endsWith("@iskolarngbayan.pup.edu.ph")) {
         errorMsg = "Student email must end with @iskolarngbayan.pup.edu.ph";
     }
@@ -87,5 +90,14 @@ document.querySelector('form').addEventListener('submit', function(e) {
         alert("Passwords do not match");
         e.preventDefault();
         return;
+    }
+});
+
+document.addEventListener("DOMContentLoaded", function() {
+    // Get the role from the hidden input
+    var role = document.querySelector('input[name="role"]').value.toLowerCase();
+    if (role === "teacher" || role === "professor") {
+        document.getElementById("course").disabled = true;
+        document.getElementById("year-section").disabled = true;
     }
 });

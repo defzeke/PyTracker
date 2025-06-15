@@ -7,14 +7,15 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='register2.css') }}">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PyTracker</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/pytrack hat logo.png') }}">
+    <title>Register - PyTracker</title>
 </head>
 <body>
     <img class="container" src="{{ url_for('static', filename='images/logincontainer.png') }}" alt="Register Container" draggable="false">
 
     <h1 class="form-heading-text">REGISTER</h1>
 
-    <form action="/otp" method="POST">
+    <form action="/register_details" method="POST">
         <input type="hidden" name="role" value="{{ role }}">
         <input type="email" id="email" name="email" placeholder=" Email" required>
 

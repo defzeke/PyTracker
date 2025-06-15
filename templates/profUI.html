@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='profui.css') }}">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/pytrack hat logo.png') }}">
     <title>PyTracker</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://code.jscharting.com/latest/jscharting.js"></script>
@@ -307,4 +308,9 @@
     <script src="{{ url_for('static', filename='attendanceprof.js') }}"></script>
 
 </body>
+<script>
+    document.getElementById("logout-btn").addEventListener("click", function() {
+        window.location.href = "{{url_for('logout')}}";
+    });
+</script>
 </html>
