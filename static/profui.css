@@ -662,3 +662,99 @@ html, body {
 .student-card .pal-btns button:hover {
     background: #d1d7e0;
 }
+
+#admin-modal {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    background: rgba(0,0,0,0.5);
+    z-index: 9999;
+    display: none;
+}
+
+.admin-modal-content {
+    background: #23234a;
+    color: #fff;
+    border-radius: 18px;
+    padding: 36px 32px 28px 32px;
+    max-width: 370px;
+    width: 90vw;
+    margin: 120px auto;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+    font-family: 'Tai Heritage Pro', serif;
+    position: relative;
+    text-align: center;
+}
+
+.admin-modal-title {
+    margin-top: 0;
+    margin-bottom: 18px;
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+.admin-modal-label {
+    font-size: 1.1rem;
+    margin-bottom: 10px;
+    display: block;
+    text-align: left;
+}
+
+.admin-modal-input {
+    width: 100%;
+    margin: 12px 0 18px 0;
+    padding: 12px 14px;
+    border-radius: 8px;
+    border: 1.5px solid #bdbddd;
+    font-size: 1.1rem;
+    background: #29295a;
+    color: #fff;
+    outline: none;
+    box-sizing: border-box;
+    transition: border 0.2s;
+}
+
+.admin-modal-btn-row {
+    display: flex;
+    gap: 12px;
+    margin-top: 0;
+}
+
+.admin-modal-btn {
+    flex: 1;
+    padding: 12px 0;
+    border-radius: 8px;
+    border: none;
+    font-size: 0.9rem;
+    font-weight: 300;
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: background 0.2s, transform 0.2s;
+}
+
+.admin-modal-submit {
+    background: linear-gradient(90deg, #3a357d 60%, #2D296A 100%);
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(44, 41, 106, 0.10);
+}
+
+.admin-modal-submit:hover {
+    background: linear-gradient(90deg, #2D296A 60%, #3a357d 100%);
+}
+
+.admin-modal-cancel {
+    background: #888;
+    color: #fff;
+}
+
+.admin-modal-cancel:hover {
+    background: #666;
+}
+
+.admin-modal-error {
+    color: #ffb3b3;
+    margin-top: 14px;
+    min-height: 22px;
+    font-size: 1rem;
+}
