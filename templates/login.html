@@ -14,13 +14,13 @@
     <img class="login-logo-password" src="{{ url_for('static', filename='images/password logo.png') }}" alt="Password Logo">
     <img class="login-logo-id" src="{{ url_for('static', filename='images/id logo.png') }}" alt="ID Logo">
 
+    
     <h1 class="form-heading-text">LOGIN</h1>
 
-    
-    <form action="/" method="POST">
-        <input type="text" id="id-number" name="identification" placeholder=" Enter your ID number" required value="{{ remembered_id|default('') }}">
+    <form action="/submit" method="POST">
+        <input type="text" id="id-number" name="identification" placeholder=" Enter your ID number">
 
-        <input type="password" id="password" name="password" placeholder=" Enter your Password" required value="{{ remembered_password|default('') }}">
+        <input type="password" id="password" name="password" placeholder=" Enter your Password">
 
         <label for="remember-me" class="remember-me">
         <input type="checkbox" id="remember-me" name="remember_me" style="margin-right: 8px;">
@@ -31,26 +31,8 @@
 
         <button id="sign-in-btn" type="submit">Sign In</button>
     </form>
-
-
     <a href="/step2" id="register-link">
             Don't have an account? <span class="register-text">Register</span>
     </a>
-    
-
-    <!--Shows and hides the error message after 5 seconds-->
-    {% if error %}
-        <div class="error-popup">
-            {{ error }}
-        </div>
-        <script>
-            setTimeout(function() {
-                var popup = document.querySelector('.error-popup');
-                if (popup) {
-                    popup.style.display = 'none';
-                }
-            }, 3000);
-        </script>
-    {% endif %}
 </body>
 </html>

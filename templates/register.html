@@ -15,11 +15,9 @@
     <h1 class="form-heading-text">REGISTER</h1>
 
     <form action="/register2" method="POST">
-        <input type="hidden" name="role" value="{{ role }}">
         <input type="text" id="first-name" name="first_name" placeholder=" First Name" required>
         <input type="text" id="middle-name" name="middle_name" placeholder=" Middle Name" required>
         <input type="text" id="last-name" name="last_name" placeholder=" Last Name" required>
-        <input type="text" id="id-number" name="id-number" placeholder=" ID number" required>
         
         <button type="submit" id="continue-btn">Continue</button>
     </form>
@@ -28,66 +26,5 @@
         Already have an account? <span class="signin-text">Sign In</span>
     </a>
 
-
-
-
-    <script>
-    document.querySelector('form').addEventListener('submit', function(e) {
-        const role = document.querySelector('input[name="role"]:checked') 
-            ? document.querySelector('input[name="role"]:checked').value 
-            : "{{ role|default('') }}";
-        const idNumber = document.getElementById('id-number').value;
-        let errorMsg = "";
-
-        if (role === "student" && !idNumber.includes("SD")) {
-            errorMsg = "Please enter a valid student ID number containing 'SD'.";
-        } else if (role === "professor" && !idNumber.includes("TC")) {
-            errorMsg = "Please enter a valid professor ID number containing 'TC'.";
-        }
-
-        if (errorMsg) {
-            alert(errorMsg);
-            e.preventDefault();
-        }
-    });
-    </script>
-
-    <script>
-    // Capitalize the first letter as you type in name fields
-    ['first-name', 'middle-name', 'last-name'].forEach(function(id) {
-        const input = document.getElementById(id);
-        if (input) {
-            input.addEventListener('input', function() {
-                if (this.value.length > 0) {
-                    this.value = this.value.charAt(0).toUpperCase() + this.value.slice(1);
-                }
-            });
-        }
-    });
-    </script>
-
-    <script>
-    document.querySelector('form').addEventListener('submit', function(e) {
-        const role = document.querySelector('input[name="role"]:checked') 
-            ? document.querySelector('input[name="role"]:checked').value 
-            : "{{ role|default('') }}";
-        const idNumber = document.getElementById('id-number').value;
-        let errorMsg = "";
-
-        // Check ID number length
-        if (idNumber.length !== 15) {
-            errorMsg = "input a valid id number";
-        } else if (role === "student" && !idNumber.includes("SD")) {
-            errorMsg = "Please enter a valid student ID number containing 'SD'.";
-        } else if (role === "professor" && !idNumber.includes("TC")) {
-            errorMsg = "Please enter a valid professor ID number containing 'TC'.";
-        }
-
-        if (errorMsg) {
-            alert(errorMsg);
-            e.preventDefault();
-        }
-    });
-    </script>
 </body>
 </html>

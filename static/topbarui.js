@@ -4,17 +4,15 @@ document.addEventListener('DOMContentLoaded', function() {
         { icon: 'notification-logo', popover: 'notification-popover' },
         { icon: 'status-logo', popover: 'status-popover' },
         { icon: 'message-logo', popover: 'message-popover' },
-        { icon: 'recitation-logo', popover: 'recitation-popover' },
-        { icon: 'extender-logo', popover: null } // Add extender logo (no popover)
+        { icon: 'recitation-logo', popover: 'recitation-popover' }
     ];
 
     // Helper to close all popovers and deactivate all icons
     function closeAllPopovers() {
         features.forEach(f => {
             const icon = document.getElementById(f.icon);
-            const popover = f.popover ? document.getElementById(f.popover) : null;
-            // Do NOT deactivate extender-logo here
-            if (icon && f.icon !== 'extender-logo') {
+            const popover = document.getElementById(f.popover);
+            if (icon) {
                 icon.classList.remove('active');
                 if (icon.hasAttribute('data-inactive')) {
                     icon.src = icon.getAttribute('data-inactive');
@@ -26,26 +24,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
     features.forEach(f => {
         const icon = document.getElementById(f.icon);
-        const popover = f.popover ? document.getElementById(f.popover) : null;
-        if (!icon) return;
+        const popover = document.getElementById(f.popover);
+        if (!icon || !popover) return;
 
         icon.addEventListener('click', function(e) {
             e.stopPropagation();
-            // Extender logo: always toggle active/inactive on click and do NOT call closeAllPopovers
-            if (f.icon === 'extender-logo') {
-                icon.classList.toggle('active');
-                if (icon.classList.contains('active')) {
-                    if (icon.hasAttribute('data-active')) {
-                        icon.src = icon.getAttribute('data-active');
-                    }
-                } else {
-                    if (icon.hasAttribute('data-inactive')) {
-                        icon.src = icon.getAttribute('data-inactive');
-                    }
-                }
-                return; // Prevent any other logic from running
-            }
-            // Other icons: popover logic
+            // If already active, close all
             if (icon.classList.contains('active')) {
                 closeAllPopovers();
             } else {
@@ -54,7 +38,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (icon.hasAttribute('data-active')) {
                     icon.src = icon.getAttribute('data-active');
                 }
-                if (popover) popover.style.display = 'block';
+                popover.style.display = 'block';
             }
         });
     });
@@ -64,43 +48,38 @@ document.addEventListener('DOMContentLoaded', function() {
         let clickedInside = false;
         features.forEach(f => {
             const icon = document.getElementById(f.icon);
-            const popover = f.popover ? document.getElementById(f.popover) : null;
+            const popover = document.getElementById(f.popover);
             if (popover && (popover.contains(e.target) || e.target === icon)) {
                 clickedInside = true;
             }
-            // Extender logo: don't close on outside click
-            if (f.icon === 'extender-logo' && e.target === icon) {
-                clickedInside = true;
-            }
-        }); 
+        });
         if (!clickedInside) {
             closeAllPopovers();
         }
     });
 });
 
-document.addEventListener('DOMContentLoaded', function() {
-    const topbarIcons = document.querySelectorAll('.topbar-icon');
-    const tooltip = document.getElementById('topbar-tooltip');
-    let tooltipTimer = null;
 
-    topbarIcons.forEach(icon => {
+// --- Topbar tooltip logic ---
+document.addEventListener('DOMContentLoaded', function() {
+    let tooltipTimeout;
+    let tooltipEl = document.createElement('div');
+    tooltipEl.className = 'topbar-tooltip';
+    document.body.appendChild(tooltipEl);
+
+    document.querySelectorAll('.topbar-icon').forEach(icon => {
         icon.addEventListener('mouseenter', function(e) {
-            tooltipTimer = setTimeout(() => {
-                const tooltipText = icon.getAttribute('data-tooltip');
-                if (tooltipText) {
-                    tooltip.textContent = tooltipText;
-                    tooltip.style.opacity = 1;
-                    // Position tooltip below the icon
-                    const rect = icon.getBoundingClientRect();
-                    tooltip.style.left = rect.left + window.scrollX + rect.width / 2 - tooltip.offsetWidth / 2 + 'px';
-                    tooltip.style.top = rect.bottom + window.scrollY + 8 + 'px';
-                }
-            }, 500); 
+            tooltipTimeout = setTimeout(() => {
+                tooltipEl.textContent = icon.getAttribute('data-tooltip');
+                const rect = icon.getBoundingClientRect();
+                tooltipEl.style.top = (rect.bottom + 8) + 'px'; // show below icon
+                tooltipEl.style.left = (rect.left + rect.width / 2 - tooltipEl.offsetWidth / 2) + 'px';
+                tooltipEl.style.opacity = 1;
+            }, 500); // 1 second delay
         });
         icon.addEventListener('mouseleave', function() {
-            clearTimeout(tooltipTimer);
-            tooltip.style.opacity = 0;
+            clearTimeout(tooltipTimeout);
+            tooltipEl.style.opacity = 0;
         });
     });
 });

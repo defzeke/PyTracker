@@ -5,7 +5,6 @@ html, body {
 }
 
 
-
 #sidebar {
     position: fixed;
     width: 85px;
@@ -14,6 +13,7 @@ html, body {
     top: 0;
     left: 0;
 }
+
 
 #topbar {
     position: fixed;
@@ -41,11 +41,11 @@ html, body {
     top: 110px;
 }
 
-#attendance-logo {
+#manageuser-logo {
     top: 180px;
 }
 
-#addclass-logo {
+#manageclassroom-logo {
     top: 245px;
     left: 12.5px;
     width: 58px;
@@ -66,12 +66,7 @@ html, body {
     left: 26%;
 }
 
-#recitation-logo {
-    top: 27.5%;
-    left: 32%;
-    width: 40px;
-    height: 40px;
-}
+
 
 #notification-logo {
     top: 35%;
@@ -93,7 +88,7 @@ html, body {
 #second-line { left: 68%; }
 
 .header-text {
-    position: absolute;
+    position: fixed;
     top: 12%;
     left: 14%;
     transform: translate(-50%, -50%);
@@ -101,10 +96,20 @@ html, body {
     color: #000;
 }
 
-#attendance-dashboard {
+#manageclassroomheader{
     position: fixed;
-    width: 80%;
-    height: 33%;
+    left: 22%;
+}
+
+#manageuserheader{
+    position: fixed;
+    left: 20%;
+}
+
+#bug-reports {
+    position: fixed;
+    width: 40%;
+    height: 70%;
     top: 20%;
     left: 12%;
     background-color: #F5F7FA;
@@ -114,16 +119,16 @@ html, body {
 
 #weather {
     position: fixed;
-    width: 40%;
+    width: 38%;
     height: 33%;
-    top: 57%;
-    left: 12%;
+    top: 20%;
+    left: 54%;
     background-color: #F5F7FA;
     overflow-y: auto;
     border-radius: 15px;
 }
 
-#histogram {
+#prof-requests {
     position: fixed;
     width: 38%;
     height: 33%;
@@ -134,70 +139,7 @@ html, body {
     border-radius: 15px;
 }
 
-#addclass-form {
-    position: fixed;
-    width: 70%;
-    height: 70%;
-    top: 17%;
-    left: 18%;
-    background-color: #F5F7FA;
-    overflow-y: auto;
-    border-radius: 15px;
-}
 
-#course-dropdown {
-    position: fixed;
-    top: 44%;
-    left: 27%;
-    background-color: #E3E9ED;
-    overflow-y: auto;
-    border-radius: 15px;
-}
-
-#section-dropdown {
-    position: fixed;
-    top: 60%;
-    left: 27%;
-    background-color: #E3E9ED;
-    overflow-y: auto;
-    border-radius: 15px;
-}
-
-#subject-dropdown {
-    position: fixed;
-    top: 52%;
-    left: 27%;
-    background-color: #E3E9ED;
-    overflow-y: auto;
-    border-radius: 15px;
-}
-
-#time-dropdown {
-    position: fixed;
-    top: 68%;
-    left: 27%;
-    background-color: #E3E9ED;
-    overflow-y: auto;
-    border-radius: 15px;
-}
-
-.custom-dropdown {
-    width: 50%;
-    height: 6%;
-    border-radius: 15px;
-    border: 1.5px solid #E3E9ED;
-    background: #E3E9ED;
-    font-size: 16px;
-    color: #272757;
-    outline: none;
-    appearance: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    background-image: url("data:image/svg+xml;utf8,<svg fill='black' height='16' viewBox='0 0 24 24' width='16' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>");
-    background-repeat: no-repeat;
-    background-position: right 16px center;
-    background-size: 20px 20px;
-}
 
 .popover-panel {
     position: absolute;
@@ -241,9 +183,6 @@ html, body {
     left: 22.7%;
 }
 
-#recitation-popover {
-    left: 28.5%;
-}
 
 .btns {
     width: 20%;
@@ -293,62 +232,6 @@ html, body {
     left: 64%;
 }
 
-#classes-dropdown {
-    position: fixed;
-    width: 17%;
-    top: 20%;
-    left: 10%;
-    background-color: #fff;
-    overflow-y: auto;
-    border-radius: 15px;
-}
-
-#subjects-dropdown {
-    position: fixed;
-    width: 17%;
-    top: 20%;
-    left: 28.5%;
-    background-color: #fff;
-    overflow-y: auto;
-    border-radius: 15px;
-}
-
-#sections-dropdown {
-    position: fixed;
-    width: 17%;
-    top: 20%;
-    left: 47%;
-    background-color: #fff;
-    overflow-y: auto;
-    border-radius: 15px;
-}
-
-#take-attendance-btn {
-    position: absolute; 
-    background: #272757;
-    color: #fff;
-    border: none;
-    border-radius: 15px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: background 0.2s;
-    top: 20.2%;
-    left: 67%;  
-    width: 18%;
-    height: 5.5%;
-}
-
-#take-attendance-btn:hover {
-    background: #50509C;
-}
-
-#calendar-image {
-    position: absolute;
-    top: 20.2%;
-    left: 88%;
-    width: 3%;
-    height: auto;
-}
 
 .sidebar-tooltip {
     position: fixed;
@@ -359,7 +242,7 @@ html, body {
     font-size: 14px;
     pointer-events: none;
     opacity: 0;
-    transition: opacity 0.2s;
+    transition: opacity 0.2ss;
     z-index: 9999;
     white-space: nowrap;
     font-family: Arial, Helvetica, sans-serif !important;
@@ -380,15 +263,6 @@ html, body {
     font-family: Arial, Helvetica, sans-serif !important;
 }
 
-#calendar-popover {
-    position: absolute;
-    background: #fff;
-    border-radius: 12px;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.18);
-    z-index: 1001;
-    border: 1px solid #e3e9ed;
-    left: 87%;
-}
 
 #profile-logo {
     width: 2.3%;
@@ -462,3 +336,156 @@ html, body {
     background: #f0f0f7;
 }
 
+
+#find-user, #find-classroom{
+    border-radius: 50px;
+    background-color: #1f0949d0; 
+    padding: 5px 18px;
+    border: none;
+    font-family: "Tai Heritage Pro", serif;
+    font-size: 18px;
+    width: 26%;
+    height: 5.5%;
+    margin-bottom: 20px;
+    outline: none;
+    position: fixed; 
+    top: 22%;
+    left: 26%;
+    transform: translateX(-50%);
+    color: #fff; 
+}
+
+#find-user::placeholder, #find-classroom::placeholder{
+    font-family: "Tai Heritage Pro", serif;
+    color: #fff; 
+}
+
+
+
+.custom-dropdown {
+    width: 50%;
+    height: 6%;
+    border-radius: 15px;
+    border: 1.5px solid #E3E9ED;
+    background: #E3E9ED;
+    font-size: 16px;
+    color: #272757;
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg fill='black' height='16' viewBox='0 0 24 24' width='16' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 16px center;
+    background-size: 20px 20px;
+}
+
+#role-dropdown{
+    position: fixed;
+    height: 7%;
+    width: 15%;
+    top: 21.5%;
+    left: 45%;
+    background-color: #1f0949d0;
+    overflow-y: auto;
+    color: #E3E9ED;
+}
+
+
+.dropdown-options{
+    color: #E3E9ED;
+}
+
+#users-list, #classrooms-list {
+    position: fixed;
+    width: 80%;
+    height: 65%;
+    top: 32%;
+    left: 12%;
+    background-color: #ccc5d8d0;
+    overflow-y: auto;
+    border-radius: 15px;
+}
+
+.option-icon {
+    position: absolute;
+    width: 450px;
+    height: 450px;
+}
+
+#add-new-class-logo{
+    left: 60%;
+    top: 20%;
+}
+
+#manage-existing-class-logo{
+    left: 15%;
+    top: 20%;
+}
+
+#add-new-user-logo{
+    left: 60%;
+    top: 20%;
+}
+
+#manage-existing-user-logo{
+    left: 15%;
+    top: 20%;
+}
+
+.manageuseroption-text{
+    position: absolute;
+    font-size: 30px;
+    color: #000;
+}
+
+#addnewusertext{
+    left:66.5%;
+    top: 80%;
+}
+
+#manageexistingusertext{
+    left: 17%;
+    top: 80%;
+}
+
+.manageclassoption-text{
+    position: absolute;
+    font-size: 30px;
+    color: #000;
+}
+
+#addnewclasstext{
+    left:63%;
+    top: 80%;
+}
+
+#manageexistingclasstext{
+    left: 14%;
+    top: 80%;
+}
+
+.manage-option{
+    background: #E3E9ED;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    top: 85px;
+    left: 85px;
+}
+
+#manageuserexisting-header{
+    left: 26%;
+}
+
+#addnewuser-header{
+    left: 17%;
+}
+
+#manageclassroomexisting-header{
+    left: 29%;
+}
+
+#addnewclassroom-header{
+    left: 19%;
+}
