@@ -12,8 +12,43 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PyTracker</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jscharting.com/latest/jscharting.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+    <!-- Fail heatmap and calendar libraries dump
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-activity-heatmap@1.0.0/dist/github-activity-heatmap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/github-activity-heatmap@1.0.0/dist/github-activity-heatmap.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cal-heatmap@4.4.0/cal-heatmap.css">
+    <script src="https://cdn.jsdelivr.net/npm/cal-heatmap@4.4.0/cal-heatmap.min.js"></script>
+     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-matrix@4.0.1/dist/chartjs-chart-matrix.min.js"></script>
+    -->
 </head>
 <body>
+
+    <!-- DEBUG: Show DB test value centered 
+    {# REMOVE THIS BLOCK IF NEEDED#}
+    {% if test_db_content %}
+      <div style="
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: #e0ffe0;
+        color: #222;
+        padding: 16px 32px;
+        border: 2px solid #0c0;
+        border-radius: 8px;
+        z-index: 9999;
+        font-size: 1.2em;
+        text-align: center;
+      ">
+        {{ test_db_content|safe }}
+      </div>
+    {% endif %} -->
+
     <div id="sidebar">
         <img id="dashboard-logo" class="sidebar-icon active" 
             src="{{ url_for('static', filename='images/active dashboard.png') }}" 
@@ -149,8 +184,21 @@
     <div id="main-content">
         <div id="dashboard-content">
             <h1 class="header-text">Dashboard</h1>
-            <div id="attendance-dashboard"></div>
-            <div id="weather"></div>
+            <div id="attendance-dashboard">
+    <div id="attendance-heatmap" style="width:100%;height:180px;"></div>
+</div>
+            <div id="weather">
+                <div id="weather-greeting" style="font-size: 1.2em; font-weight: bold; margin: 18px 0 8px 0; text-align:center;">
+                    Hello Prof. {{ prof_name or '' }}!
+                </div>
+                <div id="weather-content" style="padding: 0 18px;">
+                    <div id="weather-row" style="display: flex; justify-content: space-between; align-items: stretch; gap: 16px;">
+                        <div id="weather-today" style="flex:1;"></div>
+                        <div style="width:2px; background:#ddd; margin:0 8px;"></div>
+                        <div id="weather-tomorrow" style="flex:1;"></div>
+                    </div>
+                </div>
+            </div>
             <div id="histogram"></div>
 
         </div>
@@ -169,6 +217,19 @@
                 <div class="popover-content">
                     <h3 style="margin:0 0 12px 0;">Calendar</h3>
                     <p>[Calendar here]</p>
+                </div>
+            </div>
+            <div id="attendance-content">
+                <div id="attendance-students">
+                    <div class="student-card default-card">
+                        <div class="student-pic"></div>
+                        <div class="student-name">No Option Selected</div>
+                        <div class="pal-btns">
+                            <button>P</button>
+                            <button>A</button>
+                            <button>L</button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -203,6 +264,7 @@
 
         <div id="addclass-content">
             <div id="addclass-form">
+                <img src="{{ url_for('static', filename='images/PUP Logo.png') }}" alt="PUP Logo" id="pup-logo">            
                 <select id="course-dropdown" class="custom-dropdown" required>
                     <option value="" disabled selected hidden>&nbsp;&nbsp;&nbsp;&nbsp;Course</option>
                     <option value="option1">&nbsp;&nbsp;&nbsp;&nbsp;Option 1</option>
@@ -238,5 +300,11 @@
     <script src="{{ url_for('static', filename='addclass.js') }}"></script>
     <script src="{{ url_for('static', filename='calendar.js') }}"></script>
     <script src="{{ url_for('static', filename='settings.js') }}"></script>
+    <script src="{{ url_for('static', filename='histogramprof.js') }}"></script>
+    <script src="{{ url_for('static', filename='weatherprof.js') }}"></script>
+    <script src="{{ url_for('static', filename='profui.js') }}"></script>
+    <script src="{{ url_for('static', filename='heatmapprof.js') }}"></script>
+    <script src="{{ url_for('static', filename='attendanceprof.js') }}"></script>
+
 </body>
 </html>
