@@ -98,10 +98,11 @@ def login():
     # Render the login page with any error messages and remembered credentials
     return render_template("login.html", error=error, remembered_id=remembered_id, remembered_password=remembered_password)
 
+# Route to logout the user by clearing session data and redirecting to the login page
 @app.route("/logout:)")
 def logout():
-    session.clear()
-    return redirect(url_for('login'))
+    session.clear()  # Clear all session data (logs the user out)
+    return redirect(url_for('login')) # Redirect to the login page
 
 
 @app.route("/admin")
