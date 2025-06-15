@@ -137,6 +137,16 @@ html, body {
     background-color: #F5F7FA;
     overflow-y: auto;
     border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#histogram-canvas {
+    width: 95% !important;
+    height: 90% !important;
+    max-width: 100%;
+    max-height: 100%;
 }
 
 #addclass-form {
@@ -580,3 +590,75 @@ html, body {
 .sidebar-hidden #message-logo { left: 20%; }
 .sidebar-hidden #recitation-logo { left: 26%; }
 
+/* Added styles for frontend */
+#pup-logo {
+    display: block;
+    margin: 40px auto 24px auto;
+    width: 120px;         /* Adjust as needed for reasonable size */
+    max-width: 40%;
+    height: auto;
+    opacity: 0.9;
+}
+
+/* Center the default card in the container */
+#attendance-students {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 300px; /* Adjust as needed */
+    margin-top: 220px;
+    margin-right: 980px;
+}
+
+/* Student card styling */
+.student-card.default-card {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 2px 12px rgba(39,39,87,0.08);
+    padding: 24px 32px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 180px;
+    margin: 0 auto;
+}
+
+.student-card .student-pic {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: #e3e9ed;
+    margin-bottom: 12px;
+    background-size: cover;
+    background-position: center;
+}
+
+.student-card .student-name {
+    font-size: 1.1em;
+    font-weight: 500;
+    margin-bottom: 16px;
+    color: #222;
+    text-align: center;
+}
+
+.student-card .pal-btns {
+    display: flex;
+    gap: 16px;
+}
+
+.student-card .pal-btns button {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: none;
+    background: #e3e9ed;
+    color: #272757;
+    font-size: 1.1em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.student-card .pal-btns button:hover {
+    background: #d1d7e0;
+}
