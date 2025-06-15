@@ -111,11 +111,11 @@ def login():
         if user:
             # Check if the password matches
             if user['password'] == password:
-                # Store user's name in session
+               # Store user's name in session
                 session['user'] = user['name']
                 # Redirect based on user type in id_number
                 resp = make_response(
-                    redirect(
+                 redirect(
                         url_for('adminUI') if "AD" in id_number else
                         url_for('profUI') if "TC" in id_number else
                         url_for('studentUI') if "SD" in id_number else
@@ -143,6 +143,39 @@ def login():
 def logout():
     session.clear()
     return redirect(url_for('login'))
+
+# @app.route("/add_class", methods=["GET", "POST"])
+# def add_class():
+#     error = None
+#     if request.method == "POST":
+#         # Get form data
+#         class_id = request.form.get("class_id", "").strip()
+#         subject = request.form.get("subject", "").strip()
+#         semester = request.form.get("semester", "").strip()
+#         teacher_id = request.form.get("teacher_id", "").strip()
+#         status = request.form.get("status", "").strip()
+
+#         # Validate input
+#         if not all([class_id, subject, semester, teacher_id, status]):
+#             error = "All fields are required."
+#         else:
+#             try:
+#                 conn = get_mysql_connection()
+#                 cursor = conn.cursor()
+#                 cursor.execute("""
+#                     INSERT INTO classes_database (class_ID, subject, semester, teacher_ID, status)
+#                     VALUES (%s, %s, %s, %s, %s)
+#                 """, (class_id, subject, semester, teacher_id, status))
+#                 conn.commit()
+#                 cursor.close()
+#                 conn.close()
+#                 return redirect(url_for('adminUI'))  # Redirect to admin UI after successful addition
+#             except mysql.connector.Error as err:
+#                 error = f"Error: {err}"
+
+#     return render_template("add_class.html", error=error)
+
+
 
 @app.route("/forgot-password", methods=["GET", "POST"])
 def forgot_password():
