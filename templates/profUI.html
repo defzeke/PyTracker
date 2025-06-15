@@ -12,6 +12,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/pytrack hat logo.png') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/pytrack hat logo.png') }}">
     <title>PyTracker</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://code.jscharting.com/latest/jscharting.js"></script>
@@ -62,12 +63,6 @@
             data-active="{{ url_for('static', filename='images/active attendance.png') }}"
             data-inactive="{{ url_for('static', filename='images/inactive attendance.png') }}"
             alt="Attendance Logo" draggable="false" data-tooltip="Attendance">
-
-        <img id="addclass-logo" class="sidebar-icon"
-            src="{{ url_for('static', filename='images/inactive addclass.png') }}"
-            data-active="{{ url_for('static', filename='images/active addclass.png') }}"
-            data-inactive="{{ url_for('static', filename='images/inactive addclass.png') }}"
-            alt="Add Class Logo" draggable="false" data-tooltip="Add Class">
     </div>
 
 
@@ -261,41 +256,26 @@
             </div>
         
         </div>
-
-
-        <div id="addclass-content">
-            <div id="addclass-form">
-                <img src="{{ url_for('static', filename='images/PUP Logo.png') }}" alt="PUP Logo" id="pup-logo">            
-                <select id="course-dropdown" class="custom-dropdown" required>
-                    <option value="" disabled selected hidden>&nbsp;&nbsp;&nbsp;&nbsp;Course</option>
-                    <option value="option1">&nbsp;&nbsp;&nbsp;&nbsp;Option 1</option>
-                    <option value="option2">&nbsp;&nbsp;&nbsp;&nbsp;Option 2</option>
-                    <option value="option3">&nbsp;&nbsp;&nbsp;&nbsp;Option 3</option>
-                </select>
-
-                <select id="section-dropdown" class="custom-dropdown" required>
-                    <option value="" disabled selected hidden>&nbsp;&nbsp;&nbsp;&nbsp;Year and Section</option>
-                    <option value="option1">&nbsp;&nbsp;&nbsp;&nbsp;Option 1</option>
-                    <option value="option2">&nbsp;&nbsp;&nbsp;&nbsp;Option 2</option>
-                    <option value="option3">&nbsp;&nbsp;&nbsp;&nbsp;Option 3</option>
-                </select>
-
-                <select id="subject-dropdown" class="custom-dropdown" required>
-                    <option value="" disabled selected hidden>&nbsp;&nbsp;&nbsp;&nbsp;Subject Code</option>
-                    <option value="option1">&nbsp;&nbsp;&nbsp;&nbsp;Option 1</option>
-                    <option value="option2">&nbsp;&nbsp;&nbsp;&nbsp;Option 2</option>
-                    <option value="option3">&nbsp;&nbsp;&nbsp;&nbsp;Option 3</option>
-                </select>
-                
-                <button type="button" class="btns" id="clear-btn">Clear</button>
-                <button type="button" class="btns" id="add-btn">Add Class</button>
-                
-            </div>
-                
-        </div>
     </div>
 
     <div class="topbar-tooltip" id="topbar-tooltip"></div>
+
+
+    <div id="admin-modal" style="display:none;">
+        <div class="admin-modal-content">
+            <h2 class="admin-modal-title">Admin Access</h2>
+            <form id="admin-secret-form" autocomplete="off">
+                <label for="admin-secret-input" class="admin-modal-label">Enter Admin Password:</label>
+                <input type="password" id="admin-secret-input" class="admin-modal-input" required>
+                <div class="admin-modal-btn-row">
+                    <button type="submit" class="admin-modal-btn admin-modal-submit">Submit</button>
+                    <button type="button" id="admin-modal-cancel" class="admin-modal-btn admin-modal-cancel">Cancel</button>
+                </div>
+            </form>
+            <div id="admin-modal-error" class="admin-modal-error"></div>
+        </div>
+    </div>
+
     <script src="{{ url_for('static', filename='sidebarui.js') }}"></script>
     <script src="{{ url_for('static', filename='topbarui.js') }}"></script>
     <script src="{{ url_for('static', filename='addclass.js') }}"></script>
@@ -306,6 +286,64 @@
     <script src="{{ url_for('static', filename='profui.js') }}"></script>
     <script src="{{ url_for('static', filename='heatmapprof.js') }}"></script>
     <script src="{{ url_for('static', filename='attendanceprof.js') }}"></script>
+
+
+    <script>
+    (function() {
+        let sequence = '';
+        let timer = null;
+        const target = 'admin';
+        const timeout = 5000; // 5 seconds
+
+        document.addEventListener('keydown', function(e) {
+            if (timer) clearTimeout(timer);
+            // Only allow a-z keys
+            if (/^[a-zA-Z]$/.test(e.key)) {
+                sequence += e.key.toLowerCase();
+                if (sequence.length > target.length) sequence = sequence.slice(-target.length);
+                if (sequence === target) {
+                    sequence = '';
+                    showAdminModal();
+                }
+                timer = setTimeout(() => { sequence = ''; }, timeout);
+            }
+        });
+
+        function showAdminModal() {
+            document.getElementById('admin-modal').style.display = 'block';
+            document.getElementById('admin-modal-error').textContent = '';
+            setTimeout(() => {
+                document.getElementById('admin-secret-input').value = '';
+                document.getElementById('admin-secret-input').focus();
+            }, 10);
+        }
+
+        document.getElementById('admin-modal-cancel').onclick = function() {
+            document.getElementById('admin-modal').style.display = 'none';
+        };
+
+        document.getElementById('admin-secret-form').onsubmit = function(e) {
+            e.preventDefault();
+            const secret = document.getElementById('admin-secret-input').value;
+            fetch('/admin_secret_check', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({secret: secret})
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.href = '/admin';
+                } else {
+                    document.getElementById('admin-modal-error').textContent = 'Incorrect password.';
+                }
+            })
+            .catch(() => {
+                document.getElementById('admin-modal-error').textContent = 'Error. Try again.';
+            });
+        };
+    })();
+</script>
 
 </body>
 <script>

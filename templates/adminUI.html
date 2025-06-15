@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard | PyTracker</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='adminUI.css') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/pytrack hat logo.png') }}">
+</head>
+<body>
+    <nav class="admin-navbar">
+        <div class="admin-navbar-title">PyTracker Admin</div>
+        <div class="admin-navbar-links">
+            <a href="/logout:)" class="admin-navbar-link">Logout</a>
+        </div>
+    </nav>
+    <main class="admin-main">
+        <section class="admin-hero">
+            <h1 class="admin-hero-title">Dashboard</h1>
+        </section>
+        <section class="admin-summary-cards">
+            <div class="admin-summary-card">
+                <div class="admin-summary-label">Professors Registered</div>
+                <div class="admin-summary-value">{{ prof_count }}</div>
+            </div>
+            <div class="admin-summary-card">
+                <div class="admin-summary-label">Students Registered</div>
+                <div class="admin-summary-value">{{ student_count }}</div>
+            </div>
+            <div class="admin-summary-card">
+                <div class="admin-summary-label">Classes Created</div>
+                <div class="admin-summary-value">{{ class_count }}</div>
+            </div>
+        </section>
+        
+
+        <section class="admin-section-table">
+            <h2 class="admin-section-title">Classes Overview</h2>
+            <div class="admin-table-wrapper">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Class ID</th>
+                            <th>Subject</th>
+                            <th>Semester</th>
+                            <th>Professor</th>
+                            <th>Students</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for cls in classes %}
+                        <tr>
+                            <td>{{ cls.class_ID }}</td>
+                            <td>{{ cls.subject }}</td>
+                            <td>{{ cls.semester }}</td>
+                            <td>{{ cls.professor_name or cls.teacher_ID }}</td>
+                            <td>
+                                <div class="admin-student-avatars">
+                                    {% for stu in cls.students[:4] %}
+                                        <img src="{{ stu.avatar_url }}" alt="avatar" class="admin-avatar-img" title="{{ stu.name }}">
+                                    {% endfor %}
+                                    {% if cls.student_count > 4 %}
+                                        <span class="admin-avatar-count">+{{ cls.student_count - 4 }}</span>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td>
+                                <form method="post" action="/update_class_status" class="status-form">
+                                    <input type="hidden" name="class_id" value="{{ cls.class_ID }}">
+                                    <select name="status" class="admin-status-dropdown">
+                                        <option value="Ongoing" {% if cls.status == 'Ongoing' %}selected{% endif %}>Ongoing</option>
+                                        <option value="Done" {% if cls.status == 'Done' %}selected{% endif %}>Done</option>
+                                    </select>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+
+        <section class="admin-actions">
+            <button class="admin-btn" onclick="window.location.href='/enroll_student'">
+                <span class="admin-btn-icon">🎓</span> Enroll Student
+            </button>
+            <button class="admin-btn" onclick="window.location.href='/approve_professor'">
+                <span class="admin-btn-icon">👨‍🏫</span> Approve Professor
+            </button>
+            <button class="admin-btn" onclick="window.location.href='/issue_tickets'">
+                <span class="admin-btn-icon">🎟️</span> Issue Tickets
+            </button>
+            <button class="admin-btn" onclick="window.location.href='/add_class'">
+                <span class="admin-btn-icon">🏫</span> Add Class
+            </button>
+        </section>
+    </main>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        function updateStatusDropdownColors() {
+            document.querySelectorAll('.admin-status-dropdown').forEach(function(select) {
+                select.classList.remove('admin-status-ongoing', 'admin-status-done');
+                if (select.value === 'Ongoing') {
+                    select.classList.add('admin-status-ongoing');
+                } else if (select.value === 'Done') {
+                    select.classList.add('admin-status-done');
+                }
+            });
+        }
+        updateStatusDropdownColors();
+        document.querySelectorAll('.admin-status-dropdown').forEach(function(select) {
+            select.addEventListener('change', updateStatusDropdownColors);
+        });
+    });
+    </script>
+</body>
+</html>

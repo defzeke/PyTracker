@@ -5,11 +5,9 @@ import random
 from dotenv import load_dotenv
 import os
 import mysql.connector
-from datetime import datetime, timedelta
 import calendar
 import requests
-from flask import jsonify, session
-from sqlalchemy import func
+from abc import ABC, abstractmethod
 
 load_dotenv()
 
@@ -23,8 +21,6 @@ app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
 
 mail = Mail(app)
-
-
 
 def send_otp_email(recipient, otp):
     msg = Message(
@@ -229,7 +225,48 @@ def changepasswordcomplete():
 
 @app.route("/admin")
 def adminUI():
-    return render_template("adminUI.html")
+    conn = get_mysql_connection()
+    cursor = conn.cursor(dictionary=True)
+    # Summary counts
+    cursor.execute("SELECT COUNT(*) FROM login_main WHERE role='Teacher'")
+    prof_count = cursor.fetchone()['COUNT(*)']
+    cursor.execute("SELECT COUNT(*) FROM login_main WHERE role='Student'")
+    student_count = cursor.fetchone()['COUNT(*)']
+    cursor.execute("SELECT COUNT(*) FROM classes_database")
+    class_count = cursor.fetchone()['COUNT(*)']
+
+    # Classes info for the table (now includes subject)
+    cursor.execute("""
+        SELECT c.class_ID, c.subject, c.semester, c.teacher_ID, c.status,
+               t.name AS professor_name
+        FROM classes_database c
+        LEFT JOIN login_main t ON c.teacher_ID = t.id_number
+    """)
+    classes = cursor.fetchall()
+
+    # For each class, get students (with placeholder avatar)
+    for cls in classes:
+        cursor.execute("""
+            SELECT l.name FROM enrollment_database e
+            JOIN login_main l ON e.student_ID = l.id_number
+            WHERE e.class_ID = %s
+        """, (cls['class_ID'],))
+        students = cursor.fetchall()
+        # Assign a placeholder avatar for each student
+        for stu in students:
+            stu['avatar_url'] = url_for('static', filename='images/profile.png')
+        cls['students'] = students
+        cls['student_count'] = len(students)
+
+    cursor.close()
+    conn.close()
+    return render_template(
+        "adminUI.html",
+        prof_count=prof_count,
+        student_count=student_count,
+        class_count=class_count,
+        classes=classes
+    )
 
 
 """"
@@ -383,6 +420,15 @@ def profUI():
         datetime=datetime,
         calendar=calendar
     )
+
+@app.route('/admin_secret_check', methods=['POST'])
+def admin_secret_check():
+    data = request.get_json()
+    if data.get('secret') == 'supersecret':
+        session['user'] = 'admin'
+        return jsonify({'success': True})
+    else:
+        return jsonify({'success': False})
 
 @app.route("/student")
 def studentUI():
