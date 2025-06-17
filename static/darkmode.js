@@ -5,8 +5,8 @@ document.getElementById("dark-mode-btn").addEventListener("click", function(){
                                text: "#272757",  dashboard_content: "#F5F7FA", pop_over: "#fff",
                                btns:"#fff", dropdown:"#fff", std_card: "#fff"
     };
-    const dark_mode_colors = {background: "#445c6d", sidebar: "#060639", topbar: "#646385",
-                               text: "#E3E9ED",  dashboard_content: "#646385", pop_over: "#646385",
+    const dark_mode_colors = {background: "#2b324f", sidebar: "#060639", topbar: "#54536f",
+                               text: "#c2cdd5",  dashboard_content: "#646385", pop_over: "#646385",
                                btns:"#646385", dropdown:"#646385", std_card: "#646385"
     };
 
@@ -57,7 +57,10 @@ document.getElementById("dark-mode-btn").addEventListener("click", function(){
             });
 
             Array.from(document.getElementsByClassName('btns')).forEach(element => {
-                if (element.id === 'take-attendance-btn'){
+                if (element.id === 'take-attendance-btn' && curr_mode === 'dark'){
+                    element.style.color = '#c2cdd5';
+                }
+                else if (element.id === 'take-attendance-btn' && curr_mode === 'light'){
                     element.style.color = '#fff';
                 }
                 else{
