@@ -1,491 +1,260 @@
-html, body {
+body {
+    background: #f6f8fa;
+    font-family: 'Roboto', Arial, sans-serif;
     margin: 0;
-    padding: 0;
-    background-color: #E3E9ED;
+    min-height: 100vh;
+    color: #23234a;
 }
 
-
-#sidebar {
-    position: fixed;
-    width: 85px;
-    height: 100%;
-    background: #272757;
-    top: 0;
-    left: 0;
-}
-
-
-#topbar {
-    position: fixed;
+.admin-navbar {
+    background: #23234a;
+    color: #fff;
+    padding: 0 32px;
+    height: 56px;
     display: flex;
     align-items: center;
-    width: calc(100% - 85px);
-    height: 85px;
-    background: #fff;
-    top: 0;
-    left: 85px;
-    border-bottom: 1.5px solid rgba(39, 39, 87, 0.15); 
-    z-index: 1;
-    box-shadow: 0 4px 16px rgba(39, 39, 87, 0.15); 
-    padding: 0 40px;
-    gap: 32px; /* adjust as needed */
+    justify-content: space-between;
+    box-shadow: 0 2px 8px rgba(44,41,106,0.06);
 }
 
-.sidebar-icon {
-    position: absolute;
-    left: 15px;
-    width: 52px;
-    height: 52px;
-}
-#dashboard-logo {
-    top: 110px;
+.admin-navbar-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    letter-spacing: 1px;
 }
 
-#manageuser-logo {
-    top: 180px;
+.admin-navbar-links {
+    display: flex;
+    gap: 18px;
 }
 
-#manageclassroom-logo {
-    top: 245px;
-    left: 12.5px;
-    width: 58px;
-    height: 58px;
-}
-.topbar-icon {
-    position: absolute;
-    top: 30%;
-    width: 35px;
-    height: 35px;
-}
-
-#status-logo {
-    left: 20%;
-}
-
-#message-logo {
-    left: 26%;
-}
-
-
-
-#notification-logo {
-    top: 35%;
-    left: 63.3%;
-    width: 30px;
-    height: 30px;
-}
-
-.vertical-line {
-    position: absolute;
-    width: 1px;
-    height: 100%;
-    background: rgba(39, 39, 87, 0.5);
-    top: 50%;
-    transform: translateY(-50%);
-}
-
-#first-line { left: 60%; }
-#second-line { left: 68%; }
-
-.header-text {
-    position: fixed;
-    top: 12%;
-    left: 14%;
-    transform: translate(-50%, -50%);
-    font-size: 40px;
-    color: #000;
-}
-
-#manageclassroomheader{
-    position: fixed;
-    left: 22%;
-}
-
-#manageuserheader{
-    position: fixed;
-    left: 20%;
-}
-
-#bug-reports {
-    position: fixed;
-    width: 40%;
-    height: 70%;
-    top: 20%;
-    left: 12%;
-    background-color: #F5F7FA;
-    overflow-y: auto;
-    border-radius: 15px;
-}
-
-#weather {
-    position: fixed;
-    width: 38%;
-    height: 33%;
-    top: 20%;
-    left: 54%;
-    background-color: #F5F7FA;
-    overflow-y: auto;
-    border-radius: 15px;
-}
-
-#prof-requests {
-    position: fixed;
-    width: 38%;
-    height: 33%;
-    top: 57%;
-    left: 54%;
-    background-color: #F5F7FA;
-    overflow-y: auto;
-    border-radius: 15px;
-}
-
-
-
-.popover-panel {
-    position: absolute;
-    top: 8%; 
-    min-width: 320px;
-    background: #fff;
-    border-radius: 12px;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.18);
-    z-index: 1001;
-    padding: 16px 0;
-    border: 1px solid #e3e9ed;
-}
-
-.popover-panel::before {
-    content: "";
-    position: absolute;
-    top: -15%; 
-    left: 46%; 
-    width: 0;
-    height: 0;
-    border-left: 12px solid transparent;
-    border-right: 12px solid transparent;
-    border-bottom: 16px solid #fff; 
-    filter: drop-shadow(0 -2px 2px rgba(0,0,0,0.06));
-    z-index: 1002;
-}
-
-.popover-content {
-    padding: 0 24px;
-}
-
-#notification-popover {
-    left: 59.6%;
-}
-
-#status-popover {
-    left: 16.6%;
-}
-
-#message-popover {
-    left: 22.7%;
-}
-
-
-.btns {
-    width: 20%;
-    height: 8%;
-    box-sizing: border-box;
-    text-align: center;
-}
-
-.btns#clear-btn {
-    background: #dc143c;
+.admin-navbar-link {
     color: #fff;
-    border: none;
-    border-radius: 8px;
-    padding: 12px 32px;
-    font-size: 16px;
-    cursor: pointer;
-    margin-right: 12px;
-    transition: background 0.2s;
-}
-.btns#clear-btn:hover {
-    background: #a80f2c;
+    text-decoration: none;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: color 0.2s;
 }
 
-.btns#add-btn {
-    background: #22bb33;
-    color: #fff;
-    border: none;
-    border-radius: 8px;
-    padding: 12px 32px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: background 0.2s;
-}
-.btns#add-btn:hover {
-    background: #178a24;
+.admin-navbar-link:hover {
+    color: #bdbddd;
 }
 
-#clear-btn {
-    position: absolute;
-    top: 75%;
-    left: 13%;
+.admin-main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 16px 8px 16px;
 }
 
-#add-btn {
-    position: absolute;
-    top: 75%;
-    left: 64%;
-}
-
-
-.sidebar-tooltip {
-    position: fixed;
-    background: gray;
-    color: #fff;
-    padding: 8px 18px;
-    border-radius: 8px;
-    font-size: 14px;
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 0.2ss;
-    z-index: 9999;
-    white-space: nowrap;
-    font-family: Arial, Helvetica, sans-serif !important;
-}
-
-.topbar-tooltip {
-    position: fixed;
-    background: gray;
-    color: #fff;
-    padding: 8px 18px;
-    border-radius: 8px;
-    font-size: 14px;
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 0.2s;
-    z-index: 9999;
-    white-space: nowrap;
-    font-family: Arial, Helvetica, sans-serif !important;
-}
-
-
-#profile-logo {
-    width: 2.3%;
-    height: 46%;
-    object-fit: cover;
-    border-radius: 50%;
-    border: 2px solid #e3e9ed;
-    background: #fff;
-    cursor: pointer;
-    top: 25%;
-    left: 90%;
-}
-
-#profile-popover,
-#account-settings-popover {
-    display: none;
-}
-
-#profile-popover, #account-settings-popover {
-    position: absolute;
-    left: 73%;      
-    top: 100%;      
-    width: 20%;
-    height: 200%;
-    background: #fff;
-    border-radius: 12px;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.18);
-    z-index: 1002;
-    border: 1px solid #e3e9ed;
-}
-
-#account-settings-popover {
-    height: 250%;      
-}
-
-
-#profile-popover::before, #account-settings-popover::before {
-    content: "";
-    position: absolute;
-    top: -16px; 
-    left: 91%;  
-    transform: translateX(-50%);
-    width: 0;
-    height: 0;
-    border-left: 12px solid transparent;
-    border-right: 12px solid transparent;
-    border-bottom: 16px solid #fff;
-    filter: drop-shadow(0 -2px 2px rgba(0,0,0,0.06));
-    z-index: 1002;
-}
-
-
-#profile-popover .btns,
-#account-settings-popover .btns {
-    width: 100%;
-    padding: 12px 0;
-    margin: 0 0 6px 0;
-    background: none;
-    color: #272757;
-    border: none;
-    border-radius: 8px;
-    font-size: 16px;
-    cursor: pointer;
-    text-align: left;
-    transition: background 0.2s;
-    box-sizing: border-box;
-}
-
-#profile-popover .btns:hover,
-#account-settings-popover .btns:hover {
-    background: #f0f0f7;
-}
-
-
-#find-user, #find-classroom{
-    border-radius: 50px;
-    background-color: #1f0949d0; 
-    padding: 5px 18px;
-    border: none;
-    font-family: "Tai Heritage Pro", serif;
-    font-size: 18px;
-    width: 26%;
-    height: 5.5%;
+.admin-hero-title {
+    font-size: 2.2rem;
+    font-weight: 700;
+    margin-top: 20px;
     margin-bottom: 20px;
-    outline: none;
-    position: fixed; 
-    top: 22%;
-    left: 26%;
-    transform: translateX(-50%);
-    color: #fff; 
+    color: #23234a;
+    letter-spacing: 1px;
 }
 
-#find-user::placeholder, #find-classroom::placeholder{
-    font-family: "Tai Heritage Pro", serif;
-    color: #fff; 
+.admin-summary-cards {
+    display: flex;
+    gap: 24px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
 }
 
-
-
-.custom-dropdown {
-    width: 50%;
-    height: 6%;
-    border-radius: 15px;
-    border: 1.5px solid #E3E9ED;
-    background: #E3E9ED;
-    font-size: 16px;
-    color: #272757;
-    outline: none;
-    appearance: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    background-image: url("data:image/svg+xml;utf8,<svg fill='black' height='16' viewBox='0 0 24 24' width='16' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>");
-    background-repeat: no-repeat;
-    background-position: right 16px center;
-    background-size: 20px 20px;
+.admin-summary-card {
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 2px 12px rgba(44,41,106,0.08);
+    padding: 28px 36px;
+    flex: 1 1 220px;
+    min-width: 200px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
 }
 
-#role-dropdown{
-    position: fixed;
-    height: 7%;
-    width: 15%;
-    top: 21.5%;
-    left: 45%;
-    background-color: #1f0949d0;
-    overflow-y: auto;
-    color: #E3E9ED;
+.admin-summary-label {
+    font-size: 1.1rem;
+    color: #5a5a7a;
+    margin-bottom: 10px;
 }
 
-
-.dropdown-options{
-    color: #E3E9ED;
+.admin-summary-value {
+    font-size: 2.1rem;
+    font-weight: 700;
+    color: #3a357d;
 }
 
-#users-list, #classrooms-list {
-    position: fixed;
-    width: 80%;
-    height: 65%;
-    top: 32%;
-    left: 12%;
-    background-color: #ccc5d8d0;
-    overflow-y: auto;
-    border-radius: 15px;
+.admin-section-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 18px;
+    color: #23234a;
 }
 
-.option-icon {
-    position: absolute;
-    width: 450px;
-    height: 450px;
+.admin-table-wrapper {
+    overflow-x: auto;
 }
 
-#add-new-class-logo{
-    left: 60%;
-    top: 20%;
-}
-
-#manage-existing-class-logo{
-    left: 15%;
-    top: 20%;
-}
-
-#add-new-user-logo{
-    left: 60%;
-    top: 20%;
-}
-
-#manage-existing-user-logo{
-    left: 15%;
-    top: 20%;
-}
-
-.manageuseroption-text{
-    position: absolute;
-    font-size: 30px;
-    color: #000;
-}
-
-#addnewusertext{
-    left:66.5%;
-    top: 80%;
-}
-
-#manageexistingusertext{
-    left: 17%;
-    top: 80%;
-}
-
-.manageclassoption-text{
-    position: absolute;
-    font-size: 30px;
-    color: #000;
-}
-
-#addnewclasstext{
-    left:63%;
-    top: 80%;
-}
-
-#manageexistingclasstext{
-    left: 14%;
-    top: 80%;
-}
-
-.manage-option{
-    background: #E3E9ED;
-    position: fixed;
+.admin-table {
     width: 100%;
-    height: 100%;
-    top: 85px;
-    left: 85px;
+    border-collapse: collapse;
+    font-size: 1rem;
 }
 
-#manageuserexisting-header{
-    left: 26%;
+.admin-table th, .admin-table td {
+    padding: 12px 10px;
+    text-align: left;
+    border-bottom: 1px solid #ececec;
 }
 
-#addnewuser-header{
-    left: 17%;
+.admin-table th {
+    background: #f6f8fa;
+    color: #3a357d;
+    font-weight: 700;
 }
 
-#manageclassroomexisting-header{
-    left: 29%;
+.admin-student-pill {
+    display: inline-block;
+    background: #e6e9fa;
+    color: #23234a;
+    border-radius: 12px;
+    padding: 4px 12px;
+    margin: 2px 4px 2px 0;
+    font-size: 0.98rem;
+    font-weight: 500;
 }
 
-#addnewclassroom-header{
-    left: 19%;
+.admin-actions {
+    display: flex;
+    gap: 18px;
+    margin-top: 32px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.admin-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 24px;
+    border-radius: 8px;
+    border: none;
+    font-size: 1.08rem;
+    font-weight: 600;
+    background: #23234a;
+    color: #fff;
+    cursor: pointer;
+    transition: background 0.18s, transform 0.18s, box-shadow 0.18s;
+    box-shadow: 0 2px 8px rgba(44, 41, 106, 0.06);
+    letter-spacing: 0.5px;
+}
+
+.admin-btn:hover {
+    background: #3a357d;
+    transform: translateY(-2px) scale(1.03);
+    box-shadow: 0 4px 16px rgba(44, 41, 106, 0.10);
+}
+
+.admin-btn-icon {
+    font-size: 1.3em;
+    vertical-align: middle;
+}
+
+@media (max-width: 900px) {
+    .admin-summary-cards {
+        flex-direction: column;
+        gap: 18px;
+    }
+    .admin-main {
+        padding: 16px 2vw 32px 2vw;
+    }
+}
+
+@media (max-width: 600px) {
+    .admin-section-table, .admin-summary-card {
+        padding: 16px 6px;
+    }
+    .admin-main {
+        padding: 8px 0 24px 0;
+    }
+}
+
+.admin-section-table {
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 2px 12px rgba(44,41,106,0.08);
+    padding: 12px 16px 12px 16px;
+    margin-bottom: 12px;
+    margin-top: 20px;
+    max-height: 420px;    
+    display: flex;
+    flex-direction: column;
+}
+
+.admin-table-wrapper {
+    overflow-y: auto;       
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
+.admin-student-avatars {
+    display: flex;
+    align-items: center;
+    gap: 0.25em;
+    min-width: 80px;
+    margin-left: 0px; 
+}
+
+.admin-status-dropdown {
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: 1px solid #d1d5db;
+    font-size: 1rem;
+    background: #f6f8fa;
+    color: #23234a;
+    font-weight: 500;
+    outline: none;
+    transition: border 0.2s, color 0.2s, background 0.2s;
+}
+
+.admin-status-ongoing {
+    color: #fff !important;
+    background: #e74c3c !important;
+    border-color: #e74c3c !important;
+}
+.admin-status-done {
+    color: #fff !important;
+    background: #27ae60 !important;
+    border-color: #27ae60 !important;
+}
+
+.admin-avatar-img {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    box-shadow: 0 1px 4px rgba(44,41,106,0.10);
+    object-fit: cover;
+    margin-left: -8px;
+    background: #e6e9fa;
+}
+
+.admin-avatar-img:first-child {
+    margin-left: 0;
+}
+
+.admin-avatar-count {
+    background: #6c63ff;
+    color: #fff;
+    border-radius: 12px;
+    padding: 0 10px;
+    font-size: 0.98rem;
+    font-weight: 600;
+    margin-left: 4px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }

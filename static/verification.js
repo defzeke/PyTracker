@@ -7,6 +7,7 @@ function onCaptchaSuccess() {
     const captchaSection = document.getElementById('captcha-section');
     const otpSection = document.getElementById('otp-section');
     const otpContainer = document.querySelector('.otp-container');
+    const resendContainer = document.getElementById('resend-container'); // Get the resend container
 
     // Fade out the captcha section
     captchaSection.style.transition = "opacity 0.5s";
@@ -17,6 +18,7 @@ function onCaptchaSuccess() {
         captchaSection.style.display = "none";
         otpSection.style.display = "block";
         if (otpContainer) otpContainer.style.display = "flex"; // Show the OTP container if it exists
+        if (resendContainer) resendContainer.style.display = "block"; // Show the resend code button
         setTimeout(() => {
             otpSection.style.opacity = 1;
         }, 10);
@@ -63,3 +65,4 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
+

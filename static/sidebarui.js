@@ -1,8 +1,3 @@
-const contentIds = ['dashboard-content', 
-                    'attendance-content', 'addclass-content', 
-                    'manageuser-content','manageclassroom-content'];
-
-
 document.querySelectorAll('.sidebar-icon').forEach(icon => {
     icon.addEventListener('click', function() {
         // Remove 'active' class from all icons and set to inactive image
@@ -15,6 +10,7 @@ document.querySelectorAll('.sidebar-icon').forEach(icon => {
         this.src = this.getAttribute('data-active');
 
         // Show only the matching content section
+        const contentIds = ['dashboard-content', 'attendance-content', 'addclass-content'];
         contentIds.forEach(id => {
             const el = document.getElementById(id);
             if (el) el.style.display = 'none';
@@ -25,25 +21,15 @@ document.querySelectorAll('.sidebar-icon').forEach(icon => {
             document.getElementById('attendance-content').style.display = 'block';
         } else if (this.id === 'addclass-logo') {
             document.getElementById('addclass-content').style.display = 'block';
-        } else if (this.id === 'manageuser-logo') {
-            document.getElementById('manageuser-content').style.display = 'block';
-        } else if (this.id === 'manageclassroom-logo') {
-            document.getElementById('manageclassroom-content').style.display = 'block';
         }
     });
 });
 
-
 // Show dashboard by default on page load
 document.addEventListener('DOMContentLoaded', function() {
-    contentIds.forEach(id => {
-        const el = document.getElementById(id);
-        if (el){
-            document.getElementById(id).style.display = 'none';
-        }
-    });
-
     document.getElementById('dashboard-content').style.display = 'block';
+    document.getElementById('attendance-content').style.display = 'none';
+    document.getElementById('addclass-content').style.display = 'none';
 
     // --- Tooltip logic starts here ---
     let tooltipTimeout;
@@ -67,3 +53,21 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
+
+document.addEventListener('DOMContentLoaded', function() {
+    const sidebar = document.getElementById('sidebar');
+    const extender = document.getElementById('extender-logo');
+    let sidebarHidden = false;
+
+    extender.addEventListener('click', function(e) {
+        sidebarHidden = !sidebarHidden;
+        if (sidebarHidden) {
+            sidebar.classList.add('sidebar-hidden');
+            extender.classList.add('sidebar-at-edge');
+        } else {
+            sidebar.classList.remove('sidebar-hidden');
+            extender.classList.remove('sidebar-at-edge');
+        }
+    });
+});
+

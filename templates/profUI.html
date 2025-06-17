@@ -11,9 +11,45 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='profui.css') }}">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/pytrack hat logo.png') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/pytrack hat logo.png') }}">
     <title>PyTracker</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jscharting.com/latest/jscharting.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+    <!-- Fail heatmap and calendar libraries dump
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-activity-heatmap@1.0.0/dist/github-activity-heatmap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/github-activity-heatmap@1.0.0/dist/github-activity-heatmap.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cal-heatmap@4.4.0/cal-heatmap.css">
+    <script src="https://cdn.jsdelivr.net/npm/cal-heatmap@4.4.0/cal-heatmap.min.js"></script>
+     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-matrix@4.0.1/dist/chartjs-chart-matrix.min.js"></script>
+    -->
 </head>
 <body>
+
+    <!-- DEBUG: Show DB test value centered 
+    {# REMOVE THIS BLOCK IF NEEDED#}
+    {% if test_db_content %}
+      <div style="
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: #e0ffe0;
+        color: #222;
+        padding: 16px 32px;
+        border: 2px solid #0c0;
+        border-radius: 8px;
+        z-index: 9999;
+        font-size: 1.2em;
+        text-align: center;
+      ">
+        {{ test_db_content|safe }}
+      </div>
+    {% endif %} -->
 
     <div id="sidebar">
         <img id="dashboard-logo" class="sidebar-icon active" 
@@ -27,18 +63,7 @@
             data-active="{{ url_for('static', filename='images/active attendance.png') }}"
             data-inactive="{{ url_for('static', filename='images/inactive attendance.png') }}"
             alt="Attendance Logo" draggable="false" data-tooltip="Attendance">
-
-        <img id="addclass-logo" class="sidebar-icon"
-            src="{{ url_for('static', filename='images/inactive addclass.png') }}"
-            data-active="{{ url_for('static', filename='images/active addclass.png') }}"
-            data-inactive="{{ url_for('static', filename='images/inactive addclass.png') }}"
-            alt="Add Class Logo" draggable="false" data-tooltip="Add Class">
     </div>
-
-
-
-
-
 
 
 
@@ -48,22 +73,40 @@
     alt="Profile" draggable="false" data-tooltip="Profile">
 
     <div id="profile-popover" class="popover-panel">
-        <div class="popover-content" style="display: flex; flex-direction: column; gap: 12px;">
-            <button id="account-settings-btn" class="btns">Account Settings</button>
-            <button id="dark-mode-btn" class="btns">Dark Mode</button>
-            <button id="logout-btn" class="btns">Logout</button>
+        <div class="popover-content" style="display: flex; flex-direction: column; gap: 0px;">
+            <button id="account-settings-btn" class="btns">
+                <img class="setting-logos" src="{{ url_for('static', filename='images/settings.png')}}">Account Settings
+                <span style="float: right; color: #ccc;">></span>
+            </button>
+
+            <button id="dark-mode-btn" class="btns">
+                <img class="setting-logos" src="{{ url_for('static', filename='images/dark mode.png')}}">Dark Mode
+            </button>
+
+            <button id="logout-btn" class="btns">
+                <img class="setting-logos" src="{{ url_for('static', filename='images/logout.png')}}">Logout
+            </button>
         </div>
     </div>
 
     <div id="account-settings-popover" class="popover-panel">
-        <div class="popover-content" style="display: flex; flex-direction: column; gap: 12px;">
-            <span style="font-weight:bold; margin-bottom:8px;">Account Settings</span>
-            <button id="change-dp-btn" class="btns">Change Display Picture</button>
-            <button id="change-pass-btn" class="btns">Change Password</button>
+        <div class="popover-content" style="display: flex; flex-direction: column; gap: 0px;">
+            <div style="display: flex; align-items: center; margin-bottom: 8px;">
+                <button id="back-to-profile-btn" style="background: none; border: none; cursor: pointer; padding: 4px; margin-right: 8px;">
+                    ←
+                </button>
+                <span style="font-weight:bold; font-size: 150%;">Account Settings</span>
+            </div>
+            <button id="change-dp-btn" class="btns">
+                <img class="account-setting-logos" src="{{ url_for('static', filename='images/display pic.png')}}">Change Display Picture
+            </button>
+            <button id="change-pass-btn" class="btns">
+                <img class="account-setting-logos" src="{{ url_for('static', filename='images/change pass.png')}}">Change Password
+            </button>
             <input type="file" id="profile-upload" accept="image/*" style="display:none;">
-            <button id="close-account-settings" class="btns" style="background:#eee; color:#272757;">Close</button>
         </div>
     </div>
+
 
     <div id="cropper-modal" style="display:none; position:fixed; z-index:3000; left:0; top:0; width:100vw; height:100vh; background:rgba(0,0,0,0.5); align-items:center; justify-content:center;">
         <div style="background:#fff; padding:24px; border-radius:12px; max-width:90vw; max-height:90vh;">
@@ -77,18 +120,22 @@
 
 
 
+        <img id="extender-logo" class="topbar-icon active" src="{{ url_for('static', filename='images/active extender.png') }}"
+        data-active="{{ url_for('static', filename='images/active extender.png') }}"
+        data-inactive="{{ url_for('static', filename='images/inactive extender.png') }}"
+        alt="Extender Logo" draggable="false" data-tooltip="Sidebar">
 
-        <img id="status-logo" class="topbar-icon" src="{{ url_for('static', filename='images/inactive status.png') }}"
+        <img id="status-logo" class="topbar-icon topbar-movable" src="{{ url_for('static', filename='images/inactive status.png') }}"
             data-active="{{ url_for('static', filename='images/active status.png') }}"
             data-inactive="{{ url_for('static', filename='images/inactive status.png') }}"
             alt="Status Logo" draggable="false" data-tooltip="Status">
 
-        <img id="message-logo" class="topbar-icon" src="{{ url_for('static', filename='images/inactive message.png') }}"
+        <img id="message-logo" class="topbar-icon topbar-movable" src="{{ url_for('static', filename='images/inactive message.png') }}"
             data-active="{{ url_for('static', filename='images/active message.png') }}"
             data-inactive="{{ url_for('static', filename='images/inactive message.png') }}"
             alt="Status Logo" draggable="false" data-tooltip="Messages">
         
-        <img id="recitation-logo" class="topbar-icon" src="{{ url_for('static', filename='images/inactive recitation.png') }}"
+        <img id="recitation-logo" class="topbar-icon topbar-movable" src="{{ url_for('static', filename='images/inactive recitation.png') }}"
             data-active="{{ url_for('static', filename='images/active recitation.png') }}"
             data-inactive="{{ url_for('static', filename='images/inactive recitation.png') }}"
             alt="Status Logo" draggable="false" data-tooltip="Recitation">
@@ -130,103 +177,182 @@
     </div>
 
 
-
-
-
-
-
-
-    <div id="dashboard-content">
-        <h1 class="header-text">Dashboard</h1>
-        <div id="attendance-dashboard"></div>
-        <div id="weather"></div>
-        <div id="histogram"></div>
-
-    </div>
-
-    <div id="attendance-content">
-        <h1 class="header-text">Attendance</h1>
-        <button type="button" class="btns" id="take-attendance-btn">Take Attendance</button>
-
-        <img src="{{ url_for('static', filename='images/inactive calendar.png') }}" 
-            alt="Attendance Image" id="calendar-image" 
-            data-active="{{ url_for('static', filename='images/active calendar.png') }}"
-            data-inactive="{{ url_for('static', filename='images/inactive calendar.png') }}"
-            draggable="false">
-
-        <div id="calendar-popover" class="popover-panel" style="display:none; min-width:320px; left:80%; top:27%;">
-            <div class="popover-content">
-                <h3 style="margin:0 0 12px 0;">Calendar</h3>
-                <p>[Calendar goes here]</p>
+    <div id="main-content">
+        <div id="dashboard-content" >
+            <h1 class="header-text">Dashboard</h1>
+            <div id="attendance-dashboard" class="dashboard-element">
+    <div id="attendance-heatmap" class="dashboard-element" style="width:100%;height:180px;"></div>
+</div>
+            <div id="weather" class="dashboard-element">
+                <div id="weather-greeting" style="font-size: 1.2em; font-weight: bold; margin: 18px 0 8px 0; text-align:center;">
+                    Hello Prof. {{ prof_name or '' }}!
+                </div>
+                <div id="weather-content" style="padding: 0 18px;">
+                    <div id="weather-row" style="display: flex; justify-content: space-between; align-items: stretch; gap: 16px;">
+                        <div id="weather-today" style="flex:1;"></div>
+                        <div style="width:2px; background:#ddd; margin:0 8px;"></div>
+                        <div id="weather-tomorrow" style="flex:1;"></div>
+                    </div>
+                </div>
             </div>
+            <div id="histogram" class="dashboard-element"></div>
+
         </div>
 
-        <div id="select-content">
-            <!-- Class Dropdown -->
-            <select id="classes-dropdown" class="custom-dropdown" required>
-                <option value="" disabled selected hidden>&nbsp;&nbsp;&nbsp;&nbsp;Select Class</option>
-                <option value="class1">&nbsp;&nbsp;&nbsp;&nbsp;Class 1</option>
-                <option value="class2">&nbsp;&nbsp;&nbsp;&nbsp;Class 2</option>
-                <option value="class3">&nbsp;&nbsp;&nbsp;&nbsp;Class 3</option>
-            </select>
+        <div id="attendance-content">
+            <h1 class="header-text">Attendance</h1>
+            <button type="button" class="btns" id="take-attendance-btn">Take Attendance</button>
 
-            <!-- Subject Dropdown -->
-            <select id="subjects-dropdown" class="custom-dropdown" required>
-                <option value="" disabled selected hidden>&nbsp;&nbsp;&nbsp;&nbsp;Select Subject</option>
-                <option value="subject1">&nbsp;&nbsp;&nbsp;&nbsp;Subject 1</option>
-                <option value="subject2">&nbsp;&nbsp;&nbsp;&nbsp;Subject 2</option>
-                <option value="subject3">&nbsp;&nbsp;&nbsp;&nbsp;Subject 3</option>
-            </select>
+            <img src="{{ url_for('static', filename='images/inactive calendar.png') }}" 
+                alt="Attendance Image" id="calendar-image" 
+                data-active="{{ url_for('static', filename='images/active calendar.png') }}"
+                data-inactive="{{ url_for('static', filename='images/inactive calendar.png') }}"
+                draggable="false">
 
-            <!-- Section Dropdown -->
-            <select id="sections-dropdown" class="custom-dropdown" required>
-                <option value="" disabled selected hidden>&nbsp;&nbsp;&nbsp;&nbsp;Select Section</option>
-                <option value="section1">&nbsp;&nbsp;&nbsp;&nbsp;Section 1</option>
-                <option value="section2">&nbsp;&nbsp;&nbsp;&nbsp;Section 2</option>
-                <option value="section3">&nbsp;&nbsp;&nbsp;&nbsp;Section 3</option>
-            </select>
+            <div id="calendar-popover" class="popover-panel" style="display:none; min-width:320px; left:80%; top:27%;">
+                <div class="popover-content">
+                    <h3 style="margin:0 0 12px 0;">Calendar</h3>
+                    <p>[Calendar here]</p>
+                </div>
+            </div>
+            <div id="attendance-content">
+                <div id="attendance-students">
+                    <div class="student-card default-card">
+                        <div class="student-pic"></div>
+                        <div class="student-name">No Option Selected</div>
+                        <div class="pal-btns">
+                            <button>P</button>
+                            <button>A</button>
+                            <button>L</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="select-content">
+                <!-- Class Dropdown -->
+                <select id="classes-dropdown" class="custom-dropdown" required>
+                    <option value="" disabled selected hidden>&nbsp;&nbsp;&nbsp;&nbsp;Select Class</option>
+                    <option value="class1">&nbsp;&nbsp;&nbsp;&nbsp;Class 1</option>
+                    <option value="class2">&nbsp;&nbsp;&nbsp;&nbsp;Class 2</option>
+                    <option value="class3">&nbsp;&nbsp;&nbsp;&nbsp;Class 3</option>
+                </select>
+
+                <!-- Subject Dropdown -->
+                <select id="subjects-dropdown" class="custom-dropdown" required>
+                    <option value="" disabled selected hidden>&nbsp;&nbsp;&nbsp;&nbsp;Select Subject</option>
+                    <option value="subject1">&nbsp;&nbsp;&nbsp;&nbsp;Subject 1</option>
+                    <option value="subject2">&nbsp;&nbsp;&nbsp;&nbsp;Subject 2</option>
+                    <option value="subject3">&nbsp;&nbsp;&nbsp;&nbsp;Subject 3</option>
+                </select>
+
+                <!-- Section Dropdown -->
+                <select id="sections-dropdown" class="custom-dropdown" required>
+                    <option value="" disabled selected hidden>&nbsp;&nbsp;&nbsp;&nbsp;Select Section</option>
+                    <option value="section1">&nbsp;&nbsp;&nbsp;&nbsp;Section 1</option>
+                    <option value="section2">&nbsp;&nbsp;&nbsp;&nbsp;Section 2</option>
+                    <option value="section3">&nbsp;&nbsp;&nbsp;&nbsp;Section 3</option>
+                </select>
+            </div>
+        
         </div>
-    
     </div>
 
+    <div class="topbar-tooltip" id="topbar-tooltip"></div>
 
 
-    
-    <div id="addclass-content">
-        <div id="addclass-form">
-            <select id="course-dropdown" class="custom-dropdown" required>
-                <option value="" disabled selected hidden>&nbsp;&nbsp;&nbsp;&nbsp;Course</option>
-                <option value="option1">&nbsp;&nbsp;&nbsp;&nbsp;Option 1</option>
-                <option value="option2">&nbsp;&nbsp;&nbsp;&nbsp;Option 2</option>
-                <option value="option3">&nbsp;&nbsp;&nbsp;&nbsp;Option 3</option>
-            </select>
-
-            <select id="section-dropdown" class="custom-dropdown" required>
-                <option value="" disabled selected hidden>&nbsp;&nbsp;&nbsp;&nbsp;Year and Section</option>
-                <option value="option1">&nbsp;&nbsp;&nbsp;&nbsp;Option 1</option>
-                <option value="option2">&nbsp;&nbsp;&nbsp;&nbsp;Option 2</option>
-                <option value="option3">&nbsp;&nbsp;&nbsp;&nbsp;Option 3</option>
-            </select>
-
-            <select id="subject-dropdown" class="custom-dropdown" required>
-                <option value="" disabled selected hidden>&nbsp;&nbsp;&nbsp;&nbsp;Subject Code</option>
-                <option value="option1">&nbsp;&nbsp;&nbsp;&nbsp;Option 1</option>
-                <option value="option2">&nbsp;&nbsp;&nbsp;&nbsp;Option 2</option>
-                <option value="option3">&nbsp;&nbsp;&nbsp;&nbsp;Option 3</option>
-            </select>
-            
-            <button type="button" class="btns" id="clear-btn">Clear</button>
-            <button type="button" class="btns" id="add-btn">Add Class</button>
-            
+    <div id="admin-modal" style="display:none;">
+        <div class="admin-modal-content">
+            <h2 class="admin-modal-title">Admin Access</h2>
+            <form id="admin-secret-form" autocomplete="off">
+                <label for="admin-secret-input" class="admin-modal-label">Enter Admin Password:</label>
+                <input type="password" id="admin-secret-input" class="admin-modal-input" required>
+                <div class="admin-modal-btn-row">
+                    <button type="submit" class="admin-modal-btn admin-modal-submit">Submit</button>
+                    <button type="button" id="admin-modal-cancel" class="admin-modal-btn admin-modal-cancel">Cancel</button>
+                </div>
+            </form>
+            <div id="admin-modal-error" class="admin-modal-error"></div>
         </div>
-            
     </div>
-
 
     <script src="{{ url_for('static', filename='sidebarui.js') }}"></script>
     <script src="{{ url_for('static', filename='topbarui.js') }}"></script>
     <script src="{{ url_for('static', filename='addclass.js') }}"></script>
     <script src="{{ url_for('static', filename='calendar.js') }}"></script>
     <script src="{{ url_for('static', filename='settings.js') }}"></script>
+    <script src="{{ url_for('static', filename='histogramprof.js') }}"></script>
+    <script src="{{ url_for('static', filename='weatherprof.js') }}"></script>
+    <script src="{{ url_for('static', filename='profui.js') }}"></script>
+    <script src="{{ url_for('static', filename='heatmapprof.js') }}"></script>
+    <script src="{{ url_for('static', filename='attendanceprof.js') }}"></script>
+    <script src="{{ url_for('static', filename='darkmode.js') }}"></script>
+
+
+    <script>
+    (function() {
+        let sequence = '';
+        let timer = null;
+        const target = 'admin';
+        const timeout = 5000; // 5 seconds
+
+        document.addEventListener('keydown', function(e) {
+            if (timer) clearTimeout(timer);
+            // Only allow a-z keys
+            if (/^[a-zA-Z]$/.test(e.key)) {
+                sequence += e.key.toLowerCase();
+                if (sequence.length > target.length) sequence = sequence.slice(-target.length);
+                if (sequence === target) {
+                    sequence = '';
+                    showAdminModal();
+                }
+                timer = setTimeout(() => { sequence = ''; }, timeout);
+            }
+        });
+
+        function showAdminModal() {
+            document.getElementById('admin-modal').style.display = 'block';
+            document.getElementById('admin-modal-error').textContent = '';
+            setTimeout(() => {
+                document.getElementById('admin-secret-input').value = '';
+                document.getElementById('admin-secret-input').focus();
+            }, 10);
+        }
+
+        document.getElementById('admin-modal-cancel').onclick = function() {
+            document.getElementById('admin-modal').style.display = 'none';
+        };
+
+        document.getElementById('admin-secret-form').onsubmit = function(e) {
+            e.preventDefault();
+            const secret = document.getElementById('admin-secret-input').value;
+            fetch('/admin_secret_check', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({secret: secret})
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.href = '/admin';
+                } else {
+                    document.getElementById('admin-modal-error').textContent = 'Incorrect password.';
+                }
+            })
+            .catch(() => {
+                document.getElementById('admin-modal-error').textContent = 'Error. Try again.';
+            });
+        };
+    })();
+</script>
+
 </body>
+<script>
+    document.getElementById("logout-btn").addEventListener("click", function() {
+        window.location.href = "{{url_for('logout')}}";
+    });
+    document.getElementById("change-pass-btn").addEventListener("click", function() {
+        window.location.href = "{{url_for('new_password')}}";
+    });
+</script>
 </html>

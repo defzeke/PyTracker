@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const accountSettingsPopover = document.getElementById('account-settings-popover');
     const accountSettingsBtn = document.getElementById('account-settings-btn');
     const closeAccountSettingsBtn = document.getElementById('close-account-settings');
+    const backToProfileBtn = document.getElementById('back-to-profile-btn');
     const changeDpBtn = document.getElementById('change-dp-btn');
     const profileUpload = document.getElementById('profile-upload');
 
@@ -31,11 +32,20 @@ document.addEventListener('DOMContentLoaded', function() {
         accountSettingsPopover.style.display = 'block';
     });
 
-    // Close account settings popover
-    closeAccountSettingsBtn.addEventListener('click', function(e) {
+    // Back to profile popover
+    backToProfileBtn.addEventListener('click', function(e) {
         e.stopPropagation();
         accountSettingsPopover.style.display = 'none';
+        profilePopover.style.display = 'block';
     });
+
+    // Close account settings popover
+    if (closeAccountSettingsBtn) {
+        closeAccountSettingsBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            accountSettingsPopover.style.display = 'none';
+        });
+    }
 
     // Open file dialog when clicking "Change Display Picture"
     changeDpBtn.addEventListener('click', function(e) {
@@ -93,13 +103,26 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+    // Prevent clicks inside popovers from closing them
+    profilePopover.addEventListener('click', function(e) {
+        e.stopPropagation();
+    });
+    accountSettingsPopover.addEventListener('click', function(e) {
+        e.stopPropagation();
+    });
+    if (cropperModal) {
+        cropperModal.addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
+    }
+
     // Hide popovers when clicking outside
     document.addEventListener('click', function(e) {
         if (
             !profilePopover.contains(e.target) &&
             !accountSettingsPopover.contains(e.target) &&
-            e.target !== profileIcon &&
-            (!cropperModal || !cropperModal.contains(e.target))
+            !(cropperModal && cropperModal.contains(e.target)) &&
+            e.target !== profileIcon
         ) {
             profilePopover.style.display = 'none';
             accountSettingsPopover.style.display = 'none';

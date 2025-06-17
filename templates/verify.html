@@ -7,25 +7,33 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='verify.css') }}">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-   
-    <title>PyTracker</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/pytrack hat logo.png') }}">
+    <title>Verification - PyTracker</title>
 </head>
 
 <script src="{{ url_for('static', filename='verification.js') }}"></script>
 <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 
 <body>
+    {% if error %}
+        <script>
+            alert("{{ error }}");
+        </script>
+    {% endif %}
+
     <img class="container" src="{{ url_for('static', filename='images/logincontainer.png') }}" alt="Register Container" draggable="false">
     <img class="otp-container" style="display:none;" src="{{ url_for('static', filename='images/otp text container.png') }}" alt="OTP Container" draggable="false">
 
     <h1 class="form-heading-text">REGISTER</h1>
 
-    <form id="verify-form" action="/signup" method="POST">
+    <form id="verify-form" action="/otp" method="POST">
         <div id="captcha-section">
             <div class="g-recaptcha" data-sitekey="6LcUSlErAAAAADWqQPny2a6nBKUrWugrY-c2ClZD" data-callback="onCaptchaSuccess"></div>
         </div>
         <div id="otp-section" style="display:none; opacity:0; transition:opacity 0.5s;">
-            <p id="otp-text" style="color:#fff; text-align:center;">We've sent a verification code to your email:</p>
+            <p id="otp-text" style="color:#fff; text-align:center;">
+                We've sent a verification code to your email: <span id="user-email">{{ email }}</span>
+            </p>
             <div id="otp-inputs">
                 <input type="text" class="otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]*" required>
                 <input type="text" class="otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]*" required>
@@ -37,6 +45,12 @@
             <input type="hidden" id="otp-input" name="otp" required>
         </div>
         <button id="signup-btn" type="submit" disabled>Sign Up</button>
+        <div id="resend-container" style="text-align:center; display:none;">
+            <button type="button" id="resend-code">
+                Resend Code
+            </button>
+            <span id="resend-status" style="color:#fff; margin-left:10px;"></span>
+        </div>
     </form>
 
     <a href="/" id="signin-link">
@@ -44,5 +58,33 @@
     </a>
 
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <script>
+        document.getElementById('resend-code').addEventListener('click', function() {
+        const btn = this;
+        const status = document.getElementById('resend-status');
+        let countdown = 180
+
+        btn.disabled = true;
+        status.textContent = `Available in ${countdown}s`;
+
+        // Start countdown timer
+        const timer = setInterval(() => {
+            countdown--;
+            if (countdown > 0) {
+                status.textContent = `Available in ${countdown}s`;
+            } else {
+                clearInterval(timer);
+                btn.disabled = false;
+                status.textContent = "";
+            }
+        }, 1000);
+
+        // Send the resend request (optional: you can keep or remove the fetch if you want)
+        fetch('/resend_otp', {method: 'POST'})
+            .catch(() => {
+                // Optionally handle errors, but do not interrupt the timer
+            });
+    });
+    </script>
 </body>
 </html>

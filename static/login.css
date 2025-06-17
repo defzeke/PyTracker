@@ -6,6 +6,11 @@
 
 body {
     background-color: #272757; 
+    background-image: url('../static/images/background.png');
+    background-size: cover;      
+    background-position: center; 
+    background-repeat: no-repeat;   
+    background-attachment: fixed;
 }
 
 .container {
@@ -14,7 +19,7 @@ body {
     left: 75%;
     transform: translate(-50%, -50%); 
     width: 560px;  
-    height: 690px;
+    height: 650px;
 }
 
 .form-heading-text {
@@ -60,7 +65,7 @@ body {
     margin-bottom: 20px;
     outline: none;
     position: absolute; 
-    top: 45%;
+    top: 44%;
     left: 75%;
     transform: translateX(-50%);
     color: #fff; 
@@ -76,7 +81,7 @@ body {
 
 .remember-me {
     position: absolute;
-    top: 56%;
+    top: 55.5%;
     left: 65.5%;
     transform: translateX(-50%);
     color: #fff;
@@ -86,6 +91,7 @@ body {
     display: flex;
     align-items: center;   
     gap: 8px;
+    cursor: pointer;
 }
 
 .remember-me input[type="checkbox"] {
@@ -96,11 +102,12 @@ body {
     height: 18px;                
     accent-color: #fff;         
     margin-top: 2px; 
+    cursor: pointer;
 }
 
 .forgot-password {
     position: absolute;
-    top: 56%;
+    top: 55.5%;
     left: 84%;
     transform: translateX(-50%);
     color: #fff;
@@ -116,7 +123,7 @@ body {
 
 .login-logo-password {
     position: absolute;
-    top: 47.4%;
+    top: 46.4%;
     left: 86.5%;
     transform: translateX(-50%);
     width: 30px;    
@@ -180,3 +187,20 @@ body {
     color: #b3b3ff;
 }
 
+.error-popup {
+    color: red;
+    text-align: center;
+    font-size: 100%;
+    top: 77%;
+    left: 75%;
+    transform: translate(-50%, -50%);
+    position: absolute;
+}
+
+#password-strenght {
+    margin-bottom: 10px;
+    position: absolute;
+    transform: translate(-50%, -50%);
+    top: 50%;
+    left: 50%;
+}

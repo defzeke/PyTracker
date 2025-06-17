@@ -1,10 +1,8 @@
-html, body {
+body {
     margin: 0;
     padding: 0;
     background-color: #E3E9ED;
 }
-
-
 
 #sidebar {
     position: fixed;
@@ -19,16 +17,16 @@ html, body {
     position: fixed;
     display: flex;
     align-items: center;
-    width: calc(100% - 85px);
+    width: 100%;    
     height: 85px;
     background: #fff;
     top: 0;
-    left: 85px;
+    left: 0;        
     border-bottom: 1.5px solid rgba(39, 39, 87, 0.15); 
-    z-index: 1;
+    z-index: 2;      
     box-shadow: 0 4px 16px rgba(39, 39, 87, 0.15); 
     padding: 0 40px;
-    gap: 32px; /* adjust as needed */
+    gap: 32px;
 }
 
 .sidebar-icon {
@@ -36,7 +34,9 @@ html, body {
     left: 15px;
     width: 52px;
     height: 52px;
+    cursor: pointer;
 }
+
 #dashboard-logo {
     top: 110px;
 }
@@ -51,12 +51,17 @@ html, body {
     width: 58px;
     height: 58px;
 }
+
 .topbar-icon {
     position: absolute;
     top: 30%;
     width: 35px;
     height: 35px;
+    cursor: pointer;
+    transition: filter 0.2s;
 }
+
+
 
 #status-logo {
     left: 20%;
@@ -112,6 +117,10 @@ html, body {
     border-radius: 15px;
 }
 
+.dashboard-element{
+    background-color: #F5F7FA;
+}
+
 #weather {
     position: fixed;
     width: 40%;
@@ -132,6 +141,17 @@ html, body {
     background-color: #F5F7FA;
     overflow-y: auto;
     border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+#histogram-canvas {
+    width: 95% !important;
+    height: 90% !important;
+    max-width: 100%;
+    max-height: 100%;
 }
 
 #addclass-form {
@@ -220,29 +240,29 @@ html, body {
     height: 0;
     border-left: 12px solid transparent;
     border-right: 12px solid transparent;
-    border-bottom: 16px solid #fff; 
+    border-bottom: var(--triangle, 16px solid #fff);
     filter: drop-shadow(0 -2px 2px rgba(0,0,0,0.06));
     z-index: 1002;
 }
 
 .popover-content {
-    padding: 0 24px;
+    padding: 0 10px !important; /* Reduce left/right padding */
 }
 
 #notification-popover {
-    left: 59.6%;
+    left: 57.8%;
 }
 
 #status-popover {
-    left: 16.6%;
+    left: 12.5%;
 }
 
 #message-popover {
-    left: 22.7%;
+    left: 19%;
 }
 
 #recitation-popover {
-    left: 28.5%;
+    left: 25.3%;
 }
 
 .btns {
@@ -333,7 +353,7 @@ html, body {
     cursor: pointer;
     transition: background 0.2s;
     top: 20.2%;
-    left: 67%;  
+    left: 75%;  
     width: 18%;
     height: 5.5%;
 }
@@ -345,7 +365,7 @@ html, body {
 #calendar-image {
     position: absolute;
     top: 20.2%;
-    left: 88%;
+    left: 68%;
     width: 3%;
     height: auto;
 }
@@ -387,24 +407,19 @@ html, body {
     box-shadow: 0 8px 32px rgba(0,0,0,0.18);
     z-index: 1001;
     border: 1px solid #e3e9ed;
-    left: 87%;
+    left: 60.15% !important;
 }
 
 #profile-logo {
-    width: 2.3%;
-    height: 46%;
+    width: 2.2%;
+    height: 42%;
     object-fit: cover;
     border-radius: 50%;
     border: 2px solid #e3e9ed;
     background: #fff;
     cursor: pointer;
-    top: 25%;
+    top: 27%;
     left: 90%;
-}
-
-#profile-popover,
-#account-settings-popover {
-    display: none;
 }
 
 #profile-popover, #account-settings-popover {
@@ -412,7 +427,7 @@ html, body {
     left: 73%;      
     top: 100%;      
     width: 20%;
-    height: 200%;
+    height: 220%;
     background: #fff;
     border-radius: 12px;
     box-shadow: 0 8px 32px rgba(0,0,0,0.18);
@@ -421,7 +436,11 @@ html, body {
 }
 
 #account-settings-popover {
-    height: 250%;      
+    height: 205%;      
+}
+
+#account-settings-popover, #profile-popover {
+    display: none;
 }
 
 
@@ -435,7 +454,7 @@ html, body {
     height: 0;
     border-left: 12px solid transparent;
     border-right: 12px solid transparent;
-    border-bottom: 16px solid #fff;
+    border-bottom: var(--triangle, 16px solid #fff);
     filter: drop-shadow(0 -2px 2px rgba(0,0,0,0.06));
     z-index: 1002;
 }
@@ -443,8 +462,8 @@ html, body {
 
 #profile-popover .btns,
 #account-settings-popover .btns {
-    width: 100%;
-    padding: 12px 0;
+    width: calc(100% - 8px) !important;
+    padding: 12px 8px !important;
     margin: 0 0 6px 0;
     background: none;
     color: #272757;
@@ -455,6 +474,7 @@ html, body {
     text-align: left;
     transition: background 0.2s;
     box-sizing: border-box;
+    display: block !important;
 }
 
 #profile-popover .btns:hover,
@@ -462,3 +482,284 @@ html, body {
     background: #f0f0f7;
 }
 
+#account-settings-popover .popover-content > div:first-child {
+    margin: 5px 0 15px -4px !important; /* Increased top and bottom margins */
+}
+
+
+#back-to-profile-btn {
+    background: none !important;
+    border: none !important;
+    cursor: pointer !important;
+    padding: 8px !important;
+    margin-right: 8px !important;
+    border-radius: 50% !important;
+    width: 12% !important;
+    height: 10% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: background-color 0.2s ease !important;
+    font-size: 16px !important;
+    color: #272757;
+}
+
+#back-to-profile-btn:hover {
+    background-color: rgba(39, 39, 87, 0.1) !important;
+}
+
+#back-to-profile-btn:active {
+    background-color: rgba(39, 39, 87, 0.2) !important;
+}
+
+.setting-logos {
+    width: 8%;
+    height: 8%;
+    margin-right: 8px;
+    margin-left: 0px !important; 
+    vertical-align: middle;
+    border-radius: 50%;
+    padding: 6px;
+    transition: background-color 0.2s;
+    background: none;
+    cursor: pointer;
+    box-sizing: content-box;
+}
+
+.btns:hover .setting-logos {
+    background-color: rgba(39, 39, 87, 0.1);
+}
+
+.btns:active .setting-logos {
+    background-color: rgba(39, 39, 87, 0.2);
+}
+
+.btns span[style*="float: right"] {
+    position: relative;
+    top: 7px; 
+    right: 3%;
+}
+
+#account-settings-popover .popover-content > div:first-child {
+    margin-left: -4px !important; 
+}
+
+.account-setting-logos {
+    width: 8%;
+    height: 8%;
+    margin-right: 8px;
+    margin-left: 0px !important; 
+    vertical-align: middle;
+    border-radius: 50%;
+    padding: 6px;
+    transition: background-color 0.2s;
+    background: none;
+    cursor: pointer;
+    box-sizing: content-box;
+}
+
+#sidebar {
+    transition: transform 0.35s cubic-bezier(.4,0,.2,1);
+    will-change: transform;
+    z-index: 1001;
+}
+
+#sidebar.sidebar-hidden {
+    transform: translateX(-100%);
+}
+
+#extender-logo {
+    transition: left 0.35s cubic-bezier(.4,0,.2,1);
+    position: fixed;
+    top: 3%;
+    left: 6%; 
+    z-index: 1002;
+}
+
+#sidebar.sidebar-hidden ~ #topbar #extender-logo,
+#extender-logo.sidebar-at-edge, #message-logo.sidebar-at-edge {
+    left: 1%;
+}
+
+.topbar-movable {
+    transition: left 0.35s cubic-bezier(.4,0,.2,1);
+}
+
+.sidebar-hidden #status-logo,
+.sidebar-hidden #message-logo,
+.sidebar-hidden #recitation-logo {
+    left: 6%;
+}
+
+.sidebar-hidden #status-logo { left: 14%; }
+.sidebar-hidden #message-logo { left: 20%; }
+.sidebar-hidden #recitation-logo { left: 26%; }
+
+/* Added styles for frontend */
+#pup-logo {
+    display: block;
+    margin: 40px auto 24px auto;
+    width: 120px;         /* Adjust as needed for reasonable size */
+    max-width: 40%;
+    height: auto;
+    opacity: 0.9;
+}
+
+/* Center the default card in the container */
+#attendance-students {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 300px; /* Adjust as needed */
+    margin-top: 220px;
+    margin-right: 980px;
+}
+
+/* Student card styling */
+.student-card.default-card {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 2px 12px rgba(39,39,87,0.08);
+    padding: 24px 32px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 180px;
+    margin: 0 auto;
+}
+
+.student-card .student-pic {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: #e3e9ed;
+    margin-bottom: 12px;
+    background-size: cover;
+    background-position: center;
+}
+
+.student-card .student-name {
+    font-size: 1.1em;
+    font-weight: 500;
+    margin-bottom: 16px;
+    color: #222;
+    text-align: center;
+}
+
+.student-card .pal-btns {
+    display: flex;
+    gap: 16px;
+}
+
+.student-card .pal-btns button {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: none;
+    background: #e3e9ed;
+    color: #272757;
+    font-size: 1.1em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.student-card .pal-btns button:hover {
+    background: #d1d7e0;
+}
+
+#admin-modal {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    background: rgba(0,0,0,0.5);
+    z-index: 9999;
+    display: none;
+}
+
+.admin-modal-content {
+    background: #23234a;
+    color: #fff;
+    border-radius: 18px;
+    padding: 36px 32px 28px 32px;
+    max-width: 370px;
+    width: 90vw;
+    margin: 120px auto;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+    font-family: 'Tai Heritage Pro', serif;
+    position: relative;
+    text-align: center;
+}
+
+.admin-modal-title {
+    margin-top: 0;
+    margin-bottom: 18px;
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+.admin-modal-label {
+    font-size: 1.1rem;
+    margin-bottom: 10px;
+    display: block;
+    text-align: left;
+}
+
+.admin-modal-input {
+    width: 100%;
+    margin: 12px 0 18px 0;
+    padding: 12px 14px;
+    border-radius: 8px;
+    border: 1.5px solid #bdbddd;
+    font-size: 1.1rem;
+    background: #29295a;
+    color: #fff;
+    outline: none;
+    box-sizing: border-box;
+    transition: border 0.2s;
+}
+
+.admin-modal-btn-row {
+    display: flex;
+    gap: 12px;
+    margin-top: 0;
+}
+
+.admin-modal-btn {
+    flex: 1;
+    padding: 12px 0;
+    border-radius: 8px;
+    border: none;
+    font-size: 0.9rem;
+    font-weight: 300;
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: background 0.2s, transform 0.2s;
+}
+
+.admin-modal-submit {
+    background: linear-gradient(90deg, #3a357d 60%, #2D296A 100%);
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(44, 41, 106, 0.10);
+}
+
+.admin-modal-submit:hover {
+    background: linear-gradient(90deg, #2D296A 60%, #3a357d 100%);
+}
+
+.admin-modal-cancel {
+    background: #888;
+    color: #fff;
+}
+
+.admin-modal-cancel:hover {
+    background: #666;
+}
+
+.admin-modal-error {
+    color: #ffb3b3;
+    margin-top: 14px;
+    min-height: 22px;
+    font-size: 1rem;
+}
