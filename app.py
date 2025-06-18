@@ -8,8 +8,13 @@ import mysql.connector
 import calendar
 import requests
 from abc import ABC, abstractmethod
+from werkzeug.utils import secure_filename
+import time
 
 load_dotenv()
+
+##########################################################################################################################
+# OTP
 
 app = Flask(__name__)
 
@@ -65,8 +70,11 @@ def generate_otp():
     """Generate a 6-digit numeric OTP as a string."""
     return ''.join([str(random.randint(0, 9)) for _ in range(6)])
 
+#########################################################################################################################
 
 
+#########################################################################################################################
+# CONNECTION FUNCTION
 
 def get_mysql_connection():
     return mysql.connector.connect(
@@ -79,9 +87,11 @@ def get_mysql_connection():
 
 app.secret_key = '123123123'
 
+#########################################################################################################################
 
 
-
+#########################################################################################################################
+#   LOGIN & REGISTRATION
 @app.route("/", methods=["GET", "POST"])
 def login():
     """
@@ -113,6 +123,7 @@ def login():
             if user['password'] == password:
                 # Store user's name in session
                 session['user'] = user['name']
+                session['id_number'] = user['id_number'] 
                 # Redirect based on user type in id_number
                 resp = make_response(
                     redirect(
@@ -221,226 +232,6 @@ def check_otp():
 def changepasswordcomplete():
     return render_template('changepasswordcomplete.html')
 
-
-
-@app.route("/admin")
-def adminUI():
-    conn = get_mysql_connection()
-    cursor = conn.cursor(dictionary=True)
-    # Summary counts
-    cursor.execute("SELECT COUNT(*) FROM login_main WHERE role='Teacher'")
-    prof_count = cursor.fetchone()['COUNT(*)']
-    cursor.execute("SELECT COUNT(*) FROM login_main WHERE role='Student'")
-    student_count = cursor.fetchone()['COUNT(*)']
-    cursor.execute("SELECT COUNT(*) FROM classes_database")
-    class_count = cursor.fetchone()['COUNT(*)']
-
-    # Classes info for the table (now includes subject)
-    cursor.execute("""
-        SELECT c.class_ID, c.subject, c.semester, c.teacher_ID, c.status,
-               t.name AS professor_name
-        FROM classes_database c
-        LEFT JOIN login_main t ON c.teacher_ID = t.id_number
-    """)
-    classes = cursor.fetchall()
-
-    # For each class, get students (with placeholder avatar)
-    for cls in classes:
-        cursor.execute("""
-            SELECT l.name FROM enrollment_database e
-            JOIN login_main l ON e.student_ID = l.id_number
-            WHERE e.class_ID = %s
-        """, (cls['class_ID'],))
-        students = cursor.fetchall()
-        # Assign a placeholder avatar for each student
-        for stu in students:
-            stu['avatar_url'] = url_for('static', filename='images/profile.png')
-        cls['students'] = students
-        cls['student_count'] = len(students)
-
-    cursor.close()
-    conn.close()
-    return render_template(
-        "adminUI.html",
-        prof_count=prof_count,
-        student_count=student_count,
-        class_count=class_count,
-        classes=classes
-    )
-
-
-""""
-@app.route("/prof")
-def profUI():
-    prof_name = None
-    attendance_calendar = {}
-    histogram_counts = {
-        "Absent": 0,
-        "Late": 0,
-        "No Classes/Excused": 0,
-        "Attended": 0,
-        "Days Remaining": 0
-    }
-    today = datetime.today()
-    # School year start (adjust as needed)
-    school_year_start = datetime(today.year if today.month >= 6 else today.year - 1, 6, 1)
-    school_days_passed = 0
-    total_school_days = 180
-
-    # Calculate school days passed (Mon-Fri, skip weekends)
-    d = school_year_start
-    while d <= today:
-        if d.weekday() < 5:  # Mon-Fri
-            school_days_passed += 1
-        d += timedelta(days=1)
-    days_remaining = max(0, total_school_days - school_days_passed)
-    histogram_counts["Days Remaining"] = days_remaining
-
-    # Calculate calendar range: -2 months to +5 months
-    months = []
-    for i in range(-2, 6):
-        month = (today.month + i - 1) % 12 + 1
-        year = today.year + ((today.month + i - 1) // 12)
-        months.append((year, month))
-
-    if 'user' in session:
-        conn = get_mysql_connection()
-        cursor = conn.cursor(dictionary=True)
-        cursor.execute("SELECT name, id_number FROM login_main WHERE name = %s", (session['user'],))
-        result = cursor.fetchone()
-        if result:
-            prof_name = result['name']
-            prof_id = result['id_number']
-            # Get all classes for this professor
-            cursor.execute("SELECT class_ID FROM classes_database WHERE teacher_ID = %s", (prof_id,))
-            class_ids = [row['class_ID'] for row in cursor.fetchall()]
-            # Build calendar days
-            calendar_days = []
-            for year, month in months:
-                _, last_day = calendar.monthrange(year, month)
-                for day in range(1, last_day + 1):
-                    d = datetime(year, month, day)
-                    calendar_days.append(d)
-            # Query attendance for these classes and days
-            attendance_map = {}
-            for d in calendar_days:
-                date_str = d.strftime("%Y-%m-%d")
-                found = False
-                for class_id in class_ids:
-                    cursor.execute("SELECT 1 FROM attendance_database WHERE class_ID = %s AND date = %s LIMIT 1", (class_id, date_str))
-                    if cursor.fetchone():
-                        found = True
-                        break
-                attendance_map[date_str] = found
-            attendance_calendar = {
-                "months": months,
-                "days": calendar_days,
-                "attendance": attendance_map
-            }
-            # Histogram: count attendance statuses for this professor's classes
-            if class_ids:
-                format_strings = ','.join(['%s'] * len(class_ids))
-                cursor.execute(f"SELECT status FROM attendance_database WHERE class_ID IN ({format_strings})", tuple(class_ids))
-                for row in cursor.fetchall():
-                    status = row['status'].strip().lower()
-                    if status == "present":
-                        histogram_counts["Attended"] += 1
-                    elif status == "late":
-                        histogram_counts["Late"] += 1
-                    elif status == "absent":
-                        histogram_counts["Absent"] += 1
-                    else:
-                        histogram_counts["No Classes/Excused"] += 1
-        cursor.close()
-        conn.close()
-    return render_template(
-    "profUI.html",
-    prof_name=prof_name,
-    attendance_calendar=attendance_calendar,
-    histogram_counts=histogram_counts,
-    datetime=datetime,
-    calendar=calendar
-)
-"""
-
-@app.route("/prof")
-def profUI():
-    prof_name = None
-    attendance_calendar = {}
-    histogram_counts = {
-        "Absent": 0,
-        "Late": 0,
-        "No Classes/Excused": 0,
-        "Attended": 0,
-        "Days Remaining": 0
-    }
-    today = datetime.today()
-    # School year start (adjust as needed)
-    school_year_start = datetime(today.year if today.month >= 6 else today.year - 1, 6, 1)
-    school_days_passed = 0
-    total_school_days = 180
-
-    # Calculate school days passed (Mon-Fri, skip weekends)
-    d = school_year_start
-    while d <= today:
-        if d.weekday() < 5:  # Mon-Fri
-            school_days_passed += 1
-        d += timedelta(days=1)
-    days_remaining = max(0, total_school_days - school_days_passed)
-    histogram_counts["Days Remaining"] = days_remaining
-
-    # Calculate calendar range: -2 months to +5 months
-    months = []
-    for i in range(-2, 6):
-        month = (today.month + i - 1) % 12 + 1
-        year = today.year + ((today.month + i - 1) // 12)
-        months.append((year, month))
-
-    if 'user' in session:
-        conn = get_mysql_connection()
-        cursor = conn.cursor(dictionary=True)
-        # Get professor's name and ID
-        cursor.execute("SELECT name, id_number FROM login_main WHERE name = %s", (session['user'],))
-        prof_row = cursor.fetchone()
-        prof_name = prof_row['name'] if prof_row else None
-        prof_id_test = prof_row['id_number'] if prof_row else None
-        # Get class IDs for this professor
-        class_ids = None
-        if prof_id_test:
-            cursor.execute("SELECT class_ID FROM classes_database WHERE teacher_ID = %s", (prof_id_test,))
-            class_rows = cursor.fetchall()
-            class_ids = [row['class_ID'] for row in class_rows] if class_rows else None
-        cursor.close()
-        conn.close()
-    return render_template(
-        "profUI.html",
-        prof_name=prof_name,
-        attendance_calendar=attendance_calendar,
-        histogram_counts=histogram_counts,
-        datetime=datetime,
-        calendar=calendar
-    )
-
-@app.route('/admin_secret_check', methods=['POST'])
-def admin_secret_check():
-    data = request.get_json()
-    if data.get('secret') == 'supersecret':
-        session['user'] = 'admin'
-        return jsonify({'success': True})
-    else:
-        return jsonify({'success': False})
-
-@app.route("/student")
-def studentUI():
-    return render_template("studentUI.html")
-
-
-
-@app.route("/step2")
-def step2():
-    return render_template("role.html")
-
-
 @app.route("/credentials", methods=["GET", "POST"])
 def register():
     """
@@ -459,21 +250,13 @@ def register():
 
 @app.route("/register2", methods=["GET", "POST"])
 def register2():
-    """
-    Handles the first registration step:
-    - For students: validates ID and name against enrollment DB.
-    - For teachers: only checks ID format.
-    """
     error = None
-    # Get the selected role from the form or session
     role = request.form.get("role") or session.get("role")
     if request.method == "POST":
-        # Get name and ID fields from the form
         first_name = request.form.get("first_name", "").strip()
         middle_name = request.form.get("middle_name", "").strip()
         last_name = request.form.get("last_name", "").strip()
         id_number = request.form.get("id-number", "").strip()
-        # Combine names for comparison
         input_name = f"{first_name} {middle_name} {last_name}".replace("  ", " ").strip().lower()
 
         if role and role.lower() == "teacher":
@@ -482,15 +265,27 @@ def register2():
                 error = "Professor ID must contain 'TC'."
             elif len(id_number) != 15:
                 error = "Invalid ID number."
+            else:
+                # Check for duplicate TC ID or name in login_main
+                conn = get_mysql_connection()
+                cursor = conn.cursor(dictionary=True)
+                cursor.execute("SELECT 1 FROM login_main WHERE id_number = %s", (id_number,))
+                if cursor.fetchone():
+                    error = "This professor ID is already registered."
+                else:
+                    cursor.execute("SELECT 1 FROM login_main WHERE LOWER(name) = %s", (input_name,))
+                    if cursor.fetchone():
+                        error = "A professor with this name is already registered."
+                cursor.close()
+                conn.close()
         else:
-            # Student validation: check if already registered
+            # ...existing student logic...
             conn = get_mysql_connection()
             cursor = conn.cursor()
             cursor.execute("SELECT 1 FROM login_main WHERE ID_number = %s", (id_number,))
             if cursor.fetchone():
                 error = "This student ID is already registered."
             else:
-                # Check if student is enrolled and name matches
                 cursor.execute("SELECT name FROM enrollment_database WHERE student_ID = %s", (id_number,))
                 row = cursor.fetchone()
                 if not row:
@@ -503,17 +298,13 @@ def register2():
             conn.close()
 
         if error:
-            # If any error, re-render the form with error message
             return render_template("register.html", role=role, error=error)
 
-        # Passed all checks, store registration info in session for next step
         session['name'] = f"{first_name} {middle_name} {last_name}".replace("  ", " ").strip()
         session['id_number'] = id_number
         session['role'] = role
-        # Redirect to the next registration step (details)
         return redirect(url_for('register2_details'))
 
-    # Render the registration form for GET or if not POST
     return render_template("register2.html", role=role)
 
 
@@ -651,10 +442,8 @@ def verify():
 def complete_registration():
     """
     Finalizes registration:
-    - Students: inserts into login_main.
-    - Teachers: generates TMP-XXX, inserts as pending into registration_main.
+    - Students and Professors: inserts into login_main.
     """
-    
     # Retrieve registration data from session
     name = session.get('name')
     email = session.get('email')
@@ -672,43 +461,433 @@ def complete_registration():
     cursor = conn.cursor()
     error = None
 
-    if role == "Student":
-        # Insert student registration directly into login_main
-        try:
-            cursor.execute("""
-                INSERT INTO login_main (name, id_number, role, password, email, course, year_section)
-                VALUES (%s, %s, %s, %s, %s, %s, %s)
-            """, (name, id_number, role, password, email, course, year_section))
-            conn.commit()
-        except mysql.connector.Error as err:
-            print("MySQL Error:", err)
-            error = f"MySQL Error: {err}"
-            
-    elif role == "Teacher":
-        # Generate next TMP-XXX ID for teacher registration
-        cursor.execute("SELECT temp_ID FROM registration_main WHERE temp_ID LIKE 'TMP-%' ORDER BY Control_No DESC LIMIT 1")
-        row = cursor.fetchone()
-        if row and row[0]:
-            try:
-                # Extract the numeric part and increment
-                last_num = int(row[0].split('-')[1])
-            except (IndexError, ValueError):
-                last_num = 0
-        else:
-            last_num = 0
-        new_tmp_id = f"TMP-{last_num+1:03d}"
-        
-        # Insert teacher registration as pending into registration_main
+    try:
         cursor.execute("""
-            INSERT INTO registration_main (temp_ID, name, email, role, status)
-            VALUES (%s, %s, %s, %s, %s)
-        """, (new_tmp_id, name, email, role, "Pending"))
-        
-   # Commit changes and close connection
-    conn.commit()
+            INSERT INTO login_main (name, id_number, role, password, email, course, year_section)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
+        """, (name, id_number, role, password, email, course, year_section))
+        conn.commit()
+    except mysql.connector.Error as err:
+        print("MySQL Error:", err)
+        error = f"MySQL Error: {err}"
+
     cursor.close()
     conn.close()
     return render_template("registration_complete.html", role=role, error=error)
+
+@app.route("/step2")
+def step2():
+    return render_template("role.html")
+
+#########################################################################################################################
+
+
+#########################################################################################################################
+#   FOR ADMIN 
+
+@app.route("/admin")
+def adminUI():
+    conn = get_mysql_connection()
+    cursor = conn.cursor(dictionary=True)
+    # Summary counts
+    cursor.execute("SELECT COUNT(*) FROM login_main WHERE role='Teacher'")
+    prof_count = cursor.fetchone()['COUNT(*)']
+    cursor.execute("SELECT COUNT(*) FROM login_main WHERE role='Student'")
+    student_count = cursor.fetchone()['COUNT(*)']
+    cursor.execute("SELECT COUNT(*) FROM classes_database")
+    class_count = cursor.fetchone()['COUNT(*)']
+
+    # Classes info for the table (now includes subject)
+    cursor.execute("""
+        SELECT c.class_ID, c.subject, c.semester, c.teacher_ID, c.status,
+               t.name AS professor_name
+        FROM classes_database c
+        LEFT JOIN login_main t ON c.teacher_ID = t.id_number
+    """)
+    classes = cursor.fetchall()
+
+    # For each class, get students (with placeholder avatar)
+    for cls in classes:
+        cursor.execute("""
+            SELECT l.name FROM enrollment_database e
+            JOIN login_main l ON e.student_ID = l.id_number
+            WHERE e.class_ID = %s
+        """, (cls['class_ID'],))
+        students = cursor.fetchall()
+        for stu in students:
+            stu['avatar_url'] = url_for('static', filename='images/profile.png')
+        cls['students'] = students
+        cls['student_count'] = len(students)
+
+    cursor.execute("SELECT id_number, name, role, email FROM login_main")
+    all_users = cursor.fetchall()
+   
+    cursor.execute("SELECT DISTINCT class_ID, subject FROM classes_database")
+    class_subjects = cursor.fetchall()
+    class_id_subject_map = {row['class_ID']: row['subject'] for row in class_subjects}
+
+    cursor.execute("SELECT * FROM issue_tickets ORDER BY created_at DESC")
+    tickets = cursor.fetchall()
+    
+    cursor.close()
+    conn.close()
+
+    
+    return render_template(
+        "adminUI.html",
+        prof_count=prof_count,
+        student_count=student_count,
+        class_count=class_count,
+        classes=classes,
+        all_users=all_users,
+        class_id_subject_map=class_id_subject_map,
+        year=datetime.now().year,
+        tickets=tickets
+    )
+
+@app.route("/enroll_student", methods=["POST"])
+def enroll_student():
+    first_name = request.form.get("first_name", "").strip()
+    middle_name = request.form.get("middle_name", "").strip()
+    last_name = request.form.get("last_name", "").strip()
+    class_ids = request.form.getlist("class_id")  # getlist for multiple
+    student_id = request.form.get("student_id", "").strip()
+    full_name = f"{first_name} {middle_name} {last_name}".replace("  ", " ").strip()
+
+    conn = get_mysql_connection()
+    cursor = conn.cursor()
+
+    # Get the last enrollment_ID and increment it
+    cursor.execute("SELECT MAX(enrollment_ID) FROM enrollment_database")
+    last_id = cursor.fetchone()[0]
+    if last_id and last_id.startswith("ENR-"):
+        last_num = int(last_id.split('-')[1])
+    else:
+        last_num = 0
+
+    for class_id in class_ids:
+        new_id = f"ENR-{last_num+1:04d}"
+        cursor.execute(
+            "INSERT INTO enrollment_database (enrollment_ID, name, student_ID, class_ID) VALUES (%s, %s, %s, %s)",
+            (new_id, full_name, student_id, class_id)
+        )
+        last_num += 1
+
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return redirect(url_for('adminUI', enroll='success'))
+
+@app.route("/delete_registrant", methods=["POST"])
+def delete_registrant():
+    user_id = request.form.get("user_id")
+    if not user_id:
+        return redirect(url_for('adminUI'))
+    conn = get_mysql_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM login_main WHERE id_number = %s", (user_id,))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return redirect(url_for('adminUI', remove='success')) 
+
+@app.route("/add_class", methods=["POST"])
+def add_class():
+    class_id = request.form.get("class_id", "").strip()
+    subject = request.form.get("subject", "").strip()
+    semester = request.form.get("semester", "").strip()
+    teacher_id = request.form.get("teacher_id", "").strip()
+
+    # Check for duplicate class_id + teacher_id
+    conn = get_mysql_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        "SELECT 1 FROM classes_database WHERE class_ID = %s AND teacher_ID = %s",
+        (class_id, teacher_id)
+    )
+    exists = cursor.fetchone()
+    if exists:
+        cursor.close()
+        conn.close()
+        return redirect(url_for('adminUI', addclass='duplicate'))
+
+    cursor.execute(
+        "INSERT INTO classes_database (class_ID, subject, semester, teacher_ID, status) VALUES (%s, %s, %s, %s, %s)",
+        (class_id, subject, semester, teacher_id, "Ongoing")
+    )
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return redirect(url_for('adminUI', addclass='success'))
+
+@app.route("/delete_class", methods=["POST"])
+def delete_class():
+    class_id = request.form.get("class_id")
+    if not class_id:
+        return redirect(url_for('adminUI'))
+    conn = get_mysql_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM classes_database WHERE class_ID = %s", (class_id,))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return redirect(url_for('adminUI'))
+
+@app.route('/change_password', methods=['POST'])
+def change_password_logged_in():
+    if 'user' not in session:
+        return jsonify({'error': 'Not logged in'}), 401
+
+    data = request.get_json()
+    current_password = data.get('current_password')
+    new_password = data.get('new_password')
+    confirm_password = data.get('confirm_password')
+
+    conn = get_mysql_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT password FROM login_main WHERE name = %s", (session['user'],))
+    user = cursor.fetchone()
+    if not user:
+        error = "User not found."
+        cursor.close()
+        conn.close()
+        return jsonify({'error': error}), 400
+    elif user['password'] != current_password:
+        error = "Current password is incorrect."
+        cursor.close()
+        conn.close()
+        return jsonify({'error': error}), 400
+    elif new_password != confirm_password:
+        error = "New passwords do not match."
+        cursor.close()
+        conn.close()
+        return jsonify({'error': error}), 400
+    else:
+        cursor.execute("UPDATE login_main SET password = %s WHERE name = %s", (new_password, session['user']))
+        conn.commit()
+        cursor.close()
+        conn.close()
+        return jsonify({'success': "Password changed successfully."})
+
+def send_ticket_reply_email(recipient, subject, reply):
+    msg = Message(
+        subject=f"PyTracker Issue Ticket Reply: {subject}",
+        sender=("Pytracker", app.config['MAIL_USERNAME']),
+        recipients=[recipient]
+    )
+    msg.body = f"Admin replied to your issue:\n\n{reply}\n\nThank you for using PyTracker."
+    mail.send(msg)
+
+@app.route("/reply_ticket", methods=["POST"])
+def reply_ticket():
+    ticket_id = request.form.get("ticket_id")
+    reply = request.form.get("reply")
+    conn = get_mysql_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT user_email, subject FROM issue_tickets WHERE ticket_id = %s", (ticket_id,))
+    ticket = cursor.fetchone()
+    if ticket:
+        send_ticket_reply_email(ticket['user_email'], ticket['subject'], reply)
+        cursor.execute("UPDATE issue_tickets SET admin_reply = %s, status = %s WHERE ticket_id = %s", (reply, "Closed", ticket_id))
+        conn.commit()
+    cursor.close()
+    conn.close()
+    return redirect(url_for('adminUI'))
+
+@app.route("/issue_tickets")
+def issue_tickets():
+    conn = get_mysql_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM issue_tickets ORDER BY created_at DESC")
+    tickets = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return render_template("issue_tickets.html", tickets=tickets)
+
+
+
+#########################################################################################################################
+
+
+""""
+@app.route("/prof")
+def profUI():
+    prof_name = None
+    attendance_calendar = {}
+    histogram_counts = {
+        "Absent": 0,
+        "Late": 0,
+        "No Classes/Excused": 0,
+        "Attended": 0,
+        "Days Remaining": 0
+    }
+    today = datetime.today()
+    # School year start (adjust as needed)
+    school_year_start = datetime(today.year if today.month >= 6 else today.year - 1, 6, 1)
+    school_days_passed = 0
+    total_school_days = 180
+
+    # Calculate school days passed (Mon-Fri, skip weekends)
+    d = school_year_start
+    while d <= today:
+        if d.weekday() < 5:  # Mon-Fri
+            school_days_passed += 1
+        d += timedelta(days=1)
+    days_remaining = max(0, total_school_days - school_days_passed)
+    histogram_counts["Days Remaining"] = days_remaining
+
+    # Calculate calendar range: -2 months to +5 months
+    months = []
+    for i in range(-2, 6):
+        month = (today.month + i - 1) % 12 + 1
+        year = today.year + ((today.month + i - 1) // 12)
+        months.append((year, month))
+
+    if 'user' in session:
+        conn = get_mysql_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT name, id_number FROM login_main WHERE name = %s", (session['user'],))
+        result = cursor.fetchone()
+        if result:
+            prof_name = result['name']
+            prof_id = result['id_number']
+            # Get all classes for this professor
+            cursor.execute("SELECT class_ID FROM classes_database WHERE teacher_ID = %s", (prof_id,))
+            class_ids = [row['class_ID'] for row in cursor.fetchall()]
+            # Build calendar days
+            calendar_days = []
+            for year, month in months:
+                _, last_day = calendar.monthrange(year, month)
+                for day in range(1, last_day + 1):
+                    d = datetime(year, month, day)
+                    calendar_days.append(d)
+            # Query attendance for these classes and days
+            attendance_map = {}
+            for d in calendar_days:
+                date_str = d.strftime("%Y-%m-%d")
+                found = False
+                for class_id in class_ids:
+                    cursor.execute("SELECT 1 FROM attendance_database WHERE class_ID = %s AND date = %s LIMIT 1", (class_id, date_str))
+                    if cursor.fetchone():
+                        found = True
+                        break
+                attendance_map[date_str] = found
+            attendance_calendar = {
+                "months": months,
+                "days": calendar_days,
+                "attendance": attendance_map
+            }
+            # Histogram: count attendance statuses for this professor's classes
+            if class_ids:
+                format_strings = ','.join(['%s'] * len(class_ids))
+                cursor.execute(f"SELECT status FROM attendance_database WHERE class_ID IN ({format_strings})", tuple(class_ids))
+                for row in cursor.fetchall():
+                    status = row['status'].strip().lower()
+                    if status == "present":
+                        histogram_counts["Attended"] += 1
+                    elif status == "late":
+                        histogram_counts["Late"] += 1
+                    elif status == "absent":
+                        histogram_counts["Absent"] += 1
+                    else:
+                        histogram_counts["No Classes/Excused"] += 1
+        cursor.close()
+        conn.close()
+    return render_template(
+    "profUI.html",
+    prof_name=prof_name,
+    attendance_calendar=attendance_calendar,
+    histogram_counts=histogram_counts,
+    datetime=datetime,
+    calendar=calendar
+)
+"""
+
+
+#########################################################################################################################
+#   PROFESSOR'S UI
+
+@app.route("/prof")
+def profUI():
+    prof_name = None
+    prof_role = None
+    prof_pic = None
+    attendance_calendar = {}
+    histogram_counts = {
+        "Absent": 0,
+        "Late": 0,
+        "No Classes/Excused": 0,
+        "Attended": 0,
+        "Days Remaining": 0
+    }
+    today = datetime.today()
+    school_year_start = datetime(today.year if today.month >= 6 else today.year - 1, 6, 1)
+    school_days_passed = 0
+    total_school_days = 180
+
+    d = school_year_start
+    while d <= today:
+        if d.weekday() < 5:
+            school_days_passed += 1
+        d += timedelta(days=1)
+    days_remaining = max(0, total_school_days - school_days_passed)
+    histogram_counts["Days Remaining"] = days_remaining
+
+    months = []
+    for i in range(-2, 6):
+        month = (today.month + i - 1) % 12 + 1
+        year = today.year + ((today.month + i - 1) // 12)
+        months.append((year, month))
+
+    if 'user' in session:
+        conn = get_mysql_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT name, id_number, role, profile_pic FROM login_main WHERE id_number = %s", (session['id_number'],))
+        prof_row = cursor.fetchone()
+        prof_name = prof_row['name'] if prof_row else None
+        prof_role = prof_row['role'] if prof_row else None
+        prof_pic = prof_row['profile_pic'] if prof_row else None
+        prof_id_test = prof_row['id_number'] if prof_row else None
+        class_ids = None
+        if prof_id_test:
+            cursor.execute("SELECT class_ID FROM classes_database WHERE teacher_ID = %s", (prof_id_test,))
+            class_rows = cursor.fetchall()
+            class_ids = [row['class_ID'] for row in class_rows] if class_rows else None
+        cursor.close()
+        conn.close()
+    return render_template(
+        "profUI.html",
+        prof_name=prof_name,
+        prof_role=prof_role,
+        prof_pic=prof_pic,
+        attendance_calendar=attendance_calendar,
+        histogram_counts=histogram_counts,
+        datetime=datetime,
+        calendar=calendar
+    )
+
+@app.route('/admin_secret_check', methods=['POST'])
+def admin_secret_check():
+    data = request.get_json()
+    if data.get('secret') == 'supersecret':
+        session['user'] = 'admin'
+        return jsonify({'success': True})
+    else:
+        return jsonify({'success': False})
+
+
+
+
+
+@app.route("/student")
+def studentUI():
+    return render_template("studentUI.html")
+
+
+
+
+
+
 
 
 @app.route("/weather")
@@ -898,7 +1077,6 @@ def get_classes():
         }
         for row in cursor.fetchall()
     ]
-    print(f"Classes found for {session['user']} ({prof_id}): {classes}")
     cursor.close()
     conn.close()
     return jsonify(classes)
@@ -972,6 +1150,57 @@ def get_students():
     # Sort the groups by initial
     grouped_sorted = dict(sorted(grouped.items()))
     return jsonify(grouped_sorted)
+
+@app.route("/issue_ticket", methods=["POST"])
+def issue_ticket():
+    if 'user' not in session:
+        return redirect(url_for('login'))
+    subject = request.form.get("subject")
+    description = request.form.get("description")
+    user_name = session['user']
+    # Get user's email
+    conn = get_mysql_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT email FROM login_main WHERE name = %s", (user_name,))
+    user = cursor.fetchone()
+    user_email = user['email'] if user else None
+    # Store ticket in DB (create a table 'issue_tickets' if not exists)
+    cursor.execute("""
+        INSERT INTO issue_tickets (user_name, user_email, subject, description, status)
+        VALUES (%s, %s, %s, %s, %s)
+    """, (user_name, user_email, subject, description, "Open"))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    # Redirect with ticket_success=1 so the modal shows
+    return redirect(url_for('profUI', ticket_success=1))
+
+import time
+
+@app.route('/upload_profile_pic', methods=['POST'])
+def upload_profile_pic():
+    if 'user' not in session:
+        print("No user in session")
+        return redirect(url_for('login'))
+    file = request.files['profile_pic']
+    print("File received:", file)
+    if file:
+        filename = secure_filename(f"{session['user']}_{int(time.time())}_{file.filename}")
+        os.makedirs(os.path.join('static', 'profile_pics'), exist_ok=True)
+        filepath = os.path.join('static', 'profile_pics', filename)
+        file.save(filepath)
+        print("Saved file to:", filepath)
+        conn = get_mysql_connection()
+        cursor = conn.cursor()
+        id_number = session['id_number']
+        print("Updating DB for id_number:", id_number, "with filename:", filename)
+        cursor.execute("UPDATE login_main SET profile_pic = %s WHERE id_number = %s", (filename, id_number))
+        conn.commit()
+        cursor.close()
+        conn.close()
+    else:
+        print("No file uploaded!")
+    return redirect(url_for('profUI'))
 
 if __name__ == "__main__":
     app.run(debug=True)
