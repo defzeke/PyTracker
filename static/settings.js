@@ -6,14 +6,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const closeAccountSettingsBtn = document.getElementById('close-account-settings');
     const backToProfileBtn = document.getElementById('back-to-profile-btn');
     const changeDpBtn = document.getElementById('change-dp-btn');
-    const profileUpload = document.getElementById('profile-upload');
 
-    // Cropper modal elements
-    const cropperModal = document.getElementById('cropper-modal');
-    const cropperImage = document.getElementById('cropper-image');
-    const cropperCancel = document.getElementById('cropper-cancel');
-    const cropperSave = document.getElementById('cropper-save');
-    let cropper = null;
+    // Modal elements for profile upload
+    const profileUploadModal = document.getElementById('profile-upload-modal');
+    const closeProfileUploadModal = document.getElementById('close-profile-upload-modal');
+    const cancelProfileUpload = document.getElementById('cancel-profile-upload');
+    const profileUploadForm = document.getElementById('profile-upload-form');
+    const profileUpload = document.getElementById('profile-upload');
 
     // Show profile popover on click
     profileIcon.addEventListener('click', function(e) {
@@ -47,61 +46,42 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Open file dialog when clicking "Change Display Picture"
+    // Show modal when "Change Display Picture" is clicked
     changeDpBtn.addEventListener('click', function(e) {
         e.stopPropagation();
-        profileUpload.click();
-    });
-
-    // Show cropper modal after file selection
-    profileUpload.addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        if (file && file.type.startsWith('image/')) {
-            const reader = new FileReader();
-            reader.onload = function(evt) {
-                cropperImage.src = evt.target.result;
-                cropperModal.style.display = 'flex';
-                // Wait for image to load before initializing cropper
-                cropperImage.onload = function() {
-                    if (cropper) cropper.destroy();
-                    cropper = new Cropper(cropperImage, {
-                        aspectRatio: 1, // keep it square/circle
-                        viewMode: 1,
-                        movable: true,
-                        zoomable: true,
-                        rotatable: false,
-                        scalable: true,
-                        cropBoxResizable: true,
-                        minContainerWidth: 300,
-                        minContainerHeight: 300
-                    });
-                };
-            };
-            reader.readAsDataURL(file);
+        if (profileUploadModal) {
+            profileUploadModal.style.display = 'flex';
+            if (profileUpload) profileUpload.value = ''; // reset file input
         }
     });
 
-    // Cancel cropping
-    cropperCancel.addEventListener('click', function() {
-        if (cropper) cropper.destroy();
-        cropperModal.style.display = 'none';
-        profileUpload.value = ""; // reset file input
-    });
+    // Hide modal on close or cancel
+    if (closeProfileUploadModal) {
+        closeProfileUploadModal.addEventListener('click', function() {
+            profileUploadModal.style.display = 'none';
+        });
+    }
+    if (cancelProfileUpload) {
+        cancelProfileUpload.addEventListener('click', function() {
+            profileUploadModal.style.display = 'none';
+        });
+    }
 
-    // Save cropped image
-    cropperSave.addEventListener('click', function() {
-        if (cropper) {
-            const canvas = cropper.getCroppedCanvas({
-                width: 256,
-                height: 256,
-                imageSmoothingQuality: 'high'
-            });
-            profileIcon.src = canvas.toDataURL('image/png');
-            cropper.destroy();
-            cropperModal.style.display = 'none';
-            profileUpload.value = ""; // reset file input
-        }
-    });
+    // Hide modal after successful upload
+    if (profileUploadForm) {
+        profileUploadForm.addEventListener('submit', function() {
+            profileUploadModal.style.display = 'none';
+        });
+    }
+
+    // Hide modal when clicking outside modal content
+    if (profileUploadModal) {
+        profileUploadModal.addEventListener('click', function(e) {
+            if (e.target === profileUploadModal) {
+                profileUploadModal.style.display = 'none';
+            }
+        });
+    }
 
     // Prevent clicks inside popovers from closing them
     profilePopover.addEventListener('click', function(e) {
@@ -110,23 +90,16 @@ document.addEventListener('DOMContentLoaded', function() {
     accountSettingsPopover.addEventListener('click', function(e) {
         e.stopPropagation();
     });
-    if (cropperModal) {
-        cropperModal.addEventListener('click', function(e) {
-            e.stopPropagation();
-        });
-    }
 
     // Hide popovers when clicking outside
     document.addEventListener('click', function(e) {
         if (
             !profilePopover.contains(e.target) &&
             !accountSettingsPopover.contains(e.target) &&
-            !(cropperModal && cropperModal.contains(e.target)) &&
             e.target !== profileIcon
         ) {
             profilePopover.style.display = 'none';
             accountSettingsPopover.style.display = 'none';
-            if (cropperModal) cropperModal.style.display = 'none';
         }
     });
 });

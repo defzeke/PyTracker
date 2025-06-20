@@ -2,9 +2,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // List all topbar features and their popovers by id
     const features = [
         { icon: 'notification-logo', popover: 'notification-popover' },
-        { icon: 'status-logo', popover: 'status-popover' },
-        { icon: 'message-logo', popover: 'message-popover' },
-        { icon: 'recitation-logo', popover: 'recitation-popover' },
         { icon: 'extender-logo', popover: null } // Add extender logo (no popover)
     ];
 
