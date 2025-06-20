@@ -12,10 +12,14 @@
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/pytrack hat logo.png') }}">
     <title>PyTracker</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://code.jscharting.com/latest/jscharting.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pikaday/css/pikaday.css">
+    <script src="https://cdn.jsdelivr.net/npm/pikaday/pikaday.js"></script>
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cal-heatmap@4.4.0/cal-heatmap.css">
+    <script src="https://cdn.jsdelivr.net/npm/cal-heatmap@4.4.0/cal-heatmap.min.js"></script>
+    
     <!-- Fail heatmap and calendar libraries dump
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-activity-heatmap@1.0.0/dist/github-activity-heatmap.min.css">
     <script src="https://cdn.jsdelivr.net/npm/github-activity-heatmap@1.0.0/dist/github-activity-heatmap.min.js"></script>
@@ -23,6 +27,9 @@
     <script src="https://cdn.jsdelivr.net/npm/cal-heatmap@4.4.0/cal-heatmap.min.js"></script>
      <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-matrix@4.0.1/dist/chartjs-chart-matrix.min.js"></script>
+    <script src="https://code.jscharting.com/latest/jscharting.js"></script>
+    
+    
     -->
 </head>
 <body>
@@ -183,10 +190,9 @@
             <div id="calendar-popover" class="popover-panel" style="display:none; min-width:320px; left:80%; top:27%;">
                 <div class="popover-content">
                     <h3 style="margin:0 0 12px 0;">Calendar</h3>
-                    <p>[Calendar here]</p>
+                    <div id="calendar-container"></div>
                 </div>
             </div>
-            <div id="attendance-content">
                 <div id="attendance-students">
                     <div class="student-card default-card">
                         <div class="student-pic"></div>
@@ -198,31 +204,16 @@
                         </div>
                     </div>
                 </div>
-            </div>
 
             <div id="select-content">
-                <!-- Class Dropdown -->
-                <select id="classes-dropdown" class="custom-dropdown" required>
-                    <option value="" disabled selected hidden>&nbsp;&nbsp;&nbsp;&nbsp;Select Class</option>
-                    <option value="class1">&nbsp;&nbsp;&nbsp;&nbsp;Class 1</option>
-                    <option value="class2">&nbsp;&nbsp;&nbsp;&nbsp;Class 2</option>
-                    <option value="class3">&nbsp;&nbsp;&nbsp;&nbsp;Class 3</option>
+                <select id="classes-dropdown" class="custom-dropdown">
+                    <option value="" disabled selected>Select Class</option>
                 </select>
-
-                <!-- Subject Dropdown -->
-                <select id="subjects-dropdown" class="custom-dropdown" required>
-                    <option value="" disabled selected hidden>&nbsp;&nbsp;&nbsp;&nbsp;Select Subject</option>
-                    <option value="subject1">&nbsp;&nbsp;&nbsp;&nbsp;Subject 1</option>
-                    <option value="subject2">&nbsp;&nbsp;&nbsp;&nbsp;Subject 2</option>
-                    <option value="subject3">&nbsp;&nbsp;&nbsp;&nbsp;Subject 3</option>
+                <select id="subjects-dropdown" class="custom-dropdown">
+                    <option value="" disabled selected>Select Subject</option>
                 </select>
-
-                <!-- Section Dropdown -->
-                <select id="sections-dropdown" class="custom-dropdown" required>
-                    <option value="" disabled selected hidden>&nbsp;&nbsp;&nbsp;&nbsp;Select Section</option>
-                    <option value="section1">&nbsp;&nbsp;&nbsp;&nbsp;Section 1</option>
-                    <option value="section2">&nbsp;&nbsp;&nbsp;&nbsp;Section 2</option>
-                    <option value="section3">&nbsp;&nbsp;&nbsp;&nbsp;Section 3</option>
+                <select id="sections-dropdown" class="custom-dropdown">
+                    <option value="" disabled selected>Select Section</option>
                 </select>
             </div>
         
@@ -470,6 +461,48 @@
     });
 </script>
 
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const calendarImg = document.getElementById("calendar-image");
+            const calendarPopover = document.getElementById("calendar-popover");
+
+            calendarImg.addEventListener("click", function() {
+                calendarPopover.style.display = (calendarPopover.style.display === "block") ? "none" : "block";
+            });
+
+            // Only close if click is outside BOTH the popover and the image
+            document.addEventListener("click", function(e) {
+                if (
+                    calendarPopover.style.display === "block" &&
+                    !calendarPopover.contains(e.target) &&
+                    e.target !== calendarImg
+                ) {
+                    calendarPopover.style.display = "none";
+                }
+            });
+
+            // Remove any previous calendar
+            document.getElementById('calendar-container').innerHTML = "";
+
+            // Initialize Pikaday
+            if (window.Pikaday) {
+                new Pikaday({
+                    field: document.createElement('input'),
+                    container: document.getElementById('calendar-container'),
+                    bound: false,
+                    defaultDate: new Date(),
+                    setDefaultDate: true,
+                    firstDay: 1,
+                    format: 'YYYY-MM-DD'
+                });
+            } else {
+                document.getElementById('calendar-container').innerHTML =
+                    `<div style="font-size:1.5em; font-weight:bold; text-align:center; margin:24px 0;">
+                        ${new Date().toLocaleDateString()}
+                    </div>`;
+            }
+        });
+</script>
 </body>
 <script>
     document.getElementById("logout-btn").addEventListener("click", function() {

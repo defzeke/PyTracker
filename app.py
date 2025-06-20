@@ -1104,8 +1104,22 @@ def get_sections():
         return jsonify([])
     conn = get_mysql_connection()
     cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT DISTINCT semester FROM classes_database WHERE class_ID = %s", (class_id,))
-    sections = [row['semester'] for row in cursor.fetchall()]
+    # Get all student_IDs enrolled in this class
+    cursor.execute("SELECT student_ID FROM enrollment_database WHERE class_ID = %s", (class_id,))
+    student_ids = [row['student_ID'] for row in cursor.fetchall()]
+    sections = []
+    if student_ids:
+        format_strings = ','.join(['%s'] * len(student_ids))
+        cursor.execute(
+            f"SELECT DISTINCT course, year_section FROM login_main WHERE id_number IN ({format_strings})",
+            tuple(student_ids)
+        )
+        for row in cursor.fetchall():
+            course = row['course'] or ''
+            year_section = row['year_section'] or ''
+            section = f"{course} {year_section}".strip()
+            if section and section not in sections:
+                sections.append(section)
     cursor.close()
     conn.close()
     return jsonify(sections)
@@ -1117,6 +1131,16 @@ def get_students():
     section = request.args.get("section")
     if not class_id or not subject or not section:
         return jsonify({})  # Return empty dict for grouping
+
+    # Parse section into course and year_section
+    section = section.strip()
+    if " " in section:
+        course, year_section = section.split(" ", 1)
+        course = course.strip()
+        year_section = year_section.strip()
+    else:
+        course = section
+        year_section = ""
 
     conn = get_mysql_connection()
     cursor = conn.cursor(dictionary=True)
@@ -1130,8 +1154,11 @@ def get_students():
 
     format_strings = ','.join(['%s'] * len(student_ids))
     cursor.execute(
-        f"SELECT name, id_number, course, year_section FROM login_main WHERE id_number IN ({format_strings})",
-        tuple(student_ids)
+        f"""SELECT name, id_number, course, year_section 
+            FROM login_main 
+            WHERE id_number IN ({format_strings}) 
+            AND course = %s AND year_section = %s""",
+        tuple(student_ids) + (course, year_section)
     )
     students = cursor.fetchall()
     cursor.close()
@@ -1140,18 +1167,38 @@ def get_students():
     # Group students by first letter of last name
     grouped = {}
     for stu in students:
-        # Assume last name is the last word in the name field
         last_name = stu['name'].split()[-1].upper()
         initial = last_name[0]
         if initial not in grouped:
             grouped[initial] = []
         grouped[initial].append(stu)
-    # Sort each group by last name, then first name
     for initial in grouped:
         grouped[initial].sort(key=lambda s: (s['name'].split()[-1].upper(), s['name'].upper()))
-    # Sort the groups by initial
     grouped_sorted = dict(sorted(grouped.items()))
     return jsonify(grouped_sorted)
+
+@app.route("/mark_attendance_bulk", methods=["POST"])
+def mark_attendance_bulk():
+    data = request.get_json()
+    records = data.get("records", [])
+    if not records:
+        return jsonify({"success": False, "error": "No records provided"})
+    conn = get_mysql_connection()
+    cursor = conn.cursor()
+    # Get current max control number
+    cursor.execute("SELECT MAX(`control_no`) FROM attendance_database")
+    max_control = cursor.fetchone()[0] or 0
+    control_no = max_control + 1
+    for rec in records:
+        cursor.execute(
+            "INSERT INTO attendance_database (`control_no`, date, class_ID, student_ID, status) VALUES (%s, %s, %s, %s, %s)",
+            (control_no, rec['date'], rec['class_ID'], rec['student_ID'], rec['status'])
+        )
+        control_no += 1
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return jsonify({"success": True})
 
 @app.route("/issue_ticket", methods=["POST"])
 def issue_ticket():
@@ -1205,6 +1252,7 @@ def upload_profile_pic():
     else:
         print("No file uploaded!")
     return redirect(url_for('profUI'))
+
 
 if __name__ == "__main__":
     app.run(debug=True)

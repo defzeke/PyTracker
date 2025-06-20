@@ -565,15 +565,17 @@ body.dark-mode, .dark-mode {
 }
 
 #attendance-students {
-    display: flex;
+    display: block;
     justify-content: center;
     align-items: flex-start;
     min-height: 300px; 
     margin-top: 220px;
     margin-right: 980px;
+    width: 100%;
 }
 
-.student-card.default-card {
+
+.student-card {
     background: #fff;
     border-radius: 16px;
     box-shadow: 0 2px 12px rgba(39,39,87,0.08);
@@ -582,7 +584,11 @@ body.dark-mode, .dark-mode {
     flex-direction: column;
     align-items: center;
     width: 180px;
-    margin: 0 auto;
+    margin: 0 16px 24px 16px; /* horizontal and vertical spacing */
+}
+
+.student-card.default-card {
+    margin-left: 160px;
 }
 
 .student-card .student-pic {
