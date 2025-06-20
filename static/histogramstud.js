@@ -1,6 +1,5 @@
 let histogramChart = null;
 
-// Plugin to set the canvas background color
 const chartBackgroundPlugin = {
     id: 'custom_canvas_background_color',
     beforeDraw: (chart) => {
@@ -45,12 +44,11 @@ function updateHistogramColors() {
 }
 
 document.addEventListener("DOMContentLoaded", function() {
-    fetch("/histogram_data")
+    fetch("/histogram_data_student")
         .then(res => res.json())
         .then(data => {
             if (data.error) throw new Error(data.error);
 
-            // Remove any existing canvas (for hot reloads)
             const histogramDiv = document.getElementById('histogram');
             histogramDiv.innerHTML = '<canvas id="histogram-canvas"></canvas>';
 

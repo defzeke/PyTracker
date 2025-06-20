@@ -1,16 +1,14 @@
-// Example: static/attendance.js
-// This script handles the attendance functionality for professors, including class selection, subject and section filtering, and student attendance marking.
-// Ensure this script is loaded after the DOM is fully loaded
-
-    document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", function() {
     const classDropdown = document.getElementById('classes-dropdown');
-    const subjectDropdown = document.getElementById('subjects-dropdown');
     const sectionDropdown = document.getElementById('sections-dropdown');
+    let profData = null;
 
-    // Populate class dropdown
-    fetch("/get_classes")
+    // Fetch all dropdown data at once
+    fetch("/prof_dropdown_data")
         .then(res => res.json())
-        .then(classes => {
+        .then(data => {
+            profData = data;
+            // Populate class dropdown
             classDropdown.innerHTML = '';
             const defaultOption = document.createElement("option");
             defaultOption.value = '';
@@ -19,12 +17,10 @@
             defaultOption.textContent = "Select Class";
             classDropdown.appendChild(defaultOption);
 
-            classes.forEach(cls => {
-                // Only show class_ID, no subject/parentheses
+            data.classes.forEach(cls => {
                 const option = document.createElement("option");
                 option.value = cls.class_ID;
                 option.textContent = cls.class_ID;
-                // Add a left padding for slight indent
                 option.style.paddingLeft = "12px";
                 classDropdown.appendChild(option);
             });
@@ -33,116 +29,138 @@
     classDropdown.addEventListener("change", function() {
         const classId = this.value;
 
-        // Populate subject dropdown
-        fetch(`/get_subjects?class_id=${classId}`)
-            .then(res => res.json())
-            .then(subjects => {
-                subjectDropdown.innerHTML = '';
-                const defaultOption = document.createElement("option");
-                defaultOption.value = '';
-                defaultOption.disabled = true;
-                defaultOption.selected = true;
-                defaultOption.textContent = "Select Subject";
-                subjectDropdown.appendChild(defaultOption);
-
-                subjects.forEach(subj => {
-                    const option = document.createElement("option");
-                    option.value = subj;
-                    option.textContent = subj;
-                    subjectDropdown.appendChild(option);
-                });
-            });
+        // Find the selected class and get its subject
+        const cls = profData.classes.find(c => c.class_ID === classId);
+        const subjectNameSpan = document.getElementById("subject-name");
+        if (cls && subjectNameSpan) {
+            subjectNameSpan.textContent = cls.subject || "None";
+        } else if (subjectNameSpan) {
+            subjectNameSpan.textContent = "None";
+        }
 
         // Populate section dropdown
-        fetch(`/get_sections?class_id=${classId}`)
-            .then(res => res.json())
-            .then(sections => {
-                sectionDropdown.innerHTML = '';
-                const defaultOption = document.createElement("option");
-                defaultOption.value = '';
-                defaultOption.disabled = true;
-                defaultOption.selected = true;
-                defaultOption.textContent = "Select Section";
-                sectionDropdown.appendChild(defaultOption);
+        sectionDropdown.innerHTML = '';
+        const defaultSectionOption = document.createElement("option");
+        defaultSectionOption.value = '';
+        defaultSectionOption.disabled = true;
+        defaultSectionOption.selected = true;
+        defaultSectionOption.textContent = "Select Section";
+        sectionDropdown.appendChild(defaultSectionOption);
 
-                sections.forEach(sec => {
-                    const option = document.createElement("option");
-                    option.value = sec;
-                    option.textContent = sec;
-                    sectionDropdown.appendChild(option);
-                });
-            });
-
-        document.getElementById("attendance-students").innerHTML = "";
+        // Only allow sections 1-1 to 1-5
+        (profData.class_sections[classId] || []).forEach(sec => {
+            // Extract section part after the space (e.g., "BSCPE 1-1" -> "1-1")
+            let sectionPart = sec.split(" ").pop();
+            if (["1-1", "1-2", "1-3", "1-4", "1-5"].includes(sectionPart)) {
+                const option = document.createElement("option");
+                option.value = sec;
+                option.textContent = sec;
+                sectionDropdown.appendChild(option);
+            }
+        });
     });
 
-    subjectDropdown.addEventListener("change", loadStudents);
+    classDropdown.addEventListener("blur", function() {
+        if (!this.value) {
+            const subjectNameSpan = document.getElementById("subject-name");
+            if (subjectNameSpan) subjectNameSpan.textContent = "None";
+        }
+    });
+
     sectionDropdown.addEventListener("change", loadStudents);
 
     function loadStudents() {
         const class_id = classDropdown.value;
-        const subject = subjectDropdown.value;
         const section = sectionDropdown.value;
-        if (class_id && subject && section) {
-            fetch(`/get_students?class_id=${class_id}&subject=${subject}&section=${section}`)
-                .then(res => res.json())
-                .then(grouped => {
-                    const container = document.getElementById("attendance-students");
-                    container.innerHTML = "";
-                    if (!grouped || Object.keys(grouped).length === 0) {
-                        container.innerHTML = `
-                            <div class="student-card default-card">
-                                <div class="student-pic"></div>
-                                <div class="student-name">No Students Found</div>
-                                <div class="pal-btns">
-                                    <button>P</button>
-                                    <button>A</button>
-                                    <button>L</button>
-                                </div>
+        const container = document.getElementById("attendance-students");
+        const pleaseWaitModal = document.getElementById("please-wait-modal");
+
+        if (!class_id || !section) {
+            container.innerHTML = `
+                <div style="width:100%;text-align:center;font-size:1.3em;color:#444;padding:40px 0;">
+                    No Option Selected
+                </div>
+            `;
+            if (pleaseWaitModal) pleaseWaitModal.style.display = "none";
+            return;
+        }
+
+        if (pleaseWaitModal) pleaseWaitModal.style.display = "flex";
+
+        fetch(`/get_students?class_id=${class_id}&section=${section}`)
+            .then(res => res.json())
+            .then(grouped => {
+                if (pleaseWaitModal) pleaseWaitModal.style.display = "none";
+                container.innerHTML = "";
+                if (!grouped || Object.keys(grouped).length === 0) {
+                    container.innerHTML = `
+                        <div class="student-card default-card">
+                            <div class="student-pic"></div>
+                            <div class="student-name">No Students Found</div>
+                            <div class="pal-btns">
+                                <button>P</button>
+                                <button>A</button>
+                                <button>L</button>
+                            </div>
+                        </div>
+                    `;
+                    return;
+                }
+                Object.keys(grouped).forEach(initial => {
+                    // Group wrapper (block)
+                    const groupBlock = document.createElement("div");
+                    groupBlock.style.display = "block";
+                    groupBlock.style.marginBottom = "32px";
+
+                    // Wrapper for header and row, for alignment
+                    const groupInner = document.createElement("div");
+                    groupInner.style.paddingTop = "5px";
+                    groupInner.style.paddingLeft = "120px";
+
+                    // Header for the group
+                    const header = document.createElement("div");
+                    header.textContent = initial;
+                    header.style.fontWeight = "bold";
+                    header.style.fontSize = "1.2em";
+                    header.style.margin = "20px 0 5px 0";
+                    groupInner.appendChild(header);
+
+                    // Row for student cards (flex, but only for this group)
+                    const row = document.createElement("div");
+                    row.style.display = "flex";
+                    row.style.gap = "10px";
+                    row.style.marginLeft = "85px";
+                    groupInner.appendChild(row);
+
+                    groupBlock.appendChild(groupInner);
+
+                    grouped[initial].forEach(stu => {
+                        const card = document.createElement("div");
+                        card.className = "student-card";
+                        const profilePicUrl = stu.profile_pic
+                            ? `/static/profile_pics/${stu.profile_pic}`
+                            : '/static/images/profile.png'; // fallback image
+
+                        card.innerHTML = `
+                            <div class="student-pic" style="background: none; display: flex; justify-content: center; align-items: center;">
+                                <img src="${profilePicUrl}" alt="Profile" style="width:80px;height:80px;border-radius:50%;object-fit:cover;">
+                            </div>
+                            <div class="student-name">${stu.name}</div>
+                            <div class="pal-btns">
+                                <button data-id="${stu.id_number}" data-status="Present">P</button>
+                                <button data-id="${stu.id_number}" data-status="Absent">A</button>
+                                <button data-id="${stu.id_number}" data-status="Late">L</button>
                             </div>
                         `;
-                        return;
-                    }
-                    Object.keys(grouped).forEach(initial => {
-                        // Group wrapper (block)
-                        const groupBlock = document.createElement("div");
-                        groupBlock.style.display = "block";
-                        groupBlock.style.marginBottom = "32px";
-
-                        // Header for the group
-                        const header = document.createElement("div");
-                        header.textContent = initial;
-                        header.style.fontWeight = "bold";
-                        header.style.fontSize = "1.2em";
-                        header.style.margin = "24px 0 8px 85px";
-                        groupBlock.appendChild(header);
-
-                        // Row for student cards (flex, but only for this group)
-                        const row = document.createElement("div");
-                        row.style.display = "flex";
-                        row.style.gap = "32px";
-                        row.style.marginLeft = "85px";
-
-                        grouped[initial].forEach(stu => {
-                            const card = document.createElement("div");
-                            card.className = "student-card";
-                            card.innerHTML = `
-                                <div class="student-pic"></div>
-                                <div class="student-name">${stu.name}</div>
-                                <div class="pal-btns">
-                                    <button data-id="${stu.id_number}" data-status="Present">P</button>
-                                    <button data-id="${stu.id_number}" data-status="Absent">A</button>
-                                    <button data-id="${stu.id_number}" data-status="Late">L</button>
-                                </div>
-                            `;
-                            row.appendChild(card);
-                        });
-                        groupBlock.appendChild(row);
-                        container.appendChild(groupBlock);
+                                                row.appendChild(card);
                     });
+                    groupBlock.appendChild(row);
+                    container.appendChild(groupBlock);
                 });
-        }
+            });
     }
+
+    loadStudents();
 
     let attendanceSelections = {}; // { student_ID: status }
 
@@ -232,8 +250,12 @@
             class_ID: class_id,
             student_ID: id,
             status: attendanceSelections[id],
-            date: dateStr
+            date: dateStr,
+            section: section
         }));
+        
+        const pleaseWaitModal = document.getElementById("please-wait-modal");
+        if (pleaseWaitModal) pleaseWaitModal.style.display = "flex";
 
         // Send all attendance records to backend
         fetch("/mark_attendance_bulk", {
@@ -241,6 +263,7 @@
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify({records: attendanceData})
         }).then(res => res.json()).then(resp => {
+            if (pleaseWaitModal) pleaseWaitModal.style.display = "none";
             if (resp.success) {
                 showPopup(`Attendance submitted!<br>
                     <b>Class ID:</b> ${class_id}<br>
@@ -277,3 +300,15 @@
         setTimeout(() => popup.remove(), 3500);
     }
 });
+
+function updateLiveDateTime() {
+    const dtSpan = document.getElementById("live-datetime");
+    if (!dtSpan) return;
+    const now = new Date();
+    const options = { year: 'numeric', month: 'short', day: 'numeric' };
+    const dateStr = now.toLocaleDateString(undefined, options);
+    const timeStr = now.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    dtSpan.textContent = `${dateStr} ${timeStr}`;
+}
+setInterval(updateLiveDateTime, 1000);
+updateLiveDateTime();

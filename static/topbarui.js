@@ -101,3 +101,50 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
+
+function showNotificationModal() {
+    const bell = document.getElementById('notification-logo');
+    const modal = document.getElementById('notification-modal');
+    const content = document.getElementById('notification-modal-content');
+    // Position the modal just below the bell
+    const rect = bell.getBoundingClientRect();
+    modal.style.left = (rect.left + window.scrollX - 180) + 'px'; 
+    modal.style.top = (rect.bottom + window.scrollY + 10) + 'px'; 
+    modal.style.display = 'block';
+
+    // Load notifications
+    fetch('/get_notifications')
+        .then(res => res.json())
+        .then(notifs => {
+            if (!notifs.length) {
+                content.innerHTML = "<p style='margin:12px 0;'>No new notifications</p>";
+            } else {
+                content.innerHTML = notifs.map(n =>
+                    `<div class="notif-item">
+                        <div class="notif-message">${n.message}</div>
+                        <div class="notif-date">${new Date(n.created_at).toLocaleString()}</div>
+                    </div>`
+                ).join('');
+            }
+        });
+}
+
+// Show/hide modal on bell click
+document.getElementById('notification-logo').addEventListener('click', function(e) {
+    e.stopPropagation();
+    const modal = document.getElementById('notification-modal');
+    if (modal.style.display === 'block') {
+        modal.style.display = 'none';
+    } else {
+        showNotificationModal();
+    }
+});
+
+// Hide modal when clicking outside
+document.addEventListener('click', function(e) {
+    const modal = document.getElementById('notification-modal');
+    const bell = document.getElementById('notification-logo');
+    if (!modal.contains(e.target) && e.target !== bell) {
+        modal.style.display = 'none';
+    }
+});

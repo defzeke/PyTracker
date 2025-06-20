@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session, make_response, jsonify
+from flask import Flask, render_template, request, redirect, url_for, session, make_response, jsonify, send_file
 from datetime import datetime, timedelta
 from flask_mail import Mail, Message
 import random
@@ -10,10 +10,14 @@ import requests
 from abc import ABC, abstractmethod
 from werkzeug.utils import secure_filename
 import time
+import pdfkit
+
+
 
 load_dotenv()
 print("API KEY:", os.getenv("OPENWEATHERMAP_API_KEY"))
-
+WKHTMLTOPDF_PATH = r"C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe"  
+PDFKIT_CONFIG = pdfkit.configuration(wkhtmltopdf=WKHTMLTOPDF_PATH)
 ##########################################################################################################################
 # OTP
 
@@ -860,6 +864,7 @@ def profUI():
         "profUI.html",
         prof_name=prof_name,
         prof_role=prof_role,
+        prof_id=prof_id_test,
         prof_pic=prof_pic,
         attendance_calendar=attendance_calendar,
         histogram_counts=histogram_counts,
@@ -878,12 +883,39 @@ def admin_secret_check():
 
 
 
-
-
 @app.route("/student")
 def studentUI():
-    return render_template("studentUI.html")
-
+    student_name = None
+    student_role = None
+    student_pic = None
+    student_id = None
+    student_classes = []
+    student_cys = None
+    if 'id_number' in session:
+        conn = get_mysql_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT name, role, profile_pic, id_number, course, year_section FROM login_main WHERE id_number = %s", (session['id_number'],))
+        row = cursor.fetchone()
+        if row:
+            student_name = row['name']
+            student_role = row['role']
+            student_pic = row['profile_pic']
+            student_id = row['id_number']
+            student_cys = f"{row['course']} {row['year_section']}".strip()
+        # Get all classes the student is enrolled in
+        cursor.execute("SELECT class_ID FROM enrollment_database WHERE student_ID = %s", (session['id_number'],))
+        student_classes = [r['class_ID'] for r in cursor.fetchall()]
+        cursor.close()
+        conn.close()
+    return render_template(
+        "studentUI.html",
+        student_name=student_name,
+        student_role=student_role,
+        prof_pic=student_pic,
+        student_id=student_id,
+        student_classes=student_classes,
+        student_cys=student_cys
+    )
 
 
 
@@ -1127,9 +1159,8 @@ def get_sections():
 @app.route("/get_students")
 def get_students():
     class_id = request.args.get("class_id")
-    subject = request.args.get("subject")
     section = request.args.get("section")
-    if not class_id or not subject or not section:
+    if not class_id or not section:
         return jsonify({})  # Return empty dict for grouping
 
     # Parse section into course and year_section
@@ -1154,7 +1185,7 @@ def get_students():
 
     format_strings = ','.join(['%s'] * len(student_ids))
     cursor.execute(
-        f"""SELECT name, id_number, course, year_section 
+        f"""SELECT name, id_number, course, year_section, profile_pic 
             FROM login_main 
             WHERE id_number IN ({format_strings}) 
             AND course = %s AND year_section = %s""",
@@ -1177,6 +1208,39 @@ def get_students():
     grouped_sorted = dict(sorted(grouped.items()))
     return jsonify(grouped_sorted)
 
+@app.route("/prof_dropdown_data")
+def prof_dropdown_data():
+    if 'user' not in session:
+        return jsonify({})
+    conn = get_mysql_connection()
+    cursor = conn.cursor(dictionary=True)
+    # Get professor's id_number
+    cursor.execute("SELECT id_number FROM login_main WHERE name = %s", (session['user'],))
+    prof = cursor.fetchone()
+    if not prof:
+        cursor.close()
+        conn.close()
+        return jsonify({})
+    prof_id = prof['id_number']
+    # Get all classes for this professor
+    cursor.execute("SELECT class_ID, subject, semester FROM classes_database WHERE teacher_ID = %s", (prof_id,))
+    classes = cursor.fetchall()
+    # For each class, get sections
+    class_sections = {}
+    for cls in classes:
+        cursor.execute(
+            "SELECT DISTINCT course, year_section FROM enrollment_database JOIN login_main ON enrollment_database.student_ID = login_main.id_number WHERE class_ID = %s",
+            (cls['class_ID'],)
+        )
+        sections = [f"{row['course']} {row['year_section']}".strip() for row in cursor.fetchall()]
+        class_sections[cls['class_ID']] = sections
+    cursor.close()
+    conn.close()
+    return jsonify({
+        "classes": classes,
+        "class_sections": class_sections
+    })
+
 @app.route("/mark_attendance_bulk", methods=["POST"])
 def mark_attendance_bulk():
     data = request.get_json()
@@ -1189,16 +1253,57 @@ def mark_attendance_bulk():
     cursor.execute("SELECT MAX(`control_no`) FROM attendance_database")
     max_control = cursor.fetchone()[0] or 0
     control_no = max_control + 1
+
+    # Get class/section/subject info for notification
+    class_id = records[0]['class_ID']
+    cursor.execute("SELECT subject FROM classes_database WHERE class_ID = %s", (class_id,))
+    subject = cursor.fetchone()[0]
+    section = records[0].get('section', None)
+    # You may need to fetch section info based on your logic
+
+    # Get professor's id_number from session
+    prof_id = session.get('id_number')
+
+    # Get current date/time
+    now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
     for rec in records:
         cursor.execute(
             "INSERT INTO attendance_database (`control_no`, date, class_ID, student_ID, status) VALUES (%s, %s, %s, %s, %s)",
             (control_no, rec['date'], rec['class_ID'], rec['student_ID'], rec['status'])
         )
+        # Student notification
+        student_msg = f"Your attendance was recorded for {subject} ({section}) on {rec['date']} as {rec['status']}."
+        cursor.execute(
+            "INSERT INTO notifications (user_id, message, created_at) VALUES (%s, %s, %s)",
+            (rec['student_ID'], student_msg, now)
+        )
         control_no += 1
+
+    # Professor notification (once per attendance session)
+    prof_msg = f"You took attendance for {subject} ({section}) on {records[0]['date']}."
+    cursor.execute(
+        "INSERT INTO notifications (user_id, message, created_at) VALUES (%s, %s, %s)",
+        (prof_id, prof_msg, now)
+    )
+
     conn.commit()
     cursor.close()
     conn.close()
     return jsonify({"success": True})
+
+@app.route("/get_notifications")
+def get_notifications():
+    if 'id_number' not in session:
+        return jsonify([])
+    user_id = session['id_number']
+    conn = get_mysql_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM notifications WHERE user_id = %s ORDER BY created_at DESC LIMIT 20", (user_id,))
+    notifications = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return jsonify(notifications)
 
 @app.route("/issue_ticket", methods=["POST"])
 def issue_ticket():
@@ -1242,17 +1347,374 @@ def upload_profile_pic():
         file.save(filepath)
         print("Saved file to:", filepath)
         conn = get_mysql_connection()
-        cursor = conn.cursor()
+        cursor = conn.cursor(dictionary=True)
         id_number = session['id_number']
         print("Updating DB for id_number:", id_number, "with filename:", filename)
         cursor.execute("UPDATE login_main SET profile_pic = %s WHERE id_number = %s", (filename, id_number))
+        # Fetch the user's role for redirect
+        cursor.execute("SELECT role FROM login_main WHERE id_number = %s", (id_number,))
+        user = cursor.fetchone()
+        role = user['role'].lower() if user and 'role' in user else None
         conn.commit()
         cursor.close()
         conn.close()
     else:
         print("No file uploaded!")
-    return redirect(url_for('profUI'))
+        # If no file, redirect to login or home
+        return redirect(url_for('login'))
 
+    # Redirect based on role
+    if role == "teacher":
+        return redirect(url_for('profUI'))
+    elif role == "student":
+        return redirect(url_for('studentUI'))
+    elif role == "admin":
+        return redirect(url_for('adminUI'))
+    else:
+        return redirect(url_for('login'))
 
+@app.route("/get_attendance_summary")
+def get_attendance_summary():
+    class_id = request.args.get("class_id")
+    section = request.args.get("section")
+    if not class_id or not section:
+        return jsonify({})
+    # Parse section into course and year_section
+    section = section.strip()
+    if " " in section:
+        course, year_section = section.split(" ", 1)
+        course = course.strip()
+        year_section = year_section.strip()
+    else:
+        course = section
+        year_section = ""
+    conn = get_mysql_connection()
+    cursor = conn.cursor(dictionary=True)
+    # Get all student_IDs enrolled in this class and section
+    cursor.execute("SELECT student_ID FROM enrollment_database WHERE class_ID = %s", (class_id,))
+    student_ids = [row['student_ID'] for row in cursor.fetchall()]
+    if not student_ids:
+        cursor.close()
+        conn.close()
+        return jsonify({})
+    format_strings = ','.join(['%s'] * len(student_ids))
+    cursor.execute(
+        f"""SELECT id_number, name FROM login_main 
+            WHERE id_number IN ({format_strings}) 
+            AND course = %s AND year_section = %s""",
+        tuple(student_ids) + (course, year_section)
+    )
+    students = {row['id_number']: row['name'] for row in cursor.fetchall()}
+    # Get attendance records for these students in this class
+    cursor.execute(
+        f"""SELECT student_ID, status, date FROM attendance_database 
+            WHERE class_ID = %s AND student_ID IN ({format_strings})""",
+        (class_id, *student_ids)
+    )
+    summary = {}
+    for stu_id in students:
+        summary[stu_id] = {"present":0, "absent":0, "late":0, "dates":[]}
+    for row in cursor.fetchall():
+        stu_id = row['student_ID']
+        status = row['status'].strip().lower()
+        date = row['date']
+        if stu_id in summary:
+            if status == "present" or status == "attended":
+                summary[stu_id]["present"] += 1
+            elif status == "absent":
+                summary[stu_id]["absent"] += 1
+            elif status == "late":
+                summary[stu_id]["late"] += 1
+            summary[stu_id]["dates"].append({"status": status.title(), "date": date})
+    cursor.close()
+    conn.close()
+    return jsonify(summary)
+
+@app.route("/download_attendance_pdf")
+def download_attendance_pdf():
+    class_id = request.args.get("class_id")
+    section = request.args.get("section")
+    if not class_id or not section:
+        return "Missing data", 400
+
+    # Parse section into course and year_section
+    section = section.strip()
+    if " " in section:
+        course, year_section = section.split(" ", 1)
+        course = course.strip()
+        year_section = year_section.strip()
+    else:
+        course = section
+        year_section = ""
+
+    conn = get_mysql_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    # Get all student_IDs enrolled in this class and section
+    cursor.execute("SELECT student_ID FROM enrollment_database WHERE class_ID = %s", (class_id,))
+    student_ids = [row['student_ID'] for row in cursor.fetchall()]
+    if not student_ids:
+        cursor.close()
+        conn.close()
+        return "No students", 404
+
+    format_strings = ','.join(['%s'] * len(student_ids))
+    cursor.execute(
+        f"""SELECT id_number, name FROM login_main 
+            WHERE id_number IN ({format_strings}) 
+            AND course = %s AND year_section = %s""",
+        tuple(student_ids) + (course, year_section)
+    )
+    students = {row['id_number']: row['name'] for row in cursor.fetchall()}
+
+    # Get attendance records for these students in this class
+    cursor.execute(
+        f"""SELECT student_ID, status, date FROM attendance_database 
+            WHERE class_ID = %s AND student_ID IN ({format_strings})""",
+        (class_id, *student_ids)
+    )
+    summary = {}
+    for stu_id in students:
+        summary[stu_id] = {"present":0, "absent":0, "late":0, "dates":[]}
+    for row in cursor.fetchall():
+        stu_id = row['student_ID']
+        status = row['status'].strip().lower()
+        date = row['date']
+        if stu_id in summary:
+            if status == "present" or status == "attended":
+                summary[stu_id]["present"] += 1
+            elif status == "absent":
+                summary[stu_id]["absent"] += 1
+            elif status == "late":
+                summary[stu_id]["late"] += 1
+            summary[stu_id]["dates"].append({"status": status.title(), "date": date})
+    cursor.close()
+    conn.close()
+
+    # Generate HTML for the table (with colors)
+    html = """
+    <html>
+    <head>
+    <meta charset="utf-8">
+    <style>
+    body {{ font-family: 'Roboto', Arial, sans-serif; }}
+    table {{ width: 100%; border-collapse: collapse; min-width: 700px; }}
+    th, td {{ padding: 8px; border-bottom: 1px solid #e3e9ed; }}
+    th {{ background: #f5f7fa; }}
+    .present {{ color: #219653; font-weight: 600; background: #eafaf1; }}
+    .absent  {{ color: #d32f2f; font-weight: 600; background: #fdeaea; }}
+    .late    {{ color: #b8860b; font-weight: 600; background: #fffbe6; }}
+    .dates-cell {{ font-size: 0.95em; }}
+    </style>
+    </head>
+    <body>
+    <h2>Attendance Report for Class: {class_id} | Section: {section}</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Present</th>
+                <th>Absent</th>
+                <th>Late</th>
+                <th>Dates</th>
+            </tr>
+        </thead>
+        <tbody>
+    """.format(class_id=class_id, section=section)
+
+    for stu_id, name in students.items():
+        att = summary[stu_id]
+        html += f"""
+        <tr>
+            <td>{name}</td>
+            <td class="present">{att['present']}</td>
+            <td class="absent">{att['absent']}</td>
+            <td class="late">{att['late']}</td>
+            <td class="dates-cell">
+                {''.join([
+                    f"<span class='{d['status'].lower()}'>{d['status']}</span>: {d['date']}<br>"
+                    for d in att['dates']
+                ])}
+            </td>
+        </tr>
+        """
+
+    html += """
+        </tbody>
+    </table>
+    </body>
+    </html>
+    """
+    
+    import io
+
+    pdf_bytes = pdfkit.from_string(html, False, configuration=PDFKIT_CONFIG)
+    pdf_io = io.BytesIO(pdf_bytes)
+    pdf_io.seek(0)
+    filename = f"attendance_{class_id}_{section.replace(' ','_')}.pdf"
+    return send_file(pdf_io, mimetype='application/pdf', as_attachment=True, download_name=filename)
+
+@app.route("/download_attendance_excel")
+def download_attendance_excel():
+    from openpyxl import Workbook
+    from openpyxl.styles import Font, PatternFill, Alignment
+    import io
+
+    class_id = request.args.get("class_id")
+    section = request.args.get("section")
+    if not class_id or not section:
+        return "Missing data", 400
+
+    # Parse section into course and year_section
+    section = section.strip()
+    if " " in section:
+        course, year_section = section.split(" ", 1)
+        course = course.strip()
+        year_section = year_section.strip()
+    else:
+        course = section
+        year_section = ""
+
+    conn = get_mysql_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    # Get all student_IDs enrolled in this class and section
+    cursor.execute("SELECT student_ID FROM enrollment_database WHERE class_ID = %s", (class_id,))
+    student_ids = [row['student_ID'] for row in cursor.fetchall()]
+    if not student_ids:
+        cursor.close()
+        conn.close()
+        return "No students", 404
+
+    format_strings = ','.join(['%s'] * len(student_ids))
+    cursor.execute(
+        f"""SELECT id_number, name FROM login_main 
+            WHERE id_number IN ({format_strings}) 
+            AND course = %s AND year_section = %s""",
+        tuple(student_ids) + (course, year_section)
+    )
+    students = {row['id_number']: row['name'] for row in cursor.fetchall()}
+
+    # Get attendance records for these students in this class
+    cursor.execute(
+        f"""SELECT student_ID, status, date FROM attendance_database 
+            WHERE class_ID = %s AND student_ID IN ({format_strings})""",
+        (class_id, *student_ids)
+    )
+    summary = {}
+    for stu_id in students:
+        summary[stu_id] = {"present":0, "absent":0, "late":0, "dates":[]}
+    for row in cursor.fetchall():
+        stu_id = row['student_ID']
+        status = row['status'].strip().lower()
+        date = row['date']
+        if stu_id in summary:
+            if status == "present" or status == "attended":
+                summary[stu_id]["present"] += 1
+            elif status == "absent":
+                summary[stu_id]["absent"] += 1
+            elif status == "late":
+                summary[stu_id]["late"] += 1
+            summary[stu_id]["dates"].append({"status": status.title(), "date": date})
+    cursor.close()
+    conn.close()
+
+    # Create Excel workbook
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Attendance"
+
+    # Header
+    ws.append(["Name", "Present", "Absent", "Late", "Dates"])
+    header_font = Font(bold=True)
+    ws.row_dimensions[1].height = 22
+    for col in range(1, 6):
+        ws.cell(row=1, column=col).font = header_font
+        ws.cell(row=1, column=col).alignment = Alignment(horizontal="center", vertical="center")
+
+    # Color fills
+    present_fill = PatternFill(start_color="EAF9F1", end_color="EAF9F1", fill_type="solid")
+    absent_fill = PatternFill(start_color="FDEAEA", end_color="FDEAEA", fill_type="solid")
+    late_fill = PatternFill(start_color="FFFBE6", end_color="FFFBE6", fill_type="solid")
+
+    # Data rows
+    for stu_id, name in students.items():
+        att = summary[stu_id]
+        dates_str = "\n".join([f"{d['status']}: {d['date']}" for d in att['dates']])
+        row = [name, att['present'], att['absent'], att['late'], dates_str]
+        ws.append(row)
+        r = ws.max_row
+        ws.cell(row=r, column=2).fill = present_fill
+        ws.cell(row=r, column=3).fill = absent_fill
+        ws.cell(row=r, column=4).fill = late_fill
+        ws.cell(row=r, column=2).font = Font(color="219653", bold=True)
+        ws.cell(row=r, column=3).font = Font(color="D32F2F", bold=True)
+        ws.cell(row=r, column=4).font = Font(color="B8860B", bold=True)
+        ws.cell(row=r, column=5).alignment = Alignment(wrap_text=True)
+
+    # Adjust column widths
+    ws.column_dimensions['A'].width = 28
+    ws.column_dimensions['B'].width = 10
+    ws.column_dimensions['C'].width = 10
+    ws.column_dimensions['D'].width = 10
+    ws.column_dimensions['E'].width = 40
+
+    # Save to BytesIO
+    output = io.BytesIO()
+    wb.save(output)
+    output.seek(0)
+    filename = f"attendance_{class_id}_{section.replace(' ','_')}.xlsx"
+    return send_file(output, mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                     as_attachment=True, download_name=filename)
+    
+@app.route("/get_notifications_student")
+def get_notifications_student():
+    if 'id_number' not in session:
+        return jsonify([])
+    user_id = session['id_number']
+    conn = get_mysql_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM notifications WHERE user_id = %s ORDER BY created_at DESC LIMIT 20", (user_id,))
+    notifications = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return jsonify(notifications)
+
+@app.route("/histogram_data_student")
+def histogram_data_student():
+    if 'id_number' not in session:
+        return jsonify({"error": "Not logged in"}), 401
+
+    student_id = session['id_number']
+    conn = get_mysql_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    cursor.execute("""
+        SELECT status, COUNT(*) as count 
+        FROM attendance_database 
+        WHERE student_ID = %s 
+        GROUP BY status
+    """, (student_id,))
+    status_counts = {row['status'].strip().lower(): row['count'] for row in cursor.fetchall()}
+
+    absent = status_counts.get('absent', 0)
+    late = status_counts.get('late', 0)
+    attended = status_counts.get('attended', 0) + status_counts.get('present', 0)
+    # excused = status_counts.get('no classes/excused', 0)  # <-- Remove this
+
+    cursor.execute("SELECT COUNT(DISTINCT date) as days_recorded FROM attendance_database WHERE student_ID = %s", (student_id,))
+    days_recorded = cursor.fetchone()['days_recorded']
+    days_remaining = max(0, 180 - days_recorded)
+
+    cursor.close()
+    conn.close()
+
+    return jsonify({
+        "Absent": absent,
+        "Late": late,
+        "Attended": attended,
+        "Days Remaining": days_remaining
+    })
+    
 if __name__ == "__main__":
     app.run(debug=True)
