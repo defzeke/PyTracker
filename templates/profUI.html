@@ -5,9 +5,6 @@
     @import url('https://fonts.googleapis.com/css2?family=Actor&family=Roboto:ital,wght@0,100..900;1,100..900&family=Tai+Heritage+Pro:wght@400;700&display=swap');
     </style>
     <!-- Cropper.js CSS -->
-    <link  href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet"/>
-    <!-- Cropper.js JS -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='profui.css') }}">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -113,28 +110,12 @@
                 <span style="font-weight:bold; font-size: 150%;">Account Settings</span>
             </div>
             <button id="change-dp-btn" class="btns" type="button">
+                <img src="{{ url_for('static', filename='images/display pic.png') }}" class="account-setting-logos" style="vertical-align:middle; margin-right:8px;">
                 Change Display Picture
             </button>
             <button id="change-pass-btn" class="btns">
                 <img class="account-setting-logos" src="{{ url_for('static', filename='images/change pass.png')}}">Change Password
             </button>
-            <input type="file" id="profile-upload" accept="image/*" style="display:none;">
-
-            <form action="{{ url_for('upload_profile_pic') }}" method="post" enctype="multipart/form-data" style="margin-top: 16px;">
-                <input type="file" name="profile_pic" accept="image/*" required>
-                <button type="submit" class="btns" style="margin-top:8px;">Upload</button>
-            </form>
-        </div>
-    </div>
-
-
-    <div id="cropper-modal" style="display:none; position:fixed; z-index:3000; left:0; top:0; width:100vw; height:100vh; background:rgba(0,0,0,0.5); align-items:center; justify-content:center;">
-        <div style="background:#fff; padding:24px; border-radius:12px; max-width:90vw; max-height:90vh;">
-            <img id="cropper-image" style="max-width:60vw; max-height:60vh; display:block; margin:auto;">
-            <div style="text-align:center; margin-top:16px;">
-                <button id="cropper-cancel" class="btns">Cancel</button>
-                <button id="cropper-save" class="btns">Save</button>
-            </div>
         </div>
     </div>
 
@@ -163,46 +144,31 @@
         </div>
     </div>
 
-    <div id="status-popover" class="popover-panel" style="display:none;">
-        <div class="popover-content">
-            <p>Status content here</p>
-        </div>
-    </div>
-
-    <div id="message-popover" class="popover-panel" style="display:none;">
-        <div class="popover-content">
-            <p>Messages content here</p>
-        </div>
-    </div>
-
-    <div id="recitation-popover" class="popover-panel" style="display:none;">
-        <div class="popover-content">
-            <p>Recitation content here</p>
-        </div>
-    </div>
-
-
     <div id="main-content">
         <div id="dashboard-content">
             <h1 class="header-text">Dashboard</h1>
-            <div id="attendance-dashboard">
+            <div id="attendance-dashboard" class="dashboard-element">
     <div id="attendance-heatmap" style="width:100%;height:180px;"></div>
-</div>
-            <div id="weather">
-                <div id="weather-greeting" style="font-size: 1.2em; font-weight: bold; margin: 18px 0 8px 0; text-align:center;">
-                    Hello Prof. {{ prof_name or '' }}!
-                </div>
-                <div id="weather-content" style="padding: 0 18px;">
-                    <div id="weather-row" style="display: flex; justify-content: space-between; align-items: stretch; gap: 16px;">
-                        <div id="weather-today" style="flex:1;"></div>
-                        <div style="width:2px; background:#ddd; margin:0 8px;"></div>
-                        <div id="weather-tomorrow" style="flex:1;"></div>
-                    </div>
-                </div>
-            </div>
-            <div id="histogram"></div>
+    </div>
 
+    <div id="weather-location" style="text-align:center;font-weight:bold;font-size:1.1em;margin-bottom:8px;">
+        Manila, Philippines
+    </div>
+    <div id="weather" class="dashboard-element">
+        <div id="weather-greeting" style="font-size: 1.2em; font-weight: 200; margin: 18px 0 8px 0; text-align:center;">
+            Hello Prof. {{ prof_name or '' }}! Check out the weather today.
         </div>
+        <div id="weather-content" style="padding: 0 18px;">
+            <div id="weather-row" style="display: flex; justify-content: space-between; align-items: stretch; gap: 16px;">
+                <div id="weather-today" style="flex:1;"></div>
+                <div style="width:2px; background:#ddd; margin:0 8px;"></div>
+                <div id="weather-tomorrow" style="flex:1;"></div>
+            </div>
+        </div>
+    </div>
+    <div id="histogram" class="dashboard-element"></div>
+
+    </div>
 
         <div id="attendance-content">
             <h1 class="header-text">Attendance</h1>
@@ -336,6 +302,20 @@
         </div>
     </div>
 
+    <div id="profile-upload-modal" style="display:none; position:fixed; z-index:5000; left:0; top:0; width:100vw; height:100vh; background:rgba(0,0,0,0.4); align-items:center; justify-content:center;">
+        <div style="background:#fff; padding:32px 24px 24px 24px; border-radius:14px; min-width:320px; max-width:90vw; box-shadow:0 8px 32px rgba(44,41,106,0.18); position:relative;">
+            <button id="close-profile-upload-modal" style="position:absolute; top:12px; right:16px; background:none; border:none; font-size:1.5em; cursor:pointer;">&times;</button>
+            <h2 style="margin-top:0; margin-bottom:18px;">Upload Profile Picture</h2>
+            <form id="profile-upload-form" action="{{ url_for('upload_profile_pic') }}" method="post" enctype="multipart/form-data">
+                <input type="file" id="profile-upload" name="profile_pic" accept="image/*" required style="margin-bottom:16px;">
+                <div style="display:flex; gap:16px; justify-content:flex-end;">
+                    <button type="button" id="cancel-profile-upload" class="btns" style="background:#eee; color:#333;">Cancel</button>
+                    <button type="submit" class="btns" style="background:#23234a; color:#fff;">Upload</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script src="{{ url_for('static', filename='sidebarui.js') }}"></script>
     <script src="{{ url_for('static', filename='topbarui.js') }}"></script>
     <script src="{{ url_for('static', filename='addclass.js') }}"></script>
@@ -346,6 +326,7 @@
     <script src="{{ url_for('static', filename='profui.js') }}"></script>
     <script src="{{ url_for('static', filename='heatmapprof.js') }}"></script>
     <script src="{{ url_for('static', filename='attendanceprof.js') }}"></script>
+    <script src="{{ url_for('static', filename='darkmode.js') }}"></script>
 
 
     <script>

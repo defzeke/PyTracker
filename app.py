@@ -12,6 +12,7 @@ from werkzeug.utils import secure_filename
 import time
 
 load_dotenv()
+print("API KEY:", os.getenv("OPENWEATHERMAP_API_KEY"))
 
 ##########################################################################################################################
 # OTP
@@ -892,35 +893,36 @@ def studentUI():
 
 @app.route("/weather")
 def get_weather():
-    # Example: Manila coordinates
-    latitude = 14.5995
-    longitude = 120.9842
-    url = (
-        "https://api.open-meteo.com/v1/forecast?"
-        f"latitude={latitude}&longitude={longitude}"
-        "&daily=weathercode,temperature_2m_max,temperature_2m_min"
-        "&timezone=Asia/Manila"
-    )
+    print("Weather route called!")  
+    API_KEY = os.getenv("OPENWEATHERMAP_API_KEY")  
+    city = "Manila,PH"
+    url = f"https://api.openweathermap.org/data/2.5/weather?q={city}&appid={API_KEY}&units=metric"
     try:
+        print("Requesting:", url)  
         resp = requests.get(url, timeout=5)
         data = resp.json()
-        today = {
-            "date": data["daily"]["time"][0],
-            "weathercode": data["daily"]["weathercode"][0],
-            "temp_max": data["daily"]["temperature_2m_max"][0],
-            "temp_min": data["daily"]["temperature_2m_min"][0],
-        }
-        tomorrow = {
-            "date": data["daily"]["time"][1],
-            "weathercode": data["daily"]["weathercode"][1],
-            "temp_max": data["daily"]["temperature_2m_max"][1],
-            "temp_min": data["daily"]["temperature_2m_min"][1],
-        }
-        return jsonify({"today": today, "tomorrow": tomorrow})
-    except Exception as e:
-        return jsonify({"error": "Weather unavailable"}), 500
+        print("Weather API response:", data)  
+        if data.get("cod") != 200:
+            return jsonify({"error": "Weather unavailable"}), 500
 
-# Example SQLAlchemy model (adjust as needed)
+        weather = {
+            "description": data["weather"][0]["description"].title(),
+            "icon": data["weather"][0]["icon"],
+            "temp": round(data["main"]["temp"], 1),
+            "temp_min": round(data["main"]["temp_min"], 1),
+            "temp_max": round(data["main"]["temp_max"], 1),
+            "city": data["name"]
+        }
+        return jsonify(weather)
+    except Exception as e:
+        print("Exception in /weather:", e)  
+        return jsonify({"error": "Weather unavailable"}), 500
+    
+
+
+
+
+
 
 @app.route("/histogram_data")
 def histogram_data():
@@ -1186,8 +1188,10 @@ def upload_profile_pic():
     print("File received:", file)
     if file:
         filename = secure_filename(f"{session['user']}_{int(time.time())}_{file.filename}")
-        os.makedirs(os.path.join('static', 'profile_pics'), exist_ok=True)
-        filepath = os.path.join('static', 'profile_pics', filename)
+        # Use absolute path for the static/profile_pics directory
+        static_folder = os.path.join(app.root_path, 'static', 'profile_pics')
+        os.makedirs(static_folder, exist_ok=True)
+        filepath = os.path.join(static_folder, filename)
         file.save(filepath)
         print("Saved file to:", filepath)
         conn = get_mysql_connection()
