@@ -181,7 +181,199 @@
         <div id="dashboard-content">
             <h1 class="header-text">Dashboard</h1>
             <div id="attendance-dashboard">
-    <div id="attendance-heatmap" style="width:100%;height:180px;"></div>
+    <div id="attendance-series" style="width:100%;height:180px;"></div>
+        <style>
+
+.dropdown {
+  position: relative;
+  display: inline-block;
+  margin-right: 9px;
+}
+.dropdown-btn {
+  padding: 10px 24px;
+  cursor: pointer;
+  background: #f0f0f0;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background: #fff;
+  min-width: 120px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  z-index: 1;
+}
+.dropdown-content a {
+  display: block;
+  padding: 8px 12px;
+  text-decoration: none;
+  color: #333;
+  cursor: pointer;
+}
+.dropdown-content a:hover {
+  background: #f5f5f5;
+}
+.dropdown:hover .dropdown-content {
+  display: block;
+}
+#attendance-dashboard {
+  margin-top: 0;
+  padding-top: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  overflow: hidden;
+}
+.dropdown-group {  
+  margin-left: 18px;
+  margin-top: 10px;
+  margin-bottom: 16px;
+}
+.date-dropdown {
+  padding: 10px 24px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background: #f9f9f9;
+  font-size: 16px;
+  margin-left: 16px;
+  margin-bottom: 12px;
+}
+.download-bar { 
+  margin-bottom: 0px;
+  margin-top: 60px;
+  margin-left: 16px;                                   
+}
+.download-bar button {
+  padding: 10px 16px;     /* size of the button */
+  font-size: 16px;        /* text size */
+  margin-left: 7px;       /* space between buttons */
+}
+.info-box {
+  width: 400px;
+  height: 400px;
+  padding: 24px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background: #f9f9f9;
+}
+.info-box label {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+</style>
+
+<div id="attendance-dashboard">
+  <div style="display: flex; align-items: stretch;">
+    <div style="flex:1;">
+    <div class="date-dropdown">
+        <select id="date-select" onchange="setAttendanceDate(this.value)">
+        <option value="">Select Date</option>
+        <option value="2025-06-19">June 19, 2025</option>
+        <option value="2025-06-18">June 18, 2025</option>
+        <option value="2025-06-17">June 17, 2025</option>
+        <!-- Add more dates as needed -->
+        </select>
+        <input type="date" id="attendance-date" style="border:none; background:transparent; font-size:16px;">
+    </div>
+    <div class="dropdown-group" style="display: flex; gap: 12px;">
+        <div class="dropdown">
+        <button class="dropdown-btn">CLS</button>
+        <div class="dropdown-content">
+            <a>Class 1</a>
+            <a>Class 2</a>
+            <a>Class 3</a>
+        </div>
+        </div>
+        <div class="dropdown">
+        <button class="dropdown-btn">SUB</button>
+        <div class="dropdown-content">
+            <a>Subject 1</a>
+            <a>Subject 2</a>
+            <a>Subject 3</a>
+        </div>
+        </div>
+        <div class="dropdown">
+        <button class="dropdown-btn">SEC</button>
+        <div class="dropdown-content">
+            <a>Section 1</a>
+            <a>Section 2</a>
+            <a>Section 3</a>
+        </div>
+        </div>
+    </div>
+        <div class="download-bar">
+        <button onclick="downloadPDF()">Download PDF</button>
+        <button onclick="downloadExcel()">Download Excel</button>
+        </div>
+    <div id="attendance-series" style="width:100%;height:180px;"></div>
+  </div>
+  <div style="width:2px; height:230px; background:#bbb; border-radius:2px; margin: 0 50px;"></div>
+  <div style="flex:1;">
+
+<div id="user-info-box" style="max-width: 400px; max-height: fit-content; padding: 24px; border: 1px solid #ccc; border-radius: 8px; background: #f9f9f9;">
+  <div style="margin-bottom: 10px;">
+    <strong>Full Name:</strong> <span id="user-fullname"></span>
+  </div>
+  <div style="margin-bottom: 10px;">
+    <strong>ID No.:</strong> <span id="user-id"></span>
+  </div>
+  <div style="margin-bottom: 10px;">
+    <strong>Position:</strong> <span id="user-position"></span>
+  </div>
+  <div style="margin-bottom: 10px;">
+    <strong>CYS:</strong> <span id="user-cys"></span>
+  </div>
+  <div>
+    <strong>College:</strong> <span id="user-college"></span>
+  </div>
+</div>
+
+</div>
+  </div>
+</div>
+<script>
+function setAttendanceDate(val) {
+  document.getElementById('attendance-date').value = val;
+}
+function downloadPDF() {
+  const link = document.createElement('a');
+  link.href = 'path/to/your/file.pdf'; // Replace with your PDF file path
+  link.download = 'report.pdf';
+  link.click();
+}
+function downloadExcel() {
+  const link = document.createElement('a');
+  link.href = 'path/to/your/file.xlsx'; // Replace with your Excel file path
+  link.download = 'report.xlsx';
+  link.click();
+}
+</script>
+<script>
+// Example: Replace these values with data from your backend or authentication system
+const userData = {
+  fullname: "Maya Chan",
+  id: "2025-12345",
+  position: "Professor",
+  cys: "BSCpE",
+  college: "College of Computer Engineering"
+};
+
+document.getElementById('user-fullname').textContent = userData.fullname;
+document.getElementById('user-id').textContent = userData.id;
+document.getElementById('user-position').textContent = userData.position;
+document.getElementById('user-cys').textContent = userData.cys;
+document.getElementById('user-college').textContent = userData.college;
+</script>
+<!-- ...existing code... -->
+
+
+
+
+
+
+    
 </div>
             <div id="weather">
                 <div id="weather-greeting" style="font-size: 1.2em; font-weight: bold; margin: 18px 0 8px 0; text-align:center;">
@@ -190,7 +382,7 @@
                 <div id="weather-content" style="padding: 0 18px;">
                     <div id="weather-row" style="display: flex; justify-content: space-between; align-items: stretch; gap: 16px;">
                         <div id="weather-today" style="flex:1;"></div>
-                        <div style="width:2px; background:#ddd; margin:0 8px;"></div>
+                        <div style="width:2px; background:#dddddd; margin:0 8px;"></div>
                         <div id="weather-tomorrow" style="flex:1;"></div>
                     </div>
                 </div>
@@ -284,7 +476,7 @@
     <script src="{{ url_for('static', filename='histogramprof.js') }}"></script>
     <script src="{{ url_for('static', filename='weatherprof.js') }}"></script>
     <script src="{{ url_for('static', filename='profui.js') }}"></script>
-    <script src="{{ url_for('static', filename='heatmapprof.js') }}"></script>
+    <!-- <script src="{{ url_for('static', filename='heatmapprof.js') }}"></script> -->
     <script src="{{ url_for('static', filename='attendanceprof.js') }}"></script>
 
 
