@@ -23,7 +23,6 @@ togglePopover("message-logo", "message-popover");
 togglePopover("recitation-logo", "recitation-popover");
 togglePopover("notification-logo", "notification-popover");
 togglePopover("calendar-image", "calendar-popover");
-togglePopover("profile-logo", "profile-popover");
 
 // Account Settings Popover
 document.getElementById("account-btn").addEventListener("click", () => {
@@ -52,9 +51,10 @@ function showSection(section) {
 // Sidebar click handlers
 document.getElementById('dashboard-logo').addEventListener('click', () => showSection('dashboard'));
 document.getElementById('attendance-logo').addEventListener('click', () => showSection('attendance'));
-document.getElementById('addclass-logo').addEventListener('click', () => showSection('addclass'));
 
 // On load, show dashboard only
 showSection('dashboard');
+
+
 
 

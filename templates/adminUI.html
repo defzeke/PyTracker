@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard | PyTracker</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='adminUI.css') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/pytrack hat logo.png') }}">
+</head>
+<body>
+    <nav class="admin-navbar">
+        <div class="admin-navbar-title">PyTracker Admin</div>
+        <div class="admin-navbar-links">
+            <a href="/logout:)" class="admin-navbar-link">Logout</a>
+        </div>
+    </nav>
+    <main class="admin-main">
+        <section class="admin-hero">
+            <h1 class="admin-hero-title">Dashboard</h1>
+        </section>
+        <section class="admin-summary-cards">
+            <div class="admin-summary-card">
+                <div class="admin-summary-label">Professors Registered</div>
+                <div class="admin-summary-value">{{ prof_count }}</div>
+            </div>
+            <div class="admin-summary-card">
+                <div class="admin-summary-label">Students Registered</div>
+                <div class="admin-summary-value">{{ student_count }}</div>
+            </div>
+            <div class="admin-summary-card">
+                <div class="admin-summary-label">Classes Created</div>
+                <div class="admin-summary-value">{{ class_count }}</div>
+            </div>
+        </section>
+        
+
+        <section class="admin-section-table">
+            <h2 class="admin-section-title">Classes Overview</h2>
+            <div class="admin-table-wrapper">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Class ID</th>
+                            <th>Subject</th>
+                            <th>Semester</th>
+                            <th>Professor</th>
+                            <th>Students</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for cls in classes %}
+                        <tr class="student-row" data-students='{{ cls.students|tojson }}'>
+                            <td>{{ cls.class_ID }}</td>
+                            <td>{{ cls.subject }}</td>
+                            <td>{{ cls.semester }}</td>
+                            <td>{{ cls.professor_name or cls.teacher_ID }}</td>
+                            <td>
+                                <div class="admin-student-avatars">
+                                    {% for stu in cls.students[:4] %}
+                                        <img src="{{ stu.avatar_url }}" alt="avatar" class="admin-avatar-img" title="{{ stu.name }}">
+                                    {% endfor %}
+                                    {% if cls.student_count > 4 %}
+                                        <span class="admin-avatar-count">+{{ cls.student_count - 4 }}</span>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td>
+                                <form method="post" action="/update_class_status" class="status-form" style="display:inline;">
+                                    <input type="hidden" name="class_id" value="{{ cls.class_ID }}">
+                                    <select name="status" class="admin-status-dropdown" data-class-id="{{ cls.class_ID }}">
+                                        <option value="Ongoing" {% if cls.status == 'Ongoing' %}selected{% endif %}>Ongoing</option>
+                                        <option value="Done" {% if cls.status == 'Done' %}selected{% endif %}>Done</option>
+                                    </select>
+                                </form>
+                                <button class="admin-btn admin-delete-btn" data-class-id="{{ cls.class_ID }}" style="display:none; margin-left:8px;">Delete</button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+
+        <section class="admin-actions">
+            <button class="admin-btn" id="openEnrollStudentModal">
+                <span class="admin-btn-icon">🎓</span> Enroll Student
+            </button>
+            <button class="admin-btn" id="openIssueTicketsModal">
+                <span class="admin-btn-icon">🎟️</span> Issue Tickets
+            </button>
+            <button class="admin-btn" id="openAddClassModal">
+                <span class="admin-btn-icon">🏫</span> Add Class
+            </button>
+            <button class="admin-btn" id="openRemoveRegistrantModal">
+                <span class="admin-btn-icon">🗑️</span> Remove Registrants
+            </button>
+        </section>
+    </main>
+
+    <div id="studentModal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <span class="close" id="closeModal">&times;</span>
+            <h2>Enrolled Students</h2>
+            <ul id="studentList"></ul>
+        </div>
+    </div>
+
+    <div id="enrollStudentModal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <span class="close" id="closeEnrollModal">&times;</span>
+            <h2>Enroll Student</h2>
+            <form id="enrollStudentForm" method="post" action="/enroll_student">
+                <div style="margin-bottom:12px;">
+                    <label>First Name:</label>
+                    <input type="text" name="first_name" required style="width:100%;">
+                </div>
+                <div style="margin-bottom:12px;">
+                    <label>Middle Name:</label>
+                    <input type="text" name="middle_name" required style="width:100%;">
+                </div>
+                <div style="margin-bottom:12px;">
+                    <label>Last Name:</label>
+                    <input type="text" name="last_name" required style="width:100%;">
+                </div>
+                <div style="margin-bottom:12px;">
+                    <label>Class ID:</label>
+                    <select name="class_id" multiple required style="width:100%; min-height: 80px;">
+                        {% for cls in classes %}
+                            <option value="{{ cls.class_ID }}">{{ cls.class_ID }} - {{ cls.subject }}</option>
+                        {% endfor %}
+                    </select>
+                    <small>Hold Ctrl (Windows) or Cmd (Mac) to select multiple classes.</small>
+                </div>
+                <div style="margin-bottom:16px;">
+                    <label>Student ID:</label>
+                    <input type="text" name="student_id" required style="width:100%;">
+                </div>
+                <button type="submit" class="admin-btn" style="width:100%;">Enroll</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="enrollSuccessModal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <span class="close" id="closeEnrollSuccessModal">&times;</span>
+            <h2>Enrollment Successful!</h2>
+            <p>The student has been enrolled successfully.</p>
+        </div>
+    </div>
+
+    <div id="removeRegistrantModal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <span class="close" id="closeRemoveRegistrantModal">&times;</span>
+            <h2>Remove Registrant</h2>
+            <form id="removeRegistrantForm" method="post" action="/delete_registrant">
+                <label for="user_id">Select a registrant to remove:</label>
+                <select name="user_id" id="user_id" required style="width:100%;margin-bottom:16px;">
+                    {% for user in all_users %}
+                        <option value="{{ user.id_number }}">
+                            {{ user.name }} ({{ user.role }}, {{ user.id_number }}, {{ user.email }})
+                        </option>
+                    {% endfor %}
+                </select>
+                <button type="submit" class="admin-btn" style="width:100%;">Remove</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="removeSuccessModal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <span class="close" id="closeRemoveSuccessModal">&times;</span>
+            <h2>Registrant Removed!</h2>
+            <p>The registrant has been successfully removed.</p>
+        </div>
+    </div>
+
+    <div id="addClassModal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <span class="close" id="closeAddClassModal">&times;</span>
+            <h2>Add Class</h2>
+            <form id="addClassForm" method="post" action="/add_class">
+                <div style="margin-bottom:12px;">
+                    <label>Class ID:</label>
+                    <select name="class_id" id="addClassID" required style="width:100%;">
+                        <option value="">Select Class ID</option>
+                        {% for cid, subj in class_id_subject_map.items() %}
+                            <option value="{{ cid }}">{{ cid }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div style="margin-bottom:12px;">
+                    <label>Subject:</label>
+                    <input type="text" name="subject" id="addSubject" required style="width:100%;" readonly>
+                </div>
+                <div style="margin-bottom:12px;">
+                    <label>Semester:</label>
+                    <select id="addSemester" required style="width:100%;" disabled>
+                        <option value="S1-{{ year }}">S1-{{ year }}</option>
+                        <option value="S2-{{ year }}">S2-{{ year }}</option>
+                        <option value="S1-{{ year+1 }}">S1-{{ year+1 }}</option>
+                        <option value="S2-{{ year+1 }}">S2-{{ year+1 }}</option>
+                    </select>
+                    <input type="hidden" name="semester" id="hiddenSemester">
+                </div>
+                <div style="margin-bottom:12px;">
+                    <label>Professor:</label>
+                    <select name="teacher_id" required style="width:100%;">
+                        {% for user in all_users if user.role == 'Teacher' %}
+                            <option value="{{ user.id_number }}">{{ user.name }} ({{ user.id_number }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button type="submit" class="admin-btn" style="width:100%;">Add Class</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="addClassSuccessModal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <span class="close" id="closeAddClassSuccessModal">&times;</span>
+            <h2>Class Added!</h2>
+            <p>The class has been successfully added.</p>
+        </div>
+    </div>
+    <!-- Add Class Duplicate Modal -->
+    <div id="addClassDuplicateModal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <span class="close" id="closeAddClassDuplicateModal">&times;</span>
+            <h2>Duplicate Class</h2>
+            <p>This professor already has a class with that Class ID.</p>
+        </div>
+    </div>
+
+    <div id="issueTicketsModal" class="modal" style="display:none;">
+        <div class="modal-content" style="max-width:950px; width:98vw;">
+            <span class="close" id="closeIssueTicketsModal">&times;</span>
+            <h2>Issue Tickets</h2>
+            <div style="overflow-x:auto;">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>User</th>
+                            <th>Email</th>
+                            <th>Subject</th>
+                            <th>Description</th>
+                            <th style="width: 90px;">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for ticket in tickets %}
+                        <tr>
+                            <td>{{ ticket.ticket_id }}</td>
+                            <td>
+                                <div style="display:flex;align-items:center;gap:8px;">
+                                    <img src="{{ url_for('static', filename='images/profile.png') }}" alt="avatar" style="width:32px;height:32px;border-radius:50%;border:1.5px solid #e0e0e0;">
+                                    <span>{{ ticket.user_name }}</span>
+                                </div>
+                            </td>
+                            <td style="word-break:break-all;">{{ ticket.user_email }}</td>
+                            <td>{{ ticket.subject }}</td>
+                            <td style="max-width:220px;white-space:pre-line;">{{ ticket.description }}</td>
+                            <td>
+                                {% if ticket.status == 'Closed' %}
+                                    <span style="color:#27ae60;font-weight:600;">Closed</span>
+                                {% else %}
+                                    <span style="color:#e67e22;font-weight:600;">Open</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="6" style="background:#f6f8fa; text-align:center; padding-top: 0;">
+                                <div style="margin-top:18px;">
+                                    {% if ticket.status != 'Closed' %}
+                                    <form method="post" action="/reply_ticket" style="display:inline-flex; flex-direction:column; align-items:center; gap:10px; max-width:400px; width:100%;">
+                                        <input type="hidden" name="ticket_id" value="{{ ticket.ticket_id }}">
+                                        <textarea name="reply" required placeholder="Type your reply here..." style="width:100%;"></textarea>
+                                        <button type="submit" class="admin-btn" style="width:160px;">Send Reply</button>
+                                    </form>
+                                    {% else %}
+                                    <div style="color:#23234a;font-size:0.98em;white-space:pre-line; text-align:center;">{{ ticket.admin_reply or '—' }}</div>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        function updateStatusDropdownColors() {
+            document.querySelectorAll('.admin-status-dropdown').forEach(function(select) {
+                select.classList.remove('admin-status-ongoing', 'admin-status-done');
+                if (select.value === 'Ongoing') {
+                    select.classList.add('admin-status-ongoing');
+                } else if (select.value === 'Done') {
+                    select.classList.add('admin-status-done');
+                }
+            });
+        }
+        updateStatusDropdownColors();
+        document.querySelectorAll('.admin-status-dropdown').forEach(function(select) {
+            select.addEventListener('change', updateStatusDropdownColors);
+        });
+    });
+
+    document.querySelectorAll('.student-row').forEach(function(row) {
+        row.addEventListener('click', function(e) {
+            if (e.target.tagName === 'SELECT' || e.target.tagName === 'OPTION' || e.target.closest('form')) return;
+            const students = JSON.parse(this.dataset.students);
+            const list = document.getElementById('studentList');
+            list.innerHTML = '';
+            if (students.length === 0) {
+                list.innerHTML = '<li>No students enrolled.</li>';
+            } else {
+                students.forEach(stu => {
+                    list.innerHTML += `<li>${stu.name}</li>`;
+                });
+            }
+            document.getElementById('studentModal').style.display = 'flex';
+        });
+    });
+    document.getElementById('closeModal').onclick = function() {
+        document.getElementById('studentModal').style.display = 'none';
+    };
+    window.onclick = function(event) {
+        const modal = document.getElementById('studentModal');
+        if (event.target === modal) {
+            modal.style.display = 'none';
+        }
+    };
+
+    document.getElementById('openEnrollStudentModal').onclick = function() {
+        document.getElementById('enrollStudentModal').style.display = 'flex';
+    };
+    document.getElementById('closeEnrollModal').onclick = function() {
+        document.getElementById('enrollStudentModal').style.display = 'none';
+    };
+    window.addEventListener('click', function(event) {
+        const modal = document.getElementById('enrollStudentModal');
+        if (event.target === modal) {
+            modal.style.display = 'none';
+        }
+    });
+
+    function getQueryParam(name) {
+        const url = new URL(window.location.href);
+        return url.searchParams.get(name);
+    }
+    if (getQueryParam('enroll') === 'success') {
+        document.getElementById('enrollSuccessModal').style.display = 'flex';
+    }
+    document.getElementById('closeEnrollSuccessModal').onclick = function() {
+        document.getElementById('enrollSuccessModal').style.display = 'none';
+        const url = new URL(window.location);
+        url.searchParams.delete('enroll');
+        window.history.replaceState({}, document.title, url.pathname + url.search);
+    };
+    window.addEventListener('click', function(event) {
+        const modal = document.getElementById('enrollSuccessModal');
+        if (event.target === modal) {
+            modal.style.display = 'none';
+            const url = new URL(window.location);
+            url.searchParams.delete('enroll');
+            window.history.replaceState({}, document.title, url.pathname + url.search);
+        }
+    });
+
+    document.querySelectorAll('#enrollStudentForm input[type="text"]').forEach(function(input) {
+        input.addEventListener('input', function() {
+            if (this.name === "first_name" || this.name === "middle_name" || this.name === "last_name") {
+                if (this.value.length > 0) {
+                    this.value = this.value.charAt(0).toUpperCase() + this.value.slice(1).toLowerCase();
+                }
+            }
+        });
+    });
+
+    document.getElementById('openRemoveRegistrantModal').onclick = function() {
+        document.getElementById('removeRegistrantModal').style.display = 'flex';
+    };
+    document.getElementById('closeRemoveRegistrantModal').onclick = function() {
+        document.getElementById('removeRegistrantModal').style.display = 'none';
+    };
+    window.addEventListener('click', function(event) {
+        const modal = document.getElementById('removeRegistrantModal');
+        if (event.target === modal) {
+            modal.style.display = 'none';
+        }
+    });
+
+    function getQueryParam(name) {
+        const url = new URL(window.location.href);
+        return url.searchParams.get(name);
+    }
+    if (getQueryParam('remove') === 'success') {
+        document.getElementById('removeSuccessModal').style.display = 'flex';
+    }
+    document.getElementById('closeRemoveSuccessModal').onclick = function() {
+        document.getElementById('removeSuccessModal').style.display = 'none';
+        const url = new URL(window.location);
+        url.searchParams.delete('remove');
+        window.history.replaceState({}, document.title, url.pathname + url.search);
+    };
+    window.addEventListener('click', function(event) {
+        const modal = document.getElementById('removeSuccessModal');
+        if (event.target === modal) {
+            modal.style.display = 'none';
+            const url = new URL(window.location);
+            url.searchParams.delete('remove');
+            window.history.replaceState({}, document.title, url.pathname + url.search);
+        }
+    });
+
+    document.getElementById('openAddClassModal').onclick = function() {
+        document.getElementById('addClassModal').style.display = 'flex';
+        document.getElementById('hiddenSemester').value = document.getElementById('addSemester').value;
+    };
+    document.getElementById('closeAddClassModal').onclick = function() {
+        document.getElementById('addClassModal').style.display = 'none';
+    };
+    window.addEventListener('click', function(event) {
+        const modal = document.getElementById('addClassModal');
+        if (event.target === modal) {
+            modal.style.display = 'none';
+        }
+    });
+
+    if (getQueryParam('addclass') === 'success') {
+        document.getElementById('addClassSuccessModal').style.display = 'flex';
+    }
+    document.getElementById('closeAddClassSuccessModal').onclick = function() {
+        document.getElementById('addClassSuccessModal').style.display = 'none';
+        const url = new URL(window.location);
+        url.searchParams.delete('addclass');
+        window.history.replaceState({}, document.title, url.pathname + url.search);
+    };
+    if (getQueryParam('addclass') === 'duplicate') {
+        document.getElementById('addClassDuplicateModal').style.display = 'flex';
+    }
+    document.getElementById('closeAddClassDuplicateModal').onclick = function() {
+        document.getElementById('addClassDuplicateModal').style.display = 'none';
+        const url = new URL(window.location);
+        url.searchParams.delete('addclass');
+        window.history.replaceState({}, document.title, url.pathname + url.search);
+    };
+
+    const classIdSubjectMap = {{ class_id_subject_map|tojson }};
+
+    document.getElementById('addClassID').addEventListener('change', function() {
+        const selectedId = this.value;
+        document.getElementById('addSubject').value = classIdSubjectMap[selectedId] || '';
+
+        let semesterSelect = document.getElementById('addSemester');
+        let hiddenSemester = document.getElementById('hiddenSemester');
+        if (selectedId) {
+            let match = selectedId.match(/S(\d)-(\d{4})/i);
+            if (match) {
+                let sem = match[1];
+                let year = match[2];
+                let value = `S${sem}-${year}`;
+                for (let opt of semesterSelect.options) {
+                    if (opt.value === value) {
+                        semesterSelect.value = value;
+                        hiddenSemester.value = value; 
+                        break;
+                    }
+                }
+                semesterSelect.disabled = true;
+            } else {
+                semesterSelect.disabled = false;
+                hiddenSemester.value = semesterSelect.value;
+            }
+        } else {
+            semesterSelect.disabled = false;
+            hiddenSemester.value = semesterSelect.value;
+        }
+    });
+
+    // Also update hiddenSemester if the dropdown is enabled and changed manually
+    document.getElementById('addSemester').addEventListener('change', function() {
+        document.getElementById('hiddenSemester').value = this.value;
+    });
+
+    document.querySelectorAll('.admin-status-dropdown').forEach(function(select) {
+        select.addEventListener('change', function() {
+            if (this.value === 'Done') {
+                const classId = this.getAttribute('data-class-id');
+                if (confirm('Are you sure you want to delete this class? This action cannot be undone.')) {
+                    // Immediately submit delete form
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = '/delete_class';
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'class_id';
+                    input.value = classId;
+                    form.appendChild(input);
+                    document.body.appendChild(form);
+                    form.submit();
+                } else {
+                    // Revert to Ongoing if cancelled
+                    this.value = 'Ongoing';
+                }
+            } else {
+                // Hide delete button if not Done
+                const row = this.closest('tr');
+                const deleteBtn = row.querySelector('.admin-delete-btn');
+                if (deleteBtn) {
+                    deleteBtn.style.display = 'none';
+                }
+            }
+        });
+    });
+
+    document.getElementById('openIssueTicketsModal').onclick = function() {
+        document.getElementById('issueTicketsModal').style.display = 'flex';
+    };
+    // Hide Modal
+    document.getElementById('closeIssueTicketsModal').onclick = function() {
+        document.getElementById('issueTicketsModal').style.display = 'none';
+    };
+    // Hide on outside click
+    window.addEventListener('click', function(event) {
+        const modal = document.getElementById('issueTicketsModal');
+        if (event.target === modal) {
+            modal.style.display = 'none';
+        }
+    });
+
+</script>
+</body>
+</html>

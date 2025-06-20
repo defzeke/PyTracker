@@ -5,12 +5,10 @@
     @import url('https://fonts.googleapis.com/css2?family=Actor&family=Roboto:ital,wght@0,100..900;1,100..900&family=Tai+Heritage+Pro:wght@400;700&display=swap');
     </style>
     <!-- Cropper.js CSS -->
-    <link  href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet"/>
-    <!-- Cropper.js JS -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='profui.css') }}">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/pytrack hat logo.png') }}">
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/pytrack hat logo.png') }}">
     <title>PyTracker</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -58,6 +56,8 @@
     {% endif %} -->
 
     <div id="sidebar">
+        <img src="{{ url_for('static', filename='images/pytrack hat logo.png') }}" draggable="false" class="sidebar-logo">
+
         <img id="dashboard-logo" class="sidebar-icon active" 
             src="{{ url_for('static', filename='images/active dashboard.png') }}" 
             data-active="{{ url_for('static', filename='images/active dashboard.png') }}"
@@ -70,19 +70,26 @@
             data-inactive="{{ url_for('static', filename='images/inactive attendance.png') }}"
             alt="Attendance Logo" draggable="false" data-tooltip="Attendance">
 
-        <img id="addclass-logo" class="sidebar-icon"
-            src="{{ url_for('static', filename='images/inactive addclass.png') }}"
-            data-active="{{ url_for('static', filename='images/active addclass.png') }}"
-            data-inactive="{{ url_for('static', filename='images/inactive addclass.png') }}"
-            alt="Add Class Logo" draggable="false" data-tooltip="Add Class">
+        <div id="report-issue-link">
+            Report an Issue
+        </div>
     </div>
 
 
 
     <div id="topbar">
         <img id="profile-logo" class="topbar-icon"
-    src="{{ url_for('static', filename='images/profile.png') }}"
+    src="{% if prof_pic %}{{ url_for('static', filename='profile_pics/' ~ prof_pic) }}{% else %}{{ url_for('static', filename='images/profile.png') }}{% endif %}"
     alt="Profile" draggable="false" data-tooltip="Profile">
+
+        <div id="user-info" style="display: inline-block; vertical-align: middle; margin-left: 12px;">
+            <div style="font-family: 'Roboto', Arial, sans-serif; font-size: 1.05em; font-weight: 500;">
+                {{ prof_name }}
+            </div>
+            <div style="font-family: 'Roboto', Arial, sans-serif; font-size: 0.85em; color: #888;">
+                {{ prof_role|capitalize }}
+            </div>
+        </div>
 
     <div id="profile-popover" class="popover-panel">
         <div class="popover-content" style="display: flex; flex-direction: column; gap: 0px;">
@@ -109,24 +116,13 @@
                 </button>
                 <span style="font-weight:bold; font-size: 150%;">Account Settings</span>
             </div>
-            <button id="change-dp-btn" class="btns">
-                <img class="account-setting-logos" src="{{ url_for('static', filename='images/display pic.png')}}">Change Display Picture
+            <button id="change-dp-btn" class="btns" type="button">
+                <img src="{{ url_for('static', filename='images/display pic.png') }}" class="account-setting-logos" style="vertical-align:middle; margin-right:8px;">
+                Change Display Picture
             </button>
             <button id="change-pass-btn" class="btns">
                 <img class="account-setting-logos" src="{{ url_for('static', filename='images/change pass.png')}}">Change Password
             </button>
-            <input type="file" id="profile-upload" accept="image/*" style="display:none;">
-        </div>
-    </div>
-
-
-    <div id="cropper-modal" style="display:none; position:fixed; z-index:3000; left:0; top:0; width:100vw; height:100vh; background:rgba(0,0,0,0.5); align-items:center; justify-content:center;">
-        <div style="background:#fff; padding:24px; border-radius:12px; max-width:90vw; max-height:90vh;">
-            <img id="cropper-image" style="max-width:60vw; max-height:60vh; display:block; margin:auto;">
-            <div style="text-align:center; margin-top:16px;">
-                <button id="cropper-cancel" class="btns">Cancel</button>
-                <button id="cropper-save" class="btns">Save</button>
-            </div>
         </div>
     </div>
 
@@ -137,21 +133,6 @@
         data-inactive="{{ url_for('static', filename='images/inactive extender.png') }}"
         alt="Extender Logo" draggable="false" data-tooltip="Sidebar">
 
-        <img id="status-logo" class="topbar-icon topbar-movable" src="{{ url_for('static', filename='images/inactive status.png') }}"
-            data-active="{{ url_for('static', filename='images/active status.png') }}"
-            data-inactive="{{ url_for('static', filename='images/inactive status.png') }}"
-            alt="Status Logo" draggable="false" data-tooltip="Status">
-
-        <img id="message-logo" class="topbar-icon topbar-movable" src="{{ url_for('static', filename='images/inactive message.png') }}"
-            data-active="{{ url_for('static', filename='images/active message.png') }}"
-            data-inactive="{{ url_for('static', filename='images/inactive message.png') }}"
-            alt="Status Logo" draggable="false" data-tooltip="Messages">
-        
-        <img id="recitation-logo" class="topbar-icon topbar-movable" src="{{ url_for('static', filename='images/inactive recitation.png') }}"
-            data-active="{{ url_for('static', filename='images/active recitation.png') }}"
-            data-inactive="{{ url_for('static', filename='images/inactive recitation.png') }}"
-            alt="Status Logo" draggable="false" data-tooltip="Recitation">
-        
         <div id="first-line" class="vertical-line"></div>
         <div id="second-line" class="vertical-line"></div>
 
@@ -170,46 +151,31 @@
         </div>
     </div>
 
-    <div id="status-popover" class="popover-panel" style="display:none;">
-        <div class="popover-content">
-            <p>Status content here</p>
-        </div>
-    </div>
-
-    <div id="message-popover" class="popover-panel" style="display:none;">
-        <div class="popover-content">
-            <p>Messages content here</p>
-        </div>
-    </div>
-
-    <div id="recitation-popover" class="popover-panel" style="display:none;">
-        <div class="popover-content">
-            <p>Recitation content here</p>
-        </div>
-    </div>
-
-
     <div id="main-content">
         <div id="dashboard-content">
             <h1 class="header-text">Dashboard</h1>
-            <div id="attendance-dashboard">
+            <div id="attendance-dashboard" class="dashboard-element">
     <div id="attendance-heatmap" style="width:100%;height:180px;"></div>
-</div>
-            <div id="weather">
-                <div id="weather-greeting" style="font-size: 1.2em; font-weight: bold; margin: 18px 0 8px 0; text-align:center;">
-                    Hello Prof. {{ prof_name or '' }}!
-                </div>
-                <div id="weather-content" style="padding: 0 18px;">
-                    <div id="weather-row" style="display: flex; justify-content: space-between; align-items: stretch; gap: 16px;">
-                        <div id="weather-today" style="flex:1;"></div>
-                        <div style="width:2px; background:#ddd; margin:0 8px;"></div>
-                        <div id="weather-tomorrow" style="flex:1;"></div>
-                    </div>
-                </div>
-            </div>
-            <div id="histogram"></div>
+    </div>
 
+    <div id="weather-location" style="text-align:center;font-weight:bold;font-size:1.1em;margin-bottom:8px;">
+        Manila, Philippines
+    </div>
+    <div id="weather" class="dashboard-element">
+        <div id="weather-greeting" style="font-size: 1.2em; font-weight: 200; margin: 18px 0 8px 0; text-align:center;">
+            Hello Prof. {{ prof_name or '' }}! Check out the weather today.
         </div>
+        <div id="weather-content" style="padding: 0 18px;">
+            <div id="weather-row" style="display: flex; justify-content: space-between; align-items: stretch; gap: 16px;">
+                <div id="weather-today" style="flex:1;"></div>
+                <div style="width:2px; background:#ddd; margin:0 8px;"></div>
+                <div id="weather-tomorrow" style="flex:1;"></div>
+            </div>
+        </div>
+    </div>
+    <div id="histogram" class="dashboard-element"></div>
+
+    </div>
 
         <div id="attendance-content">
             <h1 class="header-text">Attendance</h1>
@@ -252,41 +218,95 @@
             </div>
         
         </div>
-
-
-        <div id="addclass-content">
-            <div id="addclass-form">
-                <img src="{{ url_for('static', filename='images/PUP Logo.png') }}" alt="PUP Logo" id="pup-logo">            
-                <select id="course-dropdown" class="custom-dropdown" required>
-                    <option value="" disabled selected hidden>&nbsp;&nbsp;&nbsp;&nbsp;Course</option>
-                    <option value="option1">&nbsp;&nbsp;&nbsp;&nbsp;Option 1</option>
-                    <option value="option2">&nbsp;&nbsp;&nbsp;&nbsp;Option 2</option>
-                    <option value="option3">&nbsp;&nbsp;&nbsp;&nbsp;Option 3</option>
-                </select>
-
-                <select id="section-dropdown" class="custom-dropdown" required>
-                    <option value="" disabled selected hidden>&nbsp;&nbsp;&nbsp;&nbsp;Year and Section</option>
-                    <option value="option1">&nbsp;&nbsp;&nbsp;&nbsp;Option 1</option>
-                    <option value="option2">&nbsp;&nbsp;&nbsp;&nbsp;Option 2</option>
-                    <option value="option3">&nbsp;&nbsp;&nbsp;&nbsp;Option 3</option>
-                </select>
-
-                <select id="subject-dropdown" class="custom-dropdown" required>
-                    <option value="" disabled selected hidden>&nbsp;&nbsp;&nbsp;&nbsp;Subject Code</option>
-                    <option value="option1">&nbsp;&nbsp;&nbsp;&nbsp;Option 1</option>
-                    <option value="option2">&nbsp;&nbsp;&nbsp;&nbsp;Option 2</option>
-                    <option value="option3">&nbsp;&nbsp;&nbsp;&nbsp;Option 3</option>
-                </select>
-                
-                <button type="button" class="btns" id="clear-btn">Clear</button>
-                <button type="button" class="btns" id="add-btn">Add Class</button>
-                
-            </div>
-                
-        </div>
     </div>
 
     <div class="topbar-tooltip" id="topbar-tooltip"></div>
+
+
+    <div id="admin-modal" style="display:none;">
+        <div class="admin-modal-content">
+            <h2 class="admin-modal-title">Admin Access</h2>
+            <form id="admin-secret-form" autocomplete="off">
+                <label for="admin-secret-input" class="admin-modal-label">Enter Admin Password:</label>
+                <input type="password" id="admin-secret-input" class="admin-modal-input" required>
+                <div class="admin-modal-btn-row">
+                    <button type="submit" class="admin-modal-btn admin-modal-submit">Submit</button>
+                    <button type="button" id="admin-modal-cancel" class="admin-modal-btn admin-modal-cancel">Cancel</button>
+                </div>
+            </form>
+            <div id="admin-modal-error" class="admin-modal-error"></div>
+        </div>
+    </div>
+
+    <div id="change-password-modal" style="display:none; position:fixed; z-index:4000; left:0; top:0; width:100vw; height:100vh; background:rgba(0,0,0,0.5); align-items:center; justify-content:center;">
+        <div style="background:#fff; padding:24px; border-radius:12px; max-width:90vw; min-width:320px;">
+            <h2 style="margin-top:0;">Change Password</h2>
+            <form id="change-password-form">
+                <div>
+                    <label>Current Password:</label><br>
+                    <input type="password" name="current_password" required style="width:100%;">
+                </div>
+                <div>
+                    <label>New Password:</label><br>
+                    <input type="password" name="new_password" required style="width:100%;">
+                </div>
+                <div>
+                    <label>Confirm New Password:</label><br>
+                    <input type="password" name="confirm_password" required style="width:100%;">
+                </div>
+                <div id="change-password-error" style="color:red; margin-top:8px;"></div>
+                <div id="change-password-success" style="color:green; margin-top:8px;"></div>
+                <div style="margin-top:16px; display:flex; justify-content:flex-end; gap:16px;">
+                    <button type="button" id="cancel-change-password" class="btns" style="flex:1;">Cancel</button>
+                    <button type="submit" class="btns" style="flex:1;">Change Password</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="report-issue-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="closeReportIssueModal">&times;</span>
+            <h2>Report an Issue</h2>
+            <form id="reportIssueForm" method="post" action="/issue_ticket">
+                <div style="margin-bottom:16px;">
+                    <label for="issue_subject" style="font-weight:500;">Subject</label>
+                    <input type="text" id="issue_subject" name="subject" required style="width:100%;padding:8px;margin-top:4px;border-radius:4px;border:1px solid #ccc;">
+                </div>
+                <div style="margin-bottom:16px;">
+                    <label for="issue_description" style="font-weight:500;">About</label>
+                    <textarea id="issue_description" name="description" rows="5" required style="width:100%;padding:8px;margin-top:4px;border-radius:4px;border:1px solid #ccc;resize:vertical;" placeholder="Describe your issue or feedback here..."></textarea>
+                </div>
+                <button type="submit" class="btns" style="width:100%;">Submit</button>
+            </form>
+            <div id="report-issue-success" style="color:green; margin-top:8px; display:none;">Issue submitted!</div>
+        </div>
+    </div>
+
+    <div id="ticket-success-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="closeTicketSuccessModal">&times;</span>
+            <h2>Thank you!</h2>
+            <p>Your issue ticket has been submitted successfully.<br>
+            Our team will get back to you soon.</p>
+            <button id="ticket-success-ok" class="btns" style="width:100%;margin-top:18px;">OK</button>
+        </div>
+    </div>
+
+    <div id="profile-upload-modal" style="display:none; position:fixed; z-index:5000; left:0; top:0; width:100vw; height:100vh; background:rgba(0,0,0,0.4); align-items:center; justify-content:center;">
+        <div style="background:#fff; padding:32px 24px 24px 24px; border-radius:14px; min-width:320px; max-width:90vw; box-shadow:0 8px 32px rgba(44,41,106,0.18); position:relative;">
+            <button id="close-profile-upload-modal" style="position:absolute; top:12px; right:16px; background:none; border:none; font-size:1.5em; cursor:pointer;">&times;</button>
+            <h2 style="margin-top:0; margin-bottom:18px;">Upload Profile Picture</h2>
+            <form id="profile-upload-form" action="{{ url_for('upload_profile_pic') }}" method="post" enctype="multipart/form-data">
+                <input type="file" id="profile-upload" name="profile_pic" accept="image/*" required style="margin-bottom:16px;">
+                <div style="display:flex; gap:16px; justify-content:flex-end;">
+                    <button type="button" id="cancel-profile-upload" class="btns" style="background:#eee; color:#333;">Cancel</button>
+                    <button type="submit" class="btns" style="background:#23234a; color:#fff;">Upload</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script src="{{ url_for('static', filename='sidebarui.js') }}"></script>
     <script src="{{ url_for('static', filename='topbarui.js') }}"></script>
     <script src="{{ url_for('static', filename='addclass.js') }}"></script>
@@ -297,6 +317,149 @@
     <script src="{{ url_for('static', filename='profui.js') }}"></script>
     <script src="{{ url_for('static', filename='heatmapprof.js') }}"></script>
     <script src="{{ url_for('static', filename='attendanceprof.js') }}"></script>
+    <script src="{{ url_for('static', filename='darkmode.js') }}"></script>
+
+
+    <script>
+    (function() {
+        let sequence = '';
+        let timer = null;
+        const target = 'admin';
+        const timeout = 5000; // 5 seconds
+
+        document.addEventListener('keydown', function(e) {
+            if (timer) clearTimeout(timer);
+            // Only allow a-z keys
+            if (/^[a-zA-Z]$/.test(e.key)) {
+                sequence += e.key.toLowerCase();
+                if (sequence.length > target.length) sequence = sequence.slice(-target.length);
+                if (sequence === target) {
+                    sequence = '';
+                    showAdminModal();
+                }
+                timer = setTimeout(() => { sequence = ''; }, timeout);
+            }
+        });
+
+        function showAdminModal() {
+            document.getElementById('admin-modal').style.display = 'block';
+            document.getElementById('admin-modal-error').textContent = '';
+            setTimeout(() => {
+                document.getElementById('admin-secret-input').value = '';
+                document.getElementById('admin-secret-input').focus();
+            }, 10);
+        }
+
+        document.getElementById('admin-modal-cancel').onclick = function() {
+            document.getElementById('admin-modal').style.display = 'none';
+        };
+
+        document.getElementById('admin-secret-form').onsubmit = function(e) {
+            e.preventDefault();
+            const secret = document.getElementById('admin-secret-input').value;
+            fetch('/admin_secret_check', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({secret: secret})
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.href = '/admin';
+                } else {
+                    document.getElementById('admin-modal-error').textContent = 'Incorrect password.';
+                }
+            })
+            .catch(() => {
+                document.getElementById('admin-modal-error').textContent = 'Error. Try again.';
+            });
+        };
+    })();
+
+    document.getElementById("change-pass-btn").addEventListener("click", function() {
+        document.getElementById("change-password-modal").style.display = "flex";
+        document.getElementById("change-password-form").reset();
+        document.getElementById("change-password-error").textContent = "";
+        document.getElementById("change-password-success").textContent = "";
+    });
+
+    // Hide modal when "Cancel" is clicked
+    document.getElementById("cancel-change-password").addEventListener("click", function() {
+        document.getElementById("change-password-modal").style.display = "none";
+    });
+
+    // Handle form submission via AJAX
+    document.getElementById("change-password-form").addEventListener("submit", function(e) {
+        e.preventDefault();
+        const form = e.target;
+        const data = {
+            current_password: form.current_password.value,
+            new_password: form.new_password.value,
+            confirm_password: form.confirm_password.value
+        };
+        fetch("/change_password", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify(data)
+        })
+        .then(res => res.json())
+        .then(result => {
+            if (result.success) {
+                document.getElementById("change-password-success").textContent = result.success;
+                document.getElementById("change-password-error").textContent = "";
+                setTimeout(() => {
+                    document.getElementById("change-password-modal").style.display = "none";
+                }, 1500);
+            } else {
+                document.getElementById("change-password-error").textContent = result.error || "An error occurred.";
+                document.getElementById("change-password-success").textContent = "";
+            }
+        })
+        .catch(() => {
+            document.getElementById("change-password-error").textContent = "An error occurred. Please try again.";
+            document.getElementById("change-password-success").textContent = "";
+        });
+    });
+
+    document.getElementById('report-issue-link').onclick = function() {
+        document.getElementById('report-issue-modal').style.display = 'flex';
+    };
+    document.getElementById('closeReportIssueModal').onclick = function() {
+        document.getElementById('report-issue-modal').style.display = 'none';
+    };
+    window.addEventListener('click', function(event) {
+        const modal = document.getElementById('report-issue-modal');
+        if (event.target === modal) {
+            modal.style.display = 'none';
+        }
+    });
+
+    document.addEventListener("DOMContentLoaded", function() {
+        // Check if ticket_success is in the URL
+        if (window.location.search.includes("ticket_success=1")) {
+            document.getElementById('ticket-success-modal').style.display = 'flex';
+            // Optionally, hide the report issue modal if still open
+            var reportModal = document.getElementById('report-issue-modal');
+            if(reportModal) reportModal.style.display = 'none';
+            // Remove the query param from URL (optional, for cleaner UX)
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
+        // Close success modal
+        document.getElementById('closeTicketSuccessModal').onclick = function() {
+            document.getElementById('ticket-success-modal').style.display = 'none';
+        };
+        document.getElementById('ticket-success-ok').onclick = function() {
+            document.getElementById('ticket-success-modal').style.display = 'none';
+        };
+        // Also close on outside click
+        window.addEventListener('click', function(event) {
+            const modal = document.getElementById('ticket-success-modal');
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
+    });
+</script>
 
     <script>
         document.addEventListener("DOMContentLoaded", function() {
