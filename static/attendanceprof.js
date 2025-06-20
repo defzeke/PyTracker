@@ -1,183 +1,314 @@
-// Example: static/attendance.js
 document.addEventListener("DOMContentLoaded", function() {
-    // Helper for custom dropdowns
-    function setupCustomDropdown(dropdownId, onSelect) {
-        const dropdown = document.getElementById(dropdownId);
-        const selected = dropdown.querySelector('.selected');
-        const optionsDiv = dropdown.querySelector('.dropdown-options');
-        dropdown.addEventListener('click', function(e) {
-            if (e.target.classList.contains('selected')) {
-                // Toggle open
-                dropdown.classList.toggle('open');
-                // Close others
-                document.querySelectorAll('#attendance-dropdowns .custom-dropdown').forEach(dd => {
-                    if (dd !== dropdown) dd.classList.remove('open');
-                });
-            } else if (e.target.parentElement === optionsDiv) {
-                // Option clicked
-                const value = e.target.getAttribute('data-value');
-                selected.textContent = e.target.textContent;
-                selected.setAttribute('data-value', value);
-                dropdown.classList.remove('open');
-                // Mark selected
-                optionsDiv.querySelectorAll('div').forEach(opt => opt.classList.remove('selected'));
-                e.target.classList.add('selected');
-                if (onSelect) onSelect(value, e.target.textContent);   
-            }
-        });
-        // Close on outside click
-        document.addEventListener('click', function(e) {
-            if (!dropdown.contains(e.target)) dropdown.classList.remove('open');
-        });
-        return {
-            setOptions: function(options, placeholder) {
-                optionsDiv.innerHTML = '';
-                selected.textContent = placeholder;
-                selected.setAttribute('data-value', '');
-                options.forEach(opt => {
-                    const div = document.createElement('div');
-                    div.textContent = opt;
-                    div.setAttribute('data-value', opt);
-                    optionsDiv.appendChild(div);
-                });
-            },
-            getValue: function() {
-                return selected.getAttribute('data-value');
-            },
-            setValue: function(value, label) {
-                selected.textContent = label;
-                selected.setAttribute('data-value', value);
-                optionsDiv.querySelectorAll('div').forEach(opt => {
-                    opt.classList.toggle('selected', opt.getAttribute('data-value') === value);
-                });
-            }
-        };
-    }
+    const classDropdown = document.getElementById('classes-dropdown');
+    const sectionDropdown = document.getElementById('sections-dropdown');
+    let profData = null;
 
-    // Setup dropdowns
-    const classDropdown = setupCustomDropdown('classes-dropdown', onClassSelect);
-    const subjectDropdown = setupCustomDropdown('subjects-dropdown', onSubjectSelect);
-    const sectionDropdown = setupCustomDropdown('sections-dropdown', onSectionSelect);
-
-    // Populate class dropdown
-    fetch("/get_classes")
+    // Fetch all dropdown data at once
+    fetch("/prof_dropdown_data")
         .then(res => res.json())
-        .then(classes => {
-            // If you want to show class_ID + subject:
-            classDropdown.setOptions(
-                classes.map(c => `${c.class_ID} (${c.subject})`),
-                "Select Class"
-            );
-            subjectDropdown.setOptions([], "Select Subject");
-            sectionDropdown.setOptions([], "Select Section");
+        .then(data => {
+            profData = data;
+            // Populate class dropdown
+            classDropdown.innerHTML = '';
+            const defaultOption = document.createElement("option");
+            defaultOption.value = '';
+            defaultOption.disabled = true;
+            defaultOption.selected = true;
+            defaultOption.textContent = "Select Class";
+            classDropdown.appendChild(defaultOption);
+
+            data.classes.forEach(cls => {
+                const option = document.createElement("option");
+                option.value = cls.class_ID;
+                option.textContent = cls.class_ID;
+                option.style.paddingLeft = "12px";
+                classDropdown.appendChild(option);
+            });
         });
 
-    function onClassSelect(class_id) {
-        if (!class_id) {
-            subjectDropdown.setOptions([], "Select Subject");
-            sectionDropdown.setOptions([], "Select Section");
-            return;
-        }
-        // Subjects
-        fetch(`/get_subjects?class_id=${class_id}`)
-            .then(res => res.json())
-            .then(subjects => {
-                subjectDropdown.setOptions(subjects, "Select Subject");
-                sectionDropdown.setOptions([], "Select Section");
-            });
-        // Sections
-        fetch(`/get_sections?class_id=${class_id}`)
-            .then(res => res.json())
-            .then(sections => {
-                sectionDropdown.setOptions(sections, "Select Section");
-            });
-        // Clear students
-        document.getElementById("attendance-students").innerHTML = "";
-    }
+    classDropdown.addEventListener("change", function() {
+        const classId = this.value;
 
-    function onSubjectSelect() {
-        loadStudents();
-    }
-    function onSectionSelect() {
-        loadStudents();
-    }
+        // Find the selected class and get its subject
+        const cls = profData.classes.find(c => c.class_ID === classId);
+        const subjectNameSpan = document.getElementById("subject-name");
+        if (cls && subjectNameSpan) {
+            subjectNameSpan.textContent = cls.subject || "None";
+        } else if (subjectNameSpan) {
+            subjectNameSpan.textContent = "None";
+        }
+
+        // Populate section dropdown
+        sectionDropdown.innerHTML = '';
+        const defaultSectionOption = document.createElement("option");
+        defaultSectionOption.value = '';
+        defaultSectionOption.disabled = true;
+        defaultSectionOption.selected = true;
+        defaultSectionOption.textContent = "Select Section";
+        sectionDropdown.appendChild(defaultSectionOption);
+
+        // Only allow sections 1-1 to 1-5
+        (profData.class_sections[classId] || []).forEach(sec => {
+            // Extract section part after the space (e.g., "BSCPE 1-1" -> "1-1")
+            let sectionPart = sec.split(" ").pop();
+            if (["1-1", "1-2", "1-3", "1-4", "1-5"].includes(sectionPart)) {
+                const option = document.createElement("option");
+                option.value = sec;
+                option.textContent = sec;
+                sectionDropdown.appendChild(option);
+            }
+        });
+    });
+
+    classDropdown.addEventListener("blur", function() {
+        if (!this.value) {
+            const subjectNameSpan = document.getElementById("subject-name");
+            if (subjectNameSpan) subjectNameSpan.textContent = "None";
+        }
+    });
+
+    sectionDropdown.addEventListener("change", loadStudents);
 
     function loadStudents() {
-        const class_id = classDropdown.getValue();
-        const subject = subjectDropdown.getValue();
-        const section = sectionDropdown.getValue();
-        if (class_id && subject && section) {
-            fetch(`/get_students?class_id=${class_id}&subject=${subject}&section=${section}`)
-                .then(res => res.json())
-                .then(grouped => {
-                    const container = document.getElementById("attendance-students");
-                    container.innerHTML = "";
-                    // If no students, show a message
-                    if (!grouped || Object.keys(grouped).length === 0) {
-                        container.innerHTML = `
-                            <div class="student-card default-card">
-                                <div class="student-pic"></div>
-                                <div class="student-name">No Students Found</div>
-                                <div class="pal-btns">
-                                    <button>P</button>
-                                    <button>A</button>
-                                    <button>L</button>
-                                </div>
+        const class_id = classDropdown.value;
+        const section = sectionDropdown.value;
+        const container = document.getElementById("attendance-students");
+        const pleaseWaitModal = document.getElementById("please-wait-modal");
+
+        if (!class_id || !section) {
+            container.innerHTML = `
+                <div style="width:100%;text-align:center;font-size:1.3em;color:#444;padding:40px 0;">
+                    No Option Selected
+                </div>
+            `;
+            if (pleaseWaitModal) pleaseWaitModal.style.display = "none";
+            return;
+        }
+
+        if (pleaseWaitModal) pleaseWaitModal.style.display = "flex";
+
+        fetch(`/get_students?class_id=${class_id}&section=${section}`)
+            .then(res => res.json())
+            .then(grouped => {
+                if (pleaseWaitModal) pleaseWaitModal.style.display = "none";
+                container.innerHTML = "";
+                if (!grouped || Object.keys(grouped).length === 0) {
+                    container.innerHTML = `
+                        <div class="student-card default-card">
+                            <div class="student-pic"></div>
+                            <div class="student-name">No Students Found</div>
+                            <div class="pal-btns">
+                                <button>P</button>
+                                <button>A</button>
+                                <button>L</button>
+                            </div>
+                        </div>
+                    `;
+                    return;
+                }
+                Object.keys(grouped).forEach(initial => {
+                    // Group wrapper (block)
+                    const groupBlock = document.createElement("div");
+                    groupBlock.style.display = "block";
+                    groupBlock.style.marginBottom = "32px";
+
+                    // Wrapper for header and row, for alignment
+                    const groupInner = document.createElement("div");
+                    groupInner.style.paddingTop = "5px";
+                    groupInner.style.paddingLeft = "120px";
+
+                    // Header for the group
+                    const header = document.createElement("div");
+                    header.textContent = initial;
+                    header.style.fontWeight = "bold";
+                    header.style.fontSize = "1.2em";
+                    header.style.margin = "20px 0 5px 0";
+                    groupInner.appendChild(header);
+
+                    // Row for student cards (flex, but only for this group)
+                    const row = document.createElement("div");
+                    row.style.display = "flex";
+                    row.style.gap = "10px";
+                    row.style.marginLeft = "85px";
+                    groupInner.appendChild(row);
+
+                    groupBlock.appendChild(groupInner);
+
+                    grouped[initial].forEach(stu => {
+                        const card = document.createElement("div");
+                        card.className = "student-card";
+                        const profilePicUrl = stu.profile_pic
+                            ? `/static/profile_pics/${stu.profile_pic}`
+                            : '/static/images/profile.png'; // fallback image
+
+                        card.innerHTML = `
+                            <div class="student-pic" style="background: none; display: flex; justify-content: center; align-items: center;">
+                                <img src="${profilePicUrl}" alt="Profile" style="width:80px;height:80px;border-radius:50%;object-fit:cover;">
+                            </div>
+                            <div class="student-name">${stu.name}</div>
+                            <div class="pal-btns">
+                                <button data-id="${stu.id_number}" data-status="Present">P</button>
+                                <button data-id="${stu.id_number}" data-status="Absent">A</button>
+                                <button data-id="${stu.id_number}" data-status="Late">L</button>
                             </div>
                         `;
-                        return;
-                    }
-                    // For each group (A, B, ...)
-                    Object.keys(grouped).forEach(initial => {
-                        // Header for the group
-                        const header = document.createElement("div");
-                        header.textContent = initial;
-                        header.style.fontWeight = "bold";
-                        header.style.fontSize = "1.2em";
-                        header.style.margin = "24px 0 8px 0";
-                        container.appendChild(header);
-
-                        // Row for student cards
-                        const row = document.createElement("div");
-                        row.style.display = "flex";
-                        row.style.gap = "32px";
-                        row.style.marginBottom = "24px";
-                        grouped[initial].forEach(stu => {
-                            const card = document.createElement("div");
-                            card.className = "student-card";
-                            card.innerHTML = `
-                                <div class="student-pic"></div>
-                                <div class="student-name">${stu.name}</div>
-                                <div class="pal-btns">
-                                    <button data-id="${stu.id_number}" data-status="Present">P</button>
-                                    <button data-id="${stu.id_number}" data-status="Absent">A</button>
-                                    <button data-id="${stu.id_number}" data-status="Late">L</button>
-                                </div>
-                            `;
-                            row.appendChild(card);
-                        });
-                        container.appendChild(row);
+                                                row.appendChild(card);
                     });
+                    groupBlock.appendChild(row);
+                    container.appendChild(groupBlock);
                 });
-        }
+            });
     }
+
+    loadStudents();
+
+    let attendanceSelections = {}; // { student_ID: status }
 
     document.getElementById("attendance-students").addEventListener("click", function(e) {
         if (e.target.tagName === "BUTTON" && e.target.dataset.id && e.target.dataset.status) {
             const student_id = e.target.dataset.id;
             const status = e.target.dataset.status;
-            const class_id = classDropdown.getValue();
-            const date = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
-            fetch("/mark_attendance", {
-                method: "POST",
-                headers: {"Content-Type": "application/json"},
-                body: JSON.stringify({class_ID: class_id, student_ID: student_id, status: status, date: date})
-            }).then(res => res.json()).then(resp => {
-                if (resp.success) {
-                    e.target.style.background = "#22bb33";
-                    setTimeout(() => { e.target.style.background = "#e3e9ed"; }, 800);
-                }
+
+            // Save selection
+            attendanceSelections[student_id] = status;
+
+            // Remove selected state from sibling buttons
+            const btns = e.target.parentElement.querySelectorAll("button");
+            btns.forEach(btn => {
+                btn.classList.remove("selected-attendance");
+                btn.style.background = "#e3e9ed";
+                btn.style.color = "#272757";
             });
+
+            // Set selected state
+            e.target.classList.add("selected-attendance");
+            if (status === "Present") {
+                e.target.style.background = "#22bb33";
+                e.target.style.color = "#fff";
+            } else if (status === "Absent") {
+                e.target.style.background = "#dc143c";
+                e.target.style.color = "#fff";
+            } else if (status === "Late") {
+                e.target.style.background = "#ffb300";
+                e.target.style.color = "#fff";
+            }
         }
     });
+
+    // Hover effect (only if not selected)
+    document.getElementById("attendance-students").addEventListener("mouseover", function(e) {
+        if (e.target.tagName === "BUTTON" && !e.target.classList.contains("selected-attendance")) {
+            if (e.target.dataset.status === "Present") {
+                e.target.style.background = "#22bb33";
+                e.target.style.color = "#fff";
+            } else if (e.target.dataset.status === "Absent") {
+                e.target.style.background = "#dc143c";
+                e.target.style.color = "#fff";
+            } else if (e.target.dataset.status === "Late") {
+                e.target.style.background = "#ffb300";
+                e.target.style.color = "#fff";
+            }
+        }
+    });
+    document.getElementById("attendance-students").addEventListener("mouseout", function(e) {
+        if (e.target.tagName === "BUTTON" && !e.target.classList.contains("selected-attendance")) {
+            e.target.style.background = "#e3e9ed";
+            e.target.style.color = "#272757";
+        }
+    });
+
+    // Take Attendance button logic
+    document.getElementById("take-attendance-btn").addEventListener("click", function() {
+        // Get all student IDs
+        const studentCards = document.querySelectorAll("#attendance-students .student-card");
+        const studentIDs = Array.from(studentCards).map(card => {
+            const btn = card.querySelector("button[data-id]");
+            return btn ? btn.dataset.id : null;
+        }).filter(Boolean);
+
+        // Find students without attendance
+        const missing = studentIDs.filter(id => !attendanceSelections[id]);
+        if (missing.length > 0) {
+            // Get names of missing students
+            const names = missing.map(id => {
+                const card = document.querySelector(`#attendance-students .student-card button[data-id="${id}"]`).closest('.student-card');
+                return card.querySelector('.student-name').textContent;
+            });
+            showPopup(`The following students have not been marked for attendance:<br><b>${names.join(", ")}</b>`);
+            return;
+        }
+
+        // Prepare data for submission
+        const class_id = document.getElementById('classes-dropdown').value;
+        const section = document.getElementById('sections-dropdown').value;
+        // Format date as YYYY-MM-DD (MySQL standard)
+        const date = new Date();
+        const dateStr = `${date.getFullYear()}-${(date.getMonth()+1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
+        const timeStr = date.toLocaleTimeString();
+
+        const attendanceData = studentIDs.map(id => ({
+            class_ID: class_id,
+            student_ID: id,
+            status: attendanceSelections[id],
+            date: dateStr,
+            section: section
+        }));
+        
+        const pleaseWaitModal = document.getElementById("please-wait-modal");
+        if (pleaseWaitModal) pleaseWaitModal.style.display = "flex";
+
+        // Send all attendance records to backend
+        fetch("/mark_attendance_bulk", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({records: attendanceData})
+        }).then(res => res.json()).then(resp => {
+            if (pleaseWaitModal) pleaseWaitModal.style.display = "none";
+            if (resp.success) {
+                showPopup(`Attendance submitted!<br>
+                    <b>Class ID:</b> ${class_id}<br>
+                    <b>Section:</b> ${section}<br>
+                    <b>Date & Time:</b> ${dateStr} ${timeStr}`);
+                attendanceSelections = {}; // Reset for next session
+                // Optionally, reset button states here
+                document.querySelectorAll("#attendance-students .pal-btns button").forEach(btn => {
+                    btn.classList.remove("selected-attendance");
+                    btn.style.background = "#e3e9ed";
+                    btn.style.color = "#272757";
+                });
+            }
+        });
+    });
+
+    // Popup function
+    function showPopup(message) {
+        let popup = document.createElement("div");
+        popup.innerHTML = message;
+        popup.style.position = "fixed";
+        popup.style.top = "50%";
+        popup.style.left = "50%";
+        popup.style.transform = "translate(-50%, -50%)";
+        popup.style.background = "#fff";
+        popup.style.color = "#222";
+        popup.style.padding = "32px 48px";
+        popup.style.border = "2px solid #272757";
+        popup.style.borderRadius = "12px";
+        popup.style.zIndex = "9999";
+        popup.style.fontSize = "1.2em";
+        popup.style.textAlign = "center";
+        document.body.appendChild(popup);
+        setTimeout(() => popup.remove(), 3500);
+    }
 });
+
+function updateLiveDateTime() {
+    const dtSpan = document.getElementById("live-datetime");
+    if (!dtSpan) return;
+    const now = new Date();
+    const options = { year: 'numeric', month: 'short', day: 'numeric' };
+    const dateStr = now.toLocaleDateString(undefined, options);
+    const timeStr = now.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    dtSpan.textContent = `${dateStr} ${timeStr}`;
+}
+setInterval(updateLiveDateTime, 1000);
+updateLiveDateTime();

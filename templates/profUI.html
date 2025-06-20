@@ -12,41 +12,16 @@
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/pytrack hat logo.png') }}">
     <title>PyTracker</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://code.jscharting.com/latest/jscharting.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-
-    <!-- Fail heatmap and calendar libraries dump
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-activity-heatmap@1.0.0/dist/github-activity-heatmap.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/github-activity-heatmap@1.0.0/dist/github-activity-heatmap.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pikaday/css/pikaday.css">
+    <script src="https://cdn.jsdelivr.net/npm/pikaday/pikaday.js"></script>
+    
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cal-heatmap@4.4.0/cal-heatmap.css">
     <script src="https://cdn.jsdelivr.net/npm/cal-heatmap@4.4.0/cal-heatmap.min.js"></script>
-     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-matrix@4.0.1/dist/chartjs-chart-matrix.min.js"></script>
-    -->
+    
 </head>
 <body>
-
-    <!-- DEBUG: Show DB test value centered 
-    {# REMOVE THIS BLOCK IF NEEDED#}
-    {% if test_db_content %}
-      <div style="
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        background: #e0ffe0;
-        color: #222;
-        padding: 16px 32px;
-        border: 2px solid #0c0;
-        border-radius: 8px;
-        z-index: 9999;
-        font-size: 1.2em;
-        text-align: center;
-      ">
-        {{ test_db_content|safe }}
-      </div>
-    {% endif %} -->
 
     <div id="sidebar">
         <img src="{{ url_for('static', filename='images/pytrack hat logo.png') }}" draggable="false" class="sidebar-logo">
@@ -135,19 +110,61 @@
             alt="Notification Logo" draggable="false" data-tooltip="Notifications">
     </div>
 
-
-
-
-    <div id="notification-popover" class="popover-panel" style="display:none;">
-        <div class="popover-content">
-            <p>No new notifications</p>
-        </div>
-    </div>
-
     <div id="main-content">
         <div id="dashboard-content">
             <h1 class="header-text">Dashboard</h1>
             <div id="attendance-dashboard" class="dashboard-element">
+    
+                <div id="attendance-series" style="width:100%;height:180px;"></div>
+ 
+<div id="attendance-dashboard">
+  <div style="display: flex; align-items: stretch; justify-content: center;">
+    <div style="flex:1; display: flex; justify-content: flex-end;">
+    <div class="dashboard-controls-card">
+        <div class="dropdown-group">
+            <div class="dropdown">
+                <button class="dropdown-btn" id="student-class-btn" disabled>
+                    {{ student_class or 'CLS' }}
+                </button>
+            </div>
+            <div class="dropdown">
+                <button class="dropdown-btn" id="student-section-btn" disabled>
+                    {{ student_section or 'SEC' }}
+                </button>
+            </div>
+        </div>
+        <div class="dashboard-btn-group">
+            <button onclick="viewAttendance()">View Attendance</button>
+            <button onclick="downloadPDF()">Download PDF</button>
+            <button onclick="downloadExcel()">Download Excel</button>
+        </div>
+        </div>
+    <div id="attendance-series" style="width:100%;height:180px;"></div>
+  </div>
+  <div style="width:2px; height:265px; background:#bbb; border-radius:2px; margin: 0 50px;"></div>
+  <div style="flex:1;">
+
+<div id="user-info-box" style="max-width: 400px; max-height: fit-content; padding: 24px; background: #F5F7FA;">
+  <div style="margin-bottom: 10px; margin-top: 40px;">
+    <strong>Full Name:</strong> {{ prof_name }}
+  </div>
+  <div style="margin-bottom: 10px;">
+    <strong>ID No.:</strong> {{ prof_id }}
+  </div>
+  <div style="margin-bottom: 10px;">
+    <strong>Position:</strong> {{ prof_role|capitalize }}
+  </div>
+  <div style="margin-bottom: 10px;">
+    <strong>CYS:</strong> BSCpE
+  </div>
+  <div>
+    <strong>College:</strong> College of Computer Engineering
+  </div>
+</div>
+</div>
+  </div>
+</div>
+
     <div id="attendance-heatmap" style="width:100%;height:180px;"></div>
     </div>
 
@@ -166,64 +183,35 @@
             </div>
         </div>
     </div>
-    <div id="histogram" class="dashboard-element"></div>
+    <div id="histogram" class="dashboard-element">
+        <!-- Days Remaining in Semester Card -->
+        <div id="days-remaining-card" class="dashboard-element days-remaining-card">
+            <div class="days-remaining-number">{{ histogram_counts["Days Remaining"] }}</div>
+            <div class="days-remaining-label">Days Remaining in Semester</div>
+        </div>
+    </div>
 
     </div>
 
         <div id="attendance-content">
             <h1 class="header-text">Attendance</h1>
-            <button type="button" class="btns" id="take-attendance-btn">Take Attendance</button>
-
-            <img src="{{ url_for('static', filename='images/inactive calendar.png') }}" 
-                alt="Attendance Image" id="calendar-image" 
-                data-active="{{ url_for('static', filename='images/active calendar.png') }}"
-                data-inactive="{{ url_for('static', filename='images/inactive calendar.png') }}"
-                draggable="false">
-
-            <div id="calendar-popover" class="popover-panel" style="display:none; min-width:320px; left:80%; top:27%;">
-                <div class="popover-content">
-                    <h3 style="margin:0 0 12px 0;">Calendar</h3>
-                    <p>[Calendar here]</p>
-                </div>
+            <div id="attendance-action-row" style="display: flex; align-items: center; gap: 32px; margin-bottom: 24px;">
+                <button type="button" class="btns" id="take-attendance-btn">Take Attendance</button>
+                <span id="live-datetime"></span>
             </div>
-            <div id="attendance-content">
-                <div id="attendance-students">
-                    <div class="student-card default-card">
-                        <div class="student-pic"></div>
-                        <div class="student-name">No Option Selected</div>
-                        <div class="pal-btns">
-                            <button>P</button>
-                            <button>A</button>
-                            <button>L</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+
+                <div id="attendance-students"></div>
 
             <div id="select-content">
-                <!-- Class Dropdown -->
-                <select id="classes-dropdown" class="custom-dropdown" required>
-                    <option value="" disabled selected hidden>&nbsp;&nbsp;&nbsp;&nbsp;Select Class</option>
-                    <option value="class1">&nbsp;&nbsp;&nbsp;&nbsp;Class 1</option>
-                    <option value="class2">&nbsp;&nbsp;&nbsp;&nbsp;Class 2</option>
-                    <option value="class3">&nbsp;&nbsp;&nbsp;&nbsp;Class 3</option>
+                <select id="classes-dropdown" class="custom-dropdown">
+                    <option value="" disabled selected>Select Class</option>
                 </select>
-
-                <!-- Subject Dropdown -->
-                <select id="subjects-dropdown" class="custom-dropdown" required>
-                    <option value="" disabled selected hidden>&nbsp;&nbsp;&nbsp;&nbsp;Select Subject</option>
-                    <option value="subject1">&nbsp;&nbsp;&nbsp;&nbsp;Subject 1</option>
-                    <option value="subject2">&nbsp;&nbsp;&nbsp;&nbsp;Subject 2</option>
-                    <option value="subject3">&nbsp;&nbsp;&nbsp;&nbsp;Subject 3</option>
+                <select id="sections-dropdown" class="custom-dropdown">
+                    <option value="" disabled selected>Select Section</option>
                 </select>
-
-                <!-- Section Dropdown -->
-                <select id="sections-dropdown" class="custom-dropdown" required>
-                    <option value="" disabled selected hidden>&nbsp;&nbsp;&nbsp;&nbsp;Select Section</option>
-                    <option value="section1">&nbsp;&nbsp;&nbsp;&nbsp;Section 1</option>
-                    <option value="section2">&nbsp;&nbsp;&nbsp;&nbsp;Section 2</option>
-                    <option value="section3">&nbsp;&nbsp;&nbsp;&nbsp;Section 3</option>
-                </select>
+                <span id="subject-display" style="margin-left:18px; font-size:1.1em;">
+                    Subject: <span id="subject-name">None</span>
+                </span>
             </div>
         
         </div>
@@ -306,7 +294,7 @@
         <div style="background:#fff; padding:32px 24px 24px 24px; border-radius:14px; min-width:320px; max-width:90vw; box-shadow:0 8px 32px rgba(44,41,106,0.18); position:relative;">
             <button id="close-profile-upload-modal" style="position:absolute; top:12px; right:16px; background:none; border:none; font-size:1.5em; cursor:pointer;">&times;</button>
             <h2 style="margin-top:0; margin-bottom:18px;">Upload Profile Picture</h2>
-            <form id="profile-upload-form" action="{{ url_for('User.upload_profile_pic') }}" method="post" enctype="multipart/form-data">
+            <form id="profile-upload-form" action="{{ url_for('upload_profile_pic') }}" method="post" enctype="multipart/form-data">
                 <input type="file" id="profile-upload" name="profile_pic" accept="image/*" required style="margin-bottom:16px;">
                 <div style="display:flex; gap:16px; justify-content:flex-end;">
                     <button type="button" id="cancel-profile-upload" class="btns" style="background:#eee; color:#333;">Cancel</button>
@@ -316,17 +304,39 @@
         </div>
     </div>
 
+    <div id="please-wait-modal" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100vw; height:100vh; background:rgba(0,0,0,0.25); align-items:center; justify-content:center;">
+        <div style="background:#fff; padding:32px 48px; border-radius:14px; font-size:1.3em; box-shadow:0 8px 32px rgba(44,41,106,0.18);">
+            <span>⏳</span> Please wait...
+        </div>
+    </div>
+
+    <div id="notification-modal" style="display:none; position:fixed; z-index:2000; min-width:320px; background:#fff; border-radius:12px; box-shadow:0 8px 32px rgba(0,0,0,0.18); border:1px solid #e3e9ed; padding:16px 0;">
+        <div class="modal-arrow" style="position:absolute; top:-16px; left:46%; width:0; height:0; border-left:12px solid transparent; border-right:12px solid transparent; border-bottom:16px solid #fff; filter:drop-shadow(0 -2px 2px rgba(0,0,0,0.06));"></div>
+        <div id="notification-modal-content" style="padding:0 10px;"></div>
+    </div>
+
+    <div id="attendance-modal" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100vw; height:100vh; background:rgba(0,0,0,0.25); align-items:center; justify-content:center;">
+    <div style="background:#fff; padding:32px 24px; border-radius:14px; min-width:340px; max-width:90vw; box-shadow:0 8px 32px rgba(44,41,106,0.18); position:relative;">
+        <button id="close-attendance-modal" style="position:absolute; top:12px; right:16px; background:none; border:none; font-size:1.5em; cursor:pointer;">&times;</button>
+        <h2 style="margin-top:0; margin-bottom:18px;">Class Attendance</h2>
+        <div id="attendance-modal-content">
+        <!-- Table will be injected here -->
+        <div style="text-align:center; color:#888;">Loading...</div>
+        </div>
+    </div>
+    </div>
+
     <script src="{{ url_for('static', filename='sidebarui.js') }}"></script>
     <script src="{{ url_for('static', filename='topbarui.js') }}"></script>
     <script src="{{ url_for('static', filename='addclass.js') }}"></script>
-    <script src="{{ url_for('static', filename='calendar.js') }}"></script>
     <script src="{{ url_for('static', filename='settings.js') }}"></script>
-    <script src="{{ url_for('static', filename='histogramprof.js') }}"></script>
     <script src="{{ url_for('static', filename='weatherprof.js') }}"></script>
+    <script src="{{ url_for('static', filename='histogram.js') }}"></script>
     <script src="{{ url_for('static', filename='profui.js') }}"></script>
     <script src="{{ url_for('static', filename='heatmapprof.js') }}"></script>
     <script src="{{ url_for('static', filename='attendanceprof.js') }}"></script>
     <script src="{{ url_for('static', filename='darkmode.js') }}"></script>
+    <script src="{{ url_for('static', filename='dashboard.js') }}"></script>
 
 
     <script>
@@ -468,12 +478,51 @@
             }
         });
     });
-</script>
+    </script>
 
+    <script>
+    function setAttendanceDate(val) {
+    document.getElementById('attendance-date').value = val;
+    }
+    function downloadPDF() {
+        const clsBtn = document.querySelector('.dropdown-btn');
+        const secBtn = document.querySelectorAll('.dropdown-btn')[1];
+        const classId = clsBtn ? clsBtn.textContent.trim() : null;
+        const section = secBtn ? secBtn.textContent.trim() : null;
+        if (!classId || classId === "CLS" || !section || section === "SEC") {
+            alert("Please select a class and section first.");
+            return;
+        }
+        const url = `/download_attendance_pdf?class_id=${encodeURIComponent(classId)}&section=${encodeURIComponent(section)}`;
+        window.open(url, '_blank');
+    }
+    function downloadExcel() {
+        const clsBtn = document.querySelector('.dropdown-btn');
+        const secBtn = document.querySelectorAll('.dropdown-btn')[1];
+        const classId = clsBtn ? clsBtn.textContent.trim() : null;
+        const section = secBtn ? secBtn.textContent.trim() : null;
+        if (!classId || classId === "CLS" || !section || section === "SEC") {
+            alert("Please select a class and section first.");
+            return;
+        }
+        const url = `/download_attendance_excel?class_id=${encodeURIComponent(classId)}&section=${encodeURIComponent(section)}`;
+        window.open(url, '_blank');
+    }
+    </script>
+    <script>
+
+    const userData = {
+    cys: "BSCpE",
+    college: "College of Computer Engineering"
+    };
+
+    document.getElementById('user-cys').textContent = userData.cys;
+    document.getElementById('user-college').textContent = userData.college;
+    </script>
 </body>
 <script>
     document.getElementById("logout-btn").addEventListener("click", function() {
-        window.location.href = "{{url_for('User.logout')}}";
+        window.location.href = "{{url_for('logout')}}";
     });
 </script>
 </html>

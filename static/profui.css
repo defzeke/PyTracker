@@ -130,7 +130,6 @@ body.dark-mode, .dark-mode {
     top: 57%;
     left: 54%;
     background-color: #F5F7FA;
-    overflow-y: auto;
     border-radius: 15px;
     display: flex;
     align-items: center;
@@ -144,43 +143,6 @@ body.dark-mode, .dark-mode {
     max-height: 100%;
 }
 
-#addclass-form {
-    position: fixed;
-    width: 70%;
-    height: 70%;
-    top: 17%;
-    left: 18%;
-    background-color: #F5F7FA;
-    overflow-y: auto;
-    border-radius: 15px;
-}
-
-#course-dropdown {
-    position: fixed;
-    top: 44%;
-    left: 27%;
-    background-color: #E3E9ED;
-    overflow-y: auto;
-    border-radius: 15px;
-}
-
-#section-dropdown {
-    position: fixed;
-    top: 60%;
-    left: 27%;
-    background-color: #E3E9ED;
-    overflow-y: auto;
-    border-radius: 15px;
-}
-
-#subject-dropdown {
-    position: fixed;
-    top: 52%;
-    left: 27%;
-    background-color: #E3E9ED;
-    overflow-y: auto;
-    border-radius: 15px;
-}
 
 #time-dropdown {
     position: fixed;
@@ -238,11 +200,6 @@ body.dark-mode, .dark-mode {
 .popover-content {
     padding: 0 10px !important;
 }
-
-#notification-popover {
-    left: 57.8%;
-}
-
 
 .btns {
     width: 20%;
@@ -302,7 +259,15 @@ body.dark-mode, .dark-mode {
     border-radius: 15px;
 }
 
-#subjects-dropdown {
+#subject-display {
+    position: fixed;
+    top: 21.5%;
+    left: 47%;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+#sections-dropdown {
     position: fixed;
     width: 17%;
     top: 20%;
@@ -312,18 +277,8 @@ body.dark-mode, .dark-mode {
     border-radius: 15px;
 }
 
-#sections-dropdown {
-    position: fixed;
-    width: 17%;
-    top: 20%;
-    left: 47%;
-    background-color: #fff;
-    overflow-y: auto;
-    border-radius: 15px;
-}
-
 #take-attendance-btn {
-    position: absolute; 
+    position: fixed; 
     background: #272757;
     color: #fff;
     border: none;
@@ -332,9 +287,17 @@ body.dark-mode, .dark-mode {
     cursor: pointer;
     transition: background 0.2s;
     top: 20.2%;
-    left: 75%;  
+    left: 59.3%;  
     width: 18%;
     height: 5.5%;
+}
+
+#live-datetime {
+    position: fixed;
+    top: 21.7%;
+    left: 80%; 
+    font-size: 1rem;
+    font-weight: 300;
 }
 
 #take-attendance-btn:hover {
@@ -565,15 +528,17 @@ body.dark-mode, .dark-mode {
 }
 
 #attendance-students {
-    display: flex;
+    display: block;
     justify-content: center;
     align-items: flex-start;
     min-height: 300px; 
     margin-top: 220px;
     margin-right: 980px;
+    width: 100%;
 }
 
-.student-card.default-card {
+
+.student-card {
     background: #fff;
     border-radius: 16px;
     box-shadow: 0 2px 12px rgba(39,39,87,0.08);
@@ -582,7 +547,7 @@ body.dark-mode, .dark-mode {
     flex-direction: column;
     align-items: center;
     width: 180px;
-    margin: 0 auto;
+    margin: 0 16px 24px 16px; 
 }
 
 .student-card .student-pic {
@@ -948,4 +913,255 @@ body.dark-mode, .dark-mode {
     background: #50509C;
     color: #ffd700;
     transform: translateX(-50%) scale(1.04);
+}
+
+.dropdown {
+  position: relative;
+  display: inline-block;
+  margin-right: 9px;
+}
+.dropdown-btn {
+  padding: 10px 24px;
+  cursor: pointer;
+  background: #f0f0f0;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background: #fff;
+  min-width: 120px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  z-index: 1;
+}
+.dropdown-content a {
+  display: block;
+  padding: 8px 12px;
+  text-decoration: none;
+  color: #333;
+  cursor: pointer;
+}
+.dropdown-content a:hover {
+  background: #f5f5f5;
+}
+.dropdown:hover .dropdown-content {
+  display: block;
+}
+#attendance-dashboard {
+  margin-top: 0;
+  padding-top: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  overflow: hidden;
+}
+.dropdown-group {  
+  margin-left: 18px;
+  margin-top: 10px;
+  margin-bottom: 16px;
+}
+.date-dropdown {
+  padding: 10px 24px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background: #f9f9f9;
+  font-size: 16px;
+  margin-left: 16px;
+  margin-bottom: 12px;
+}
+.download-bar { 
+  margin-bottom: 0px;
+  margin-top: 60px;
+  margin-left: 16px;                                   
+}
+.download-bar button {
+  padding: 10px 16px;     
+  font-size: 16px;      
+  margin-left: 7px;      
+}
+.info-box {
+  width: 400px;
+  height: 400px;
+  padding: 24px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background: #f9f9f9;
+}
+.info-box label {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.notif-item {
+    padding: 14px 10px 10px 10px;
+    border-bottom: 1px solid #f0f0f0;
+    transition: background 0.2s;
+}
+.notif-item:last-child {
+    border-bottom: none;
+}
+.notif-message {
+    font-size: 1.08em;
+    font-weight: 500;
+    color: #23234c;
+    margin-bottom: 4px;
+    line-height: 1.3;
+}
+.notif-date {
+    font-size: 0.93em;
+    color: #888;
+    font-family: 'Roboto Mono', 'Consolas', monospace;
+    letter-spacing: 0.01em;
+}
+#notification-modal {
+    box-shadow: 0 8px 32px rgba(44,41,106,0.13);
+    border-radius: 14px;
+    border: 1px solid #e3e9ed;
+    min-width: 340px;
+    max-width: 400px;
+    background: #fff;
+    padding: 0;
+}
+
+.days-remaining-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 220px;
+    background: linear-gradient(135deg, #f5f7fa 70%, #e3e9ed 100%);
+    border-radius: 15px;
+    padding: 32px 0;
+    width: 100%;
+    max-width: 100%;
+    margin: 0 auto;
+    transition: box-shadow 0.2s;
+}
+
+.days-remaining-number {
+    font-size: 4.5em;
+    font-weight: 800;
+    color: #23234a;
+    letter-spacing: 2px;
+    margin-bottom: 12px;
+    font-family: 'Roboto Slab', 'Georgia', serif;
+    text-shadow: 0 2px 8px rgba(44,41,106,0.08);
+}
+
+.days-remaining-label {
+    font-size: 1.5em;
+    color: #555;
+    font-family: 'Roboto', Arial, sans-serif;
+    font-weight: 400;
+    letter-spacing: 0.5px;
+    text-align: center;
+}
+
+.dashboard-controls-card {
+  background: #F5F7FA;
+  padding: 24px 160px 24px 240px;
+  min-width: 340px;                
+  max-width: 440px;                
+  width: 380px;         
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+}
+
+.dashboard-controls-card .dropdown-group {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.dashboard-btn-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  align-items: center;
+}
+
+.dashboard-btn-group button {
+  width: 400px;
+  padding: 8px 0;
+  background: #f5f7fa;
+  border: 1.5px solid #e3e9ed;
+  border-radius: 8px;
+  font-size: 1em;
+  color: #23234a;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.18s, box-shadow 0.18s, transform 0.13s;
+  box-shadow: 0 1px 4px rgba(44,41,106,0.04);
+  letter-spacing: 0.5px;
+}
+
+.dashboard-btn-group button:hover {
+  background: #e3e9ed;
+  box-shadow: 0 2px 8px rgba(44,41,106,0.10);
+  transform: translateY(-2px) scale(1.03);
+}
+
+/* Beautify dropdown buttons */
+.dropdown {
+  position: relative;
+  display: inline-block;
+  margin-right: 18px;
+}
+
+.dropdown-btn {
+  padding: 8px 22px;
+  cursor: pointer;
+  background: #fff;
+  border: 2px solid #d1d7e0;
+  border-radius: 7px;
+  font-size: 1em;
+  color: #23234a;
+  font-family: 'Roboto', Arial, sans-serif;
+  font-weight: 600;
+  letter-spacing: 1px;
+  box-shadow: 0 1px 4px rgba(44,41,106,0.04);
+  transition: background 0.18s, border 0.18s, box-shadow 0.18s, transform 0.13s;
+}
+
+.dropdown-btn:hover, .dropdown-btn:focus {
+  background: #f5f7fa;
+  border-color: #50509C;
+  box-shadow: 0 4px 16px rgba(44,41,106,0.13);
+  transform: translateY(-2px) scale(1.03);
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background: #fff;
+  min-width: 160px;
+  box-shadow: 0 2px 8px rgba(44,41,106,0.15);
+  border-radius: 8px;
+  z-index: 10;
+  margin-top: 6px;
+  padding: 6px 0;
+}
+
+.dropdown-content a {
+  display: block;
+  padding: 10px 18px;
+  text-decoration: none;
+  color: #23234a;
+  font-size: 1.08em;
+  font-family: 'Roboto', Arial, sans-serif;
+  border-radius: 6px;
+  transition: background 0.15s;
+}
+
+.dropdown-content a:hover {
+  background: #f5f7fa;
+}
+
+.dropdown:hover .dropdown-content,
+.dropdown:focus-within .dropdown-content {
+  display: block;
 }
