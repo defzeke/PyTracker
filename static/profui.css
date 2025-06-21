@@ -1165,3 +1165,15 @@ body.dark-mode, .dark-mode {
 .dropdown:focus-within .dropdown-content {
   display: block;
 }
+
+#notification-modal {
+  position: absolute;    
+  width: 360px;         
+  box-sizing: border-box;
+}
+#notification-modal-content {
+  width: 100%;
+  padding: 8px;          
+  overflow-y: auto;     
+  max-height: 350px;    
+}

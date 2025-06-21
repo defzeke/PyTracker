@@ -51,13 +51,40 @@ document.getElementById("dark-mode-btn").addEventListener("click", function(){
             element.style.borderColor = color_mode.dashboard_content;
         });
 
-        // Popovers
-        Array.from(document.getElementsByClassName('popover-panel')).forEach(element => {
-            element.style.color = color_mode.text;
-            element.style.backgroundColor = color_mode.pop_over;
-            element.style.borderColor = color_mode.pop_over;
-            element.style.boxShadow = 'none';
+        const notifModal = document.getElementById('notification-modal');
+            if (notifModal) {
+                notifModal.style.backgroundColor = color_mode.pop_over;
+                notifModal.style.borderColor     = color_mode.pop_over;
+            }
+        
+        Array.from(document.querySelectorAll('.notif-item')).forEach(el => {
+            el.style.backgroundColor   = color_mode.dashboard_content;
+            el.style.borderBottomColor = color_mode.dashboard_content;
         });
+
+        Array.from(document.getElementsByClassName('notif-message')).forEach(el => el.style.color = color_mode.text);
+        Array.from(document.getElementsByClassName('notif-date')).forEach(el => el.style.color    = color_mode.text);
+
+        // Popovers
+        Array.from(document.getElementsByClassName('popover-panel')).forEach(el => {
+            el.style.backgroundColor = color_mode.pop_over;
+            el.style.borderColor     = color_mode.pop_over;
+            el.style.color           = color_mode.text;
+        });
+
+        Array.from(document.getElementsByClassName('info-box')).forEach(el => {
+            el.style.backgroundColor = color_mode.dashboard_content;
+            el.style.borderColor     = color_mode.dashboard_content;
+            el.style.color           = color_mode.text;
+        });
+
+        // Dashboard rectangles/cards
+        Array.from(document.getElementsByClassName('dashboard-element')).forEach(el => {
+            el.style.backgroundColor = color_mode.dashboard_content;
+            el.style.boxShadow       = 'none';
+            el.style.borderColor     = color_mode.dashboard_content;
+        });
+    
 
         // Buttons
         Array.from(document.getElementsByClassName('btns')).forEach(element => {

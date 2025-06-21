@@ -526,9 +526,8 @@ class Login():
                     cursor.close()
                     conn.close()
             else:
-                # ...existing student logic...
                 conn = DB.get_mysql_connection()
-                cursor = conn.cursor()
+                cursor = conn.cursor(buffered=True, dictionary=True)
                 cursor.execute("SELECT 1 FROM login_main WHERE ID_number = %s", (id_number,))
                 if cursor.fetchone():
                     error = "This student ID is already registered."
@@ -538,7 +537,7 @@ class Login():
                     if not row:
                         error = "This student ID is not enrolled in the school."
                     else:
-                        db_name = row[0].strip().lower()
+                        db_name = row["name"].strip().lower()
                         if db_name != input_name:
                             error = "The name you entered does not match our enrollment records."
                 cursor.close()
@@ -550,7 +549,7 @@ class Login():
             session['name'] = f"{first_name} {middle_name} {last_name}".replace("  ", " ").strip()
             session['id_number'] = id_number
             session['role'] = role
-            return redirect(url_for('register2_details'))
+            return redirect(url_for('Login.register2_details'))
 
         return render_template("register2.html", role=role)
 
@@ -603,7 +602,7 @@ class Login():
             session['year_section'] = year_section
             session['password'] = password
             # Redirect to OTP verification
-            return redirect(url_for('verify'))
+            return redirect(url_for('Login.verify'))
 
 
         # Render the registration details form
@@ -654,7 +653,7 @@ class Login():
                     session['otp_attempts'] = 0
                     session['otp_cooldown_level'] = 10
                     session['otp_cooldown_until'] = None
-                    return redirect(url_for('complete_registration'))
+                    return redirect(url_for('Login.complete_registration'))
                 else:
                     # Wrong OTP: increment attempts
                     session['otp_attempts'] += 1
