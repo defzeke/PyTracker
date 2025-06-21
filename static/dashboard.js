@@ -1,9 +1,9 @@
 document.addEventListener("DOMContentLoaded", function() {
     // Elements
-    const clsBtn = document.querySelector('.dropdown-btn:nth-child(1), .dropdown-btn'); // First CLS button
-    const clsDropdown = clsBtn.nextElementSibling;
-    const secBtn = document.querySelectorAll('.dropdown-btn')[1]; // SEC button (after CLS)
-    const secDropdown = secBtn.nextElementSibling;
+    const clsBtn = document.getElementById('student-class-btn');
+    const clsDropdown = document.getElementById('class-dropdown-content');
+    const secBtn = document.getElementById('student-section-btn');
+    const secDropdown = document.getElementById('section-dropdown-content');
 
     let profData = null;
     let selectedClass = null;
@@ -19,53 +19,96 @@ document.addEventListener("DOMContentLoaded", function() {
                 const a = document.createElement("a");
                 a.textContent = cls.class_ID;
                 a.href = "#";
+                a.style.display = "block";
+                a.style.padding = "8px";
                 a.onclick = function(e) {
                     e.preventDefault();
                     clsBtn.textContent = cls.class_ID;
                     selectedClass = cls.class_ID;
-                    // Populate SEC dropdown for this class
                     secBtn.textContent = "SEC";
+                    secBtn.disabled = false;
                     secDropdown.innerHTML = '';
                     (profData.class_sections[cls.class_ID] || []).forEach(sec => {
                         const aSec = document.createElement("a");
                         aSec.textContent = sec;
                         aSec.href = "#";
+                        aSec.style.display = "block";
+                        aSec.style.padding = "8px";
                         aSec.onclick = function(e) {
                             e.preventDefault();
                             secBtn.textContent = sec;
+                            secDropdown.style.display = "none";
                         };
                         secDropdown.appendChild(aSec);
                     });
+                    clsDropdown.style.display = "none";
                 };
                 clsDropdown.appendChild(a);
             });
+            clsBtn.disabled = false;
         });
 
-    // Optional: Reset SEC when CLS is changed
-    clsBtn.addEventListener("click", function() {
-        secBtn.textContent = "SEC";
-        secDropdown.innerHTML = '';
+    // Show/hide class dropdown
+    clsBtn.addEventListener("click", function(e) {
+        e.stopPropagation();
+        clsDropdown.style.display = clsDropdown.style.display === "block" ? "none" : "block";
+        secDropdown.style.display = "none";
+    });
+
+    // Show/hide section dropdown
+    secBtn.addEventListener("click", function(e) {
+        if (secBtn.disabled) return;
+        e.stopPropagation();
+        secDropdown.style.display = secDropdown.style.display === "block" ? "none" : "block";
+        clsDropdown.style.display = "none";
+    });
+
+    // Hide dropdowns when clicking outside
+    document.addEventListener("click", function() {
+        clsDropdown.style.display = "none";
+        secDropdown.style.display = "none";
     });
 });
 
 function getSelectedClassAndSection() {
-    const clsBtn = document.querySelector('.dropdown-btn');
-    const secBtn = document.querySelectorAll('.dropdown-btn')[1];
+    const clsBtn = document.getElementById('student-class-btn');
+    const secBtn = document.getElementById('student-section-btn');
     return {
         classId: clsBtn ? clsBtn.textContent.trim() : null,
         section: secBtn ? secBtn.textContent.trim() : null
     };
 }
 
+function getSelectedClassAndSection() {
+    const clsBtn = document.getElementById('student-class-btn');
+    const secBtn = document.getElementById('student-section-btn');
+    const classId = clsBtn ? clsBtn.textContent.trim() : null;
+    const section = secBtn ? secBtn.textContent.trim() : null;
+    return { classId, section };
+}
+
 function viewAttendance() {
+    // Get class
+    let classId = null;
+    const classDropdown = document.getElementById('student-class-dropdown');
+    const classBtn = document.getElementById('student-class-btn');
+    if (classDropdown) {
+        classId = classDropdown.value;
+    } else if (classBtn) {
+        classId = classBtn.textContent.trim();
+    }
+
+    // Get section (CYS)
+    const sectionBtn = document.getElementById('student-section-btn');
+    let section = sectionBtn ? sectionBtn.textContent.trim() : null;
+
     // Show modal
     document.getElementById('attendance-modal').style.display = 'flex';
     const modalContent = document.getElementById('attendance-modal-content');
     modalContent.innerHTML = '<div style="text-align:center; color:#888;">Loading...</div>';
 
-    const { classId, section } = getSelectedClassAndSection();
     if (!classId || classId === "CLS" || !section || section === "SEC") {
-        modalContent.innerHTML = '<div style="color:#d32f2f; text-align:center;">Please select a class and section first.</div>';
+        modalContent.innerHTML = '<div style="color:#d32f2f; text-align:center;">Please select a class first.</div>';
         return;
     }
 
@@ -109,7 +152,8 @@ function viewAttendance() {
                                             : d.status === "Absent" ? "#d32f2f"
                                             : d.status === "Late" ? "#b8860b"
                                             : "#333";
-                                    return `<span style="color:${color}; font-weight:500;">${d.status}</span>: ${d.date}`;
+                                    let dateStr = d.date || '';
+                                    return `<span style="color:${color}; font-weight:500;">${d.status}</span>: ${dateStr}`;
                                 }).join('<br>')
                             }</td>
                         </tr>`;
@@ -120,15 +164,15 @@ function viewAttendance() {
         });
 }
 
-// Close modal on X click or outside click
 document.addEventListener("DOMContentLoaded", function() {
-    document.getElementById('close-attendance-modal').onclick = function() {
-        document.getElementById('attendance-modal').style.display = 'none';
+    // Close modal on X button
+    document.getElementById("close-attendance-modal").onclick = function() {
+        document.getElementById("attendance-modal").style.display = "none";
     };
-    window.addEventListener('click', function(event) {
-        const modal = document.getElementById('attendance-modal');
-        if (event.target === modal) {
-            modal.style.display = 'none';
+    // Close modal when clicking outside the modal content
+    document.getElementById("attendance-modal").onclick = function(e) {
+        if (e.target === this) {
+            this.style.display = "none";
         }
-    });
+    };
 });

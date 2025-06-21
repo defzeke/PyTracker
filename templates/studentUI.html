@@ -300,7 +300,7 @@ alt="Profile" draggable="false" data-tooltip="Profile">
         <div style="background:#fff; padding:32px 24px 24px 24px; border-radius:14px; min-width:320px; max-width:90vw; box-shadow:0 8px 32px rgba(44,41,106,0.18); position:relative;">
             <button id="close-profile-upload-modal" style="position:absolute; top:12px; right:16px; background:none; border:none; font-size:1.5em; cursor:pointer;">&times;</button>
             <h2 style="margin-top:0; margin-bottom:18px;">Upload Profile Picture</h2>
-            <form id="profile-upload-form" action="{{ url_for('upload_profile_pic') }}" method="post" enctype="multipart/form-data">
+            <form id="profile-upload-form" action="{{ url_for('Funcs.upload_profile_pic') }}" method="post" enctype="multipart/form-data">
                 <input type="file" id="profile-upload" name="profile_pic" accept="image/*" required style="margin-bottom:16px;">
                 <div style="display:flex; gap:16px; justify-content:flex-end;">
                     <button type="button" id="cancel-profile-upload" class="btns" style="background:#eee; color:#333;">Cancel</button>
@@ -454,7 +454,7 @@ alt="Profile" draggable="false" data-tooltip="Profile">
 </body>
 <script>
     document.getElementById("logout-btn").addEventListener("click", function() {
-        window.location.href = "{{url_for('logout')}}";
+        window.location.href = "{{url_for('User.logout')}}";
     });
 </script>
 </html>

@@ -290,6 +290,14 @@
             </div>
         </div>
     </div>
+
+    <div id="replySuccessModal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <span class="close" id="closeReplySuccessModal">&times;</span>
+            <h2>Reply Sent!</h2>
+            <p>Your reply has been sent and the ticket is now closed.</p>
+        </div>
+    </div>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         function updateStatusDropdownColors() {
@@ -529,6 +537,25 @@
         const modal = document.getElementById('issueTicketsModal');
         if (event.target === modal) {
             modal.style.display = 'none';
+        }
+    });
+
+    if (getQueryParam('reply_success') === '1') {
+        document.getElementById('replySuccessModal').style.display = 'flex';
+    }
+    document.getElementById('closeReplySuccessModal').onclick = function() {
+        document.getElementById('replySuccessModal').style.display = 'none';
+        const url = new URL(window.location);
+        url.searchParams.delete('reply_success');
+        window.history.replaceState({}, document.title, url.pathname + url.search);
+    };
+    window.addEventListener('click', function(event) {
+        const modal = document.getElementById('replySuccessModal');
+        if (event.target === modal) {
+            modal.style.display = 'none';
+            const url = new URL(window.location);
+            url.searchParams.delete('reply_success');
+            window.history.replaceState({}, document.title, url.pathname + url.search);
         }
     });
 

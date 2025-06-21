@@ -122,7 +122,7 @@ function showNotificationModal() {
                 content.innerHTML = notifs.map(n =>
                     `<div class="notif-item">
                         <div class="notif-message">${n.message}</div>
-                        <div class="notif-date">${new Date(n.created_at).toLocaleString()}</div>
+                        <div class="notif-date">${n.created_at}</div>
                     </div>`
                 ).join('');
             }

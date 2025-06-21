@@ -63,7 +63,8 @@ function viewAttendance() {
                                             : d.status === "Absent" ? "#d32f2f"
                                             : d.status === "Late" ? "#b8860b"
                                             : "#333";
-                                    return `<span style="color:${color}; font-weight:500;">${d.status}</span>: ${d.date}`;
+                                    let dateStr = d.date || '';
+                                    return `<span style="color:${color}; font-weight:500;">${d.status}</span>: ${dateStr}`;
                                 }).join('<br>')
                             }</td>
                         </tr>`;
