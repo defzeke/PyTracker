@@ -93,3 +93,5 @@ pytracker-web/
 - For questions or contributions, open an issue or pull request.
 
 ---
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
